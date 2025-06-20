@@ -5,6 +5,9 @@ import StudentView from '@/components/student/StudentView';
 import Sidebar from '@/components/layout/Sidebar';
 import Dashboard from '@/components/dashboard/Dashboard';
 import BarcodeScanner from '@/components/scanner/BarcodeScanner';
+import UserManagement from '@/components/users/UserManagement';
+import ProductManagement from '@/components/products/ProductManagement';
+import SalesTerminal from '@/components/sales/SalesTerminal';
 import { AuthUser } from '@/types';
 
 const Index = () => {
@@ -54,24 +57,9 @@ const Index = () => {
       <main className="flex-1 p-6 overflow-auto">
         {activeTab === 'dashboard' && <Dashboard userRole={authUser.role} />}
         {activeTab === 'scan' && <BarcodeScanner />}
-        {activeTab === 'sales' && (
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold">Sales Terminal</h1>
-            <p className="text-muted-foreground">Point of sale system - Coming soon!</p>
-          </div>
-        )}
-        {activeTab === 'users' && authUser.role === 'admin' && (
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold">Student Management</h1>
-            <p className="text-muted-foreground">Manage students and accounts - Coming soon!</p>
-          </div>
-        )}
-        {activeTab === 'products' && authUser.role === 'admin' && (
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold">Product Management</h1>
-            <p className="text-muted-foreground">Manage inventory and pricing - Coming soon!</p>
-          </div>
-        )}
+        {activeTab === 'sales' && <SalesTerminal />}
+        {activeTab === 'users' && authUser.role === 'admin' && <UserManagement />}
+        {activeTab === 'products' && authUser.role === 'admin' && <ProductManagement />}
         {activeTab === 'settings' && authUser.role === 'admin' && (
           <div className="space-y-6">
             <h1 className="text-3xl font-bold">Settings</h1>
