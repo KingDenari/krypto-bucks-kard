@@ -8,6 +8,7 @@ import BarcodeScanner from '@/components/scanner/BarcodeScanner';
 import UserManagement from '@/components/users/UserManagement';
 import ProductManagement from '@/components/products/ProductManagement';
 import SalesTerminal from '@/components/sales/SalesTerminal';
+import Settings from '@/components/settings/Settings';
 import { AuthUser } from '@/types';
 
 const Index = () => {
@@ -47,7 +48,7 @@ const Index = () => {
 
   // Show main application
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-purple-900">
       <Sidebar 
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -60,12 +61,7 @@ const Index = () => {
         {activeTab === 'sales' && <SalesTerminal />}
         {activeTab === 'users' && authUser.role === 'admin' && <UserManagement />}
         {activeTab === 'products' && authUser.role === 'admin' && <ProductManagement />}
-        {activeTab === 'settings' && authUser.role === 'admin' && (
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold">Settings</h1>
-            <p className="text-muted-foreground">System configuration - Coming soon!</p>
-          </div>
-        )}
+        {activeTab === 'settings' && authUser.role === 'admin' && <Settings />}
       </main>
     </div>
   );

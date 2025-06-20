@@ -16,7 +16,7 @@
     --popover: 255 255 255;
     --popover-foreground: 15 23 42;
 
-    --primary: 14 165 233;
+    --primary: 59 130 246;
     --primary-foreground: 255 255 255;
 
     --secondary: 241 245 249;
@@ -33,18 +33,18 @@
 
     --border: 226 232 240;
     --input: 226 232 240;
-    --ring: 14 165 233;
+    --ring: 59 130 246;
 
     --radius: 0.5rem;
 
     --sidebar-background: 255 255 255;
     --sidebar-foreground: 15 23 42;
-    --sidebar-primary: 14 165 233;
+    --sidebar-primary: 59 130 246;
     --sidebar-primary-foreground: 255 255 255;
     --sidebar-accent: 241 245 249;
     --sidebar-accent-foreground: 15 23 42;
     --sidebar-border: 226 232 240;
-    --sidebar-ring: 14 165 233;
+    --sidebar-ring: 59 130 246;
   }
 
   .dark {
@@ -57,8 +57,8 @@
     --popover: 15 23 42;
     --popover-foreground: 248 250 252;
 
-    --primary: 56 189 248;
-    --primary-foreground: 15 23 42;
+    --primary: 147 51 234;
+    --primary-foreground: 255 255 255;
 
     --secondary: 30 41 59;
     --secondary-foreground: 248 250 252;
@@ -74,15 +74,16 @@
 
     --border: 30 41 59;
     --input: 30 41 59;
-    --ring: 56 189 248;
-    --sidebar-background: 15 23 42;
+    --ring: 147 51 234;
+    
+    --sidebar-background: 2 6 23;
     --sidebar-foreground: 248 250 252;
-    --sidebar-primary: 56 189 248;
-    --sidebar-primary-foreground: 15 23 42;
+    --sidebar-primary: 147 51 234;
+    --sidebar-primary-foreground: 255 255 255;
     --sidebar-accent: 30 41 59;
     --sidebar-accent-foreground: 248 250 252;
     --sidebar-border: 30 41 59;
-    --sidebar-ring: 56 189 248;
+    --sidebar-ring: 147 51 234;
   }
 }
 
@@ -96,10 +97,18 @@
     background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
     min-height: 100vh;
   }
+
+  .dark body {
+    background: linear-gradient(135deg, #020617 0%, #581c87 100%);
+  }
 }
 
 .gradient-bg {
-  background: linear-gradient(135deg, #0ea5e9 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #9333ea 100%);
+}
+
+.dark .gradient-bg {
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
 }
 
 .krypto-card {
@@ -108,4 +117,9 @@
   padding: 24px;
   color: white;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.dark .krypto-card {
+  background: linear-gradient(135deg, #312e81 0%, #581c87 100%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
