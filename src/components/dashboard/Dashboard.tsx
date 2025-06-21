@@ -12,48 +12,30 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
   // Mock students data that matches other components
   const mockStudents = [
-    { barcode: '1234567890', name: 'John Doe', balance: 150 },
-    { barcode: '0987654321', name: 'Jane Smith', balance: 200 },
-    { barcode: '1122334455', name: 'Mike Johnson', balance: 75 },
-    { barcode: '5566778899', name: 'Sarah Wilson', balance: 300 },
+    { barcode: '1234567890', name: 'John Doe', balance: 0 },
+    { barcode: '0987654321', name: 'Jane Smith', balance: 0 },
+    { barcode: '1122334455', name: 'Mike Johnson', balance: 0 },
+    { barcode: '5566778899', name: 'Sarah Wilson', balance: 0 },
   ];
 
   // Mock products data that matches ProductManagement
   const mockProducts = [
-    { id: '1', name: 'Pen (Blue)', price: 5, stock: 50, category: 'Stationery' },
-    { id: '2', name: 'Pencil (HB)', price: 3, stock: 75, category: 'Stationery' },
-    { id: '3', name: 'Eraser', price: 2, stock: 30, category: 'Stationery' },
-    { id: '4', name: 'Ruler (30cm)', price: 8, stock: 25, category: 'Stationery' },
-    { id: '5', name: 'Sharpener', price: 4, stock: 40, category: 'Stationery' },
+    { id: '1', name: 'Pen (Blue)', price: 5, stock: 0, category: 'Stationery' },
+    { id: '2', name: 'Pencil (HB)', price: 3, stock: 0, category: 'Stationery' },
+    { id: '3', name: 'Eraser', price: 2, stock: 0, category: 'Stationery' },
+    { id: '4', name: 'Ruler (30cm)', price: 8, stock: 0, category: 'Stationery' },
+    { id: '5', name: 'Sharpener', price: 4, stock: 0, category: 'Stationery' },
   ];
 
-  // Mock recent transactions
-  const mockTransactions = [
-    {
-      id: '1',
-      studentName: 'John Doe',
-      type: 'purchase' as const,
-      amount: 5,
-      description: 'Pen (Blue)',
-      time: '2 minutes ago'
-    },
-    {
-      id: '2',
-      studentName: 'Jane Smith',
-      type: 'deposit' as const,
-      amount: 50,
-      description: 'Balance top-up',
-      time: '15 minutes ago'
-    },
-    {
-      id: '3',
-      studentName: 'Mike Johnson',
-      type: 'purchase' as const,
-      amount: 3,
-      description: 'Pencil (HB)',
-      time: '1 hour ago'
-    },
-  ];
+  // Mock recent transactions - empty array to start
+  const mockTransactions: Array<{
+    id: string;
+    studentName: string;
+    type: 'purchase' | 'deposit' | 'deduction';
+    amount: number;
+    description: string;
+    time: string;
+  }> = [];
 
   // Calculate dynamic stats
   const stats = {
@@ -165,23 +147,27 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {stats.recentTransactions.map((transaction) => (
-                <div key={transaction.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-lg">{getTransactionIcon(transaction.type)}</span>
-                    <div>
-                      <p className="font-medium text-sm">{transaction.studentName}</p>
-                      <p className="text-xs text-muted-foreground">{transaction.description}</p>
+              {stats.recentTransactions.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">No recent transactions</p>
+              ) : (
+                stats.recentTransactions.map((transaction) => (
+                  <div key={transaction.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-lg">{getTransactionIcon(transaction.type)}</span>
+                      <div>
+                        <p className="font-medium text-sm">{transaction.studentName}</p>
+                        <p className="text-xs text-muted-foreground">{transaction.description}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className={`font-medium text-sm ${getTransactionColor(transaction.type)}`}>
+                        {transaction.type === 'purchase' || transaction.type === 'deduction' ? '-' : '+'}K$ {transaction.amount}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{transaction.time}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className={`font-medium text-sm ${getTransactionColor(transaction.type)}`}>
-                      {transaction.type === 'purchase' || transaction.type === 'deduction' ? '-' : '+'}K$ {transaction.amount}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{transaction.time}</p>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
