@@ -10,13 +10,86 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
-  // Mock data - reset to zero values
+  // Mock students data that matches other components
+  const mockStudents = [
+    { barcode: '1234567890', name: 'John Doe', balance: 150 },
+    { barcode: '0987654321', name: 'Jane Smith', balance: 200 },
+    { barcode: '1122334455', name: 'Mike Johnson', balance: 75 },
+    { barcode: '5566778899', name: 'Sarah Wilson', balance: 300 },
+  ];
+
+  // Mock products data that matches ProductManagement
+  const mockProducts = [
+    { id: '1', name: 'Pen (Blue)', price: 5, stock: 50, category: 'Stationery' },
+    { id: '2', name: 'Pencil (HB)', price: 3, stock: 75, category: 'Stationery' },
+    { id: '3', name: 'Eraser', price: 2, stock: 30, category: 'Stationery' },
+    { id: '4', name: 'Ruler (30cm)', price: 8, stock: 25, category: 'Stationery' },
+    { id: '5', name: 'Sharpener', price: 4, stock: 40, category: 'Stationery' },
+  ];
+
+  // Mock recent transactions
+  const mockTransactions = [
+    {
+      id: '1',
+      studentName: 'John Doe',
+      type: 'purchase' as const,
+      amount: 5,
+      description: 'Pen (Blue)',
+      time: '2 minutes ago'
+    },
+    {
+      id: '2',
+      studentName: 'Jane Smith',
+      type: 'deposit' as const,
+      amount: 50,
+      description: 'Balance top-up',
+      time: '15 minutes ago'
+    },
+    {
+      id: '3',
+      studentName: 'Mike Johnson',
+      type: 'purchase' as const,
+      amount: 3,
+      description: 'Pencil (HB)',
+      time: '1 hour ago'
+    },
+  ];
+
+  // Calculate dynamic stats
   const stats = {
-    totalStudents: 0,
-    totalBalance: 0,
-    totalProducts: 0,
-    todaySales: 0,
-    recentTransactions: []
+    totalStudents: mockStudents.length,
+    totalBalance: mockStudents.reduce((sum, student) => sum + student.balance, 0),
+    totalProducts: mockProducts.length,
+    todaySales: mockTransactions
+      .filter(t => t.type === 'purchase')
+      .reduce((sum, t) => sum + t.amount, 0),
+    recentTransactions: mockTransactions
+  };
+
+  const getTransactionIcon = (type: string) => {
+    switch (type) {
+      case 'purchase':
+        return '🛒';
+      case 'deposit':
+        return '💰';
+      case 'deduction':
+        return '❌';
+      default:
+        return '📝';
+    }
+  };
+
+  const getTransactionColor = (type: string) => {
+    switch (type) {
+      case 'purchase':
+        return 'text-red-600';
+      case 'deposit':
+        return 'text-green-600';
+      case 'deduction':
+        return 'text-orange-600';
+      default:
+        return 'text-gray-600';
+    }
   };
 
   return (
@@ -37,7 +110,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalStudents}</div>
             <p className="text-xs text-muted-foreground">
-              No students registered yet
+              Active registered students
             </p>
           </CardContent>
         </Card>
@@ -64,7 +137,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
             <CardContent>
               <div className="text-2xl font-bold">{stats.totalProducts}</div>
               <p className="text-xs text-muted-foreground">
-                No products added yet
+                Available in store
               </p>
             </CardContent>
           </Card>
@@ -76,9 +149,9 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.todaySales}</div>
+            <div className="text-2xl font-bold">K$ {stats.todaySales}</div>
             <p className="text-xs text-muted-foreground">
-              No transactions today
+              From {mockTransactions.filter(t => t.type === 'purchase').length} transactions
             </p>
           </CardContent>
         </Card>
@@ -91,10 +164,24 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
             <CardDescription>Latest transactions in the system</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
-              <ShoppingCart className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>No transactions yet</p>
-              <p className="text-sm">Start scanning student cards to see activity here</p>
+            <div className="space-y-4">
+              {stats.recentTransactions.map((transaction) => (
+                <div key={transaction.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-lg">{getTransactionIcon(transaction.type)}</span>
+                    <div>
+                      <p className="font-medium text-sm">{transaction.studentName}</p>
+                      <p className="text-xs text-muted-foreground">{transaction.description}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className={`font-medium text-sm ${getTransactionColor(transaction.type)}`}>
+                      {transaction.type === 'purchase' || transaction.type === 'deduction' ? '-' : '+'}K$ {transaction.amount}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{transaction.time}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -107,7 +194,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm">Active Students</span>
-              <Badge variant="secondary">0</Badge>
+              <Badge variant="default">{mockStudents.filter(s => s.balance > 0).length}</Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm">Scanner Status</span>
@@ -115,7 +202,15 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm">Low Stock Items</span>
-              <Badge variant="secondary">0</Badge>
+              <Badge variant={mockProducts.filter(p => p.stock < 10 && p.stock > 0).length > 0 ? "secondary" : "default"}>
+                {mockProducts.filter(p => p.stock < 10 && p.stock > 0).length}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Out of Stock</span>
+              <Badge variant={mockProducts.filter(p => p.stock === 0).length > 0 ? "destructive" : "default"}>
+                {mockProducts.filter(p => p.stock === 0).length}
+              </Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm">System Health</span>
