@@ -6,7 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Camera, CameraOff } from 'lucide-react';
 
-const WebcamScanner: React.FC = () => {
+interface WebcamScannerProps {
+  onScan?: (barcode: string) => void;
+}
+
+const WebcamScanner: React.FC<WebcamScannerProps> = ({ onScan }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [scannedData, setScannedData] = useState<string>('');
@@ -53,6 +57,12 @@ const WebcamScanner: React.FC = () => {
     // Simulate scanning - in real implementation, you'd use a barcode scanning library
     const randomStudent = mockStudents[Math.floor(Math.random() * mockStudents.length)];
     setScannedData(randomStudent.barcode);
+    
+    // Call the onScan callback if provided
+    if (onScan) {
+      onScan(randomStudent.barcode);
+    }
+    
     toast({
       title: "Barcode Scanned",
       description: `Found: ${randomStudent.name} - K$ ${randomStudent.balance}`,

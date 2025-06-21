@@ -5,13 +5,15 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import KryptoLogo from '@/components/KryptoLogo';
+import WebcamScanner from '@/components/settings/WebcamScanner';
 import { useToast } from '@/hooks/use-toast';
-import { ScanLine, User, Wallet } from 'lucide-react';
+import { ScanLine, User, Wallet, Camera } from 'lucide-react';
 
 const BarcodeScanner: React.FC = () => {
   const [barcode, setBarcode] = useState('');
   const [student, setStudent] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [showWebcam, setShowWebcam] = useState(false);
   const { toast } = useToast();
 
   // Mock student data
@@ -58,6 +60,19 @@ const BarcodeScanner: React.FC = () => {
       }
       setLoading(false);
     }, 1000);
+  };
+
+  const handleWebcamScan = (scannedBarcode: string) => {
+    setBarcode(scannedBarcode);
+    // Auto-trigger the scan
+    const foundStudent = mockStudents.find(s => s.barcode === scannedBarcode);
+    if (foundStudent) {
+      setStudent(foundStudent);
+      toast({
+        title: "Student found via webcam!",
+        description: `${foundStudent.name} - K$ ${foundStudent.balance}`,
+      });
+    }
   };
 
   const clearScan = () => {
@@ -109,6 +124,24 @@ const BarcodeScanner: React.FC = () => {
                 </Button>
               </div>
             </form>
+
+            <div className="border-t pt-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium">Webcam Scanner</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowWebcam(!showWebcam)}
+                >
+                  <Camera className="w-4 h-4 mr-2" />
+                  {showWebcam ? 'Hide' : 'Show'} Camera
+                </Button>
+              </div>
+              
+              {showWebcam && (
+                <WebcamScanner onScan={handleWebcamScan} />
+              )}
+            </div>
 
             <div className="border-t pt-4">
               <p className="text-sm text-muted-foreground mb-2">
