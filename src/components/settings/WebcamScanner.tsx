@@ -16,10 +16,10 @@ const WebcamScanner: React.FC<WebcamScannerProps> = ({ onScan }) => {
   const [scannedData, setScannedData] = useState<string>('');
   const { toast } = useToast();
 
-  // Mock student data for demo
+  // Mock student data for demo - reset to zero balances
   const mockStudents = [
-    { barcode: '1234567890', name: 'John Doe', balance: 150 },
-    { barcode: '0987654321', name: 'Jane Smith', balance: 230 },
+    { barcode: '1234567890', name: 'John Doe', balance: 0 },
+    { barcode: '0987654321', name: 'Jane Smith', balance: 0 },
   ];
 
   const startCamera = async () => {
@@ -54,19 +54,23 @@ const WebcamScanner: React.FC<WebcamScannerProps> = ({ onScan }) => {
   };
 
   const simulateScan = () => {
-    // Simulate scanning - in real implementation, you'd use a barcode scanning library
-    const randomStudent = mockStudents[Math.floor(Math.random() * mockStudents.length)];
-    setScannedData(randomStudent.barcode);
+    // Only simulate scanning the valid barcode
+    const validBarcode = '1234567890';
+    const validStudent = mockStudents.find(s => s.barcode === validBarcode);
     
-    // Call the onScan callback if provided
-    if (onScan) {
-      onScan(randomStudent.barcode);
+    if (validStudent) {
+      setScannedData(validStudent.barcode);
+      
+      // Call the onScan callback if provided
+      if (onScan) {
+        onScan(validStudent.barcode);
+      }
+      
+      toast({
+        title: "Barcode Scanned",
+        description: `Found: ${validStudent.name} - K$ ${validStudent.balance}`,
+      });
     }
-    
-    toast({
-      title: "Barcode Scanned",
-      description: `Found: ${randomStudent.name} - K$ ${randomStudent.balance}`,
-    });
   };
 
   useEffect(() => {

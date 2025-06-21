@@ -16,13 +16,13 @@ const BarcodeScanner: React.FC = () => {
   const [showWebcam, setShowWebcam] = useState(false);
   const { toast } = useToast();
 
-  // Mock student data
+  // Mock student data - reset balances to zero
   const mockStudents = [
     {
       id: '1',
       name: 'John Doe',
       email: 'john.doe@school.edu',
-      balance: 150,
+      balance: 0,
       barcode: '1234567890',
       class: 'Grade 10A'
     },
@@ -30,15 +30,28 @@ const BarcodeScanner: React.FC = () => {
       id: '2',
       name: 'Jane Smith',
       email: 'jane.smith@school.edu',
-      balance: 230,
+      balance: 0,
       barcode: '0987654321',
       class: 'Grade 9B'
     }
   ];
 
+  const validateBarcode = (barcode: string) => {
+    return /^1234567890$/.test(barcode);
+  };
+
   const handleScan = (e: React.FormEvent) => {
     e.preventDefault();
     if (!barcode.trim()) return;
+
+    if (!validateBarcode(barcode)) {
+      toast({
+        title: "Invalid Barcode",
+        description: "Barcode must be exactly: 1234567890",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setLoading(true);
     
@@ -63,6 +76,15 @@ const BarcodeScanner: React.FC = () => {
   };
 
   const handleWebcamScan = (scannedBarcode: string) => {
+    if (!validateBarcode(scannedBarcode)) {
+      toast({
+        title: "Invalid Barcode",
+        description: "Barcode must be exactly: 1234567890",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setBarcode(scannedBarcode);
     // Auto-trigger the scan
     const foundStudent = mockStudents.find(s => s.barcode === scannedBarcode);
@@ -97,7 +119,7 @@ const BarcodeScanner: React.FC = () => {
               Scanner
             </CardTitle>
             <CardDescription>
-              Use your webcam or enter barcode manually
+              Use your webcam or enter barcode manually (1234567890)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -145,11 +167,10 @@ const BarcodeScanner: React.FC = () => {
 
             <div className="border-t pt-4">
               <p className="text-sm text-muted-foreground mb-2">
-                <strong>Demo Barcodes:</strong>
+                <strong>Valid Barcode:</strong>
               </p>
               <div className="space-y-1 text-xs text-muted-foreground">
                 <p>1234567890 - John Doe</p>
-                <p>0987654321 - Jane Smith</p>
               </div>
             </div>
           </CardContent>

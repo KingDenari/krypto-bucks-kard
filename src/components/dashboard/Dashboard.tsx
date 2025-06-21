@@ -10,18 +10,13 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
-  // Mock data - in real app this would come from backend
+  // Mock data - reset to zero values
   const stats = {
-    totalStudents: 156,
-    totalBalance: 45230,
-    totalProducts: 12,
-    todaySales: 8,
-    recentTransactions: [
-      { id: '1', student: 'John Doe', amount: -25, type: 'purchase', time: '2 minutes ago' },
-      { id: '2', student: 'Jane Smith', amount: 100, type: 'deposit', time: '15 minutes ago' },
-      { id: '3', student: 'Mike Johnson', amount: -10, type: 'purchase', time: '1 hour ago' },
-      { id: '4', student: 'Sarah Wilson', amount: -35, type: 'purchase', time: '2 hours ago' },
-    ]
+    totalStudents: 0,
+    totalBalance: 0,
+    totalProducts: 0,
+    todaySales: 0,
+    recentTransactions: []
   };
 
   return (
@@ -42,7 +37,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalStudents}</div>
             <p className="text-xs text-muted-foreground">
-              +12 from last month
+              No students registered yet
             </p>
           </CardContent>
         </Card>
@@ -69,7 +64,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
             <CardContent>
               <div className="text-2xl font-bold">{stats.totalProducts}</div>
               <p className="text-xs text-muted-foreground">
-                Active items
+                No products added yet
               </p>
             </CardContent>
           </Card>
@@ -83,7 +78,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
           <CardContent>
             <div className="text-2xl font-bold">{stats.todaySales}</div>
             <p className="text-xs text-muted-foreground">
-              Transactions completed
+              No transactions today
             </p>
           </CardContent>
         </Card>
@@ -96,30 +91,10 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
             <CardDescription>Latest transactions in the system</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {stats.recentTransactions.map((transaction) => (
-                <div key={transaction.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full ${
-                      transaction.type === 'deposit' ? 'bg-green-500' : 'bg-red-500'
-                    }`} />
-                    <div>
-                      <p className="font-medium">{transaction.student}</p>
-                      <p className="text-sm text-muted-foreground">{transaction.time}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className={`font-semibold ${
-                      transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {transaction.amount > 0 ? '+' : ''}K$ {transaction.amount}
-                    </p>
-                    <Badge variant={transaction.type === 'deposit' ? 'default' : 'secondary'}>
-                      {transaction.type}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
+            <div className="text-center py-8 text-muted-foreground">
+              <ShoppingCart className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>No transactions yet</p>
+              <p className="text-sm">Start scanning student cards to see activity here</p>
             </div>
           </CardContent>
         </Card>
@@ -132,7 +107,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm">Active Students</span>
-              <Badge variant="default">Online</Badge>
+              <Badge variant="secondary">0</Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm">Scanner Status</span>
@@ -140,7 +115,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm">Low Stock Items</span>
-              <Badge variant="destructive">3</Badge>
+              <Badge variant="secondary">0</Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm">System Health</span>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,24 +6,26 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
-import { ScanLine, ShoppingCart, Plus, Minus, Trash2 } from 'lucide-react';
+import { ScanLine, ShoppingCart, Plus, Minus, Trash2, Camera } from 'lucide-react';
 import { User, Product, Transaction } from '@/types';
 import { useToast } from '@/hooks/use-toast';
+import WebcamScanner from '@/components/settings/WebcamScanner';
 
 const SalesTerminal: React.FC = () => {
   const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
   const [barcodeInput, setBarcodeInput] = useState('');
   const [cart, setCart] = useState<{ product: Product; quantity: number }[]>([]);
+  const [showWebcam, setShowWebcam] = useState(false);
   const { toast } = useToast();
 
-  // Mock data - in a real app, this would come from a database
+  // Mock data - reset to zero values
   const students: User[] = [
     {
       id: '1',
       name: 'John Doe',
       email: 'john@school.com',
       role: 'student',
-      balance: 150,
+      balance: 0,
       barcode: '1234567890',
       createdAt: new Date().toISOString(),
     },
@@ -33,7 +34,7 @@ const SalesTerminal: React.FC = () => {
       name: 'Jane Smith',
       email: 'jane@school.com',
       role: 'student',
-      balance: 75,
+      balance: 0,
       barcode: '1234567891',
       createdAt: new Date().toISOString(),
     }
@@ -43,46 +44,59 @@ const SalesTerminal: React.FC = () => {
     {
       id: '1',
       name: 'Pen (Blue)',
-      price: 5,
-      stock: 50,
+      price: 0,
+      stock: 0,
       category: 'Stationery',
       createdAt: new Date().toISOString(),
     },
     {
       id: '2',
       name: 'Pencil (HB)',
-      price: 3,
-      stock: 75,
+      price: 0,
+      stock: 0,
       category: 'Stationery',
       createdAt: new Date().toISOString(),
     },
     {
       id: '3',
       name: 'Eraser',
-      price: 2,
-      stock: 30,
+      price: 0,
+      stock: 0,
       category: 'Stationery',
       createdAt: new Date().toISOString(),
     },
     {
       id: '4',
       name: 'Ruler (30cm)',
-      price: 8,
-      stock: 25,
+      price: 0,
+      stock: 0,
       category: 'Stationery',
       createdAt: new Date().toISOString(),
     },
     {
       id: '5',
       name: 'Sharpener',
-      price: 4,
-      stock: 40,
+      price: 0,
+      stock: 0,
       category: 'Stationery',
       createdAt: new Date().toISOString(),
     }
   ];
 
+  const validateBarcode = (barcode: string) => {
+    return /^1234567890$/.test(barcode);
+  };
+
   const scanBarcode = () => {
+    if (!validateBarcode(barcodeInput)) {
+      toast({
+        title: "Invalid Barcode",
+        description: "Barcode must be exactly: 1234567890",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const student = students.find(s => s.barcode === barcodeInput);
     if (student) {
       setSelectedStudent(student);
@@ -96,6 +110,27 @@ const SalesTerminal: React.FC = () => {
         title: "Student Not Found",
         description: "Invalid barcode. Please try again.",
         variant: "destructive",
+      });
+    }
+  };
+
+  const handleWebcamScan = (scannedBarcode: string) => {
+    if (!validateBarcode(scannedBarcode)) {
+      toast({
+        title: "Invalid Barcode",
+        description: "Barcode must be exactly: 1234567890",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setBarcodeInput(scannedBarcode);
+    const foundStudent = students.find(s => s.barcode === scannedBarcode);
+    if (foundStudent) {
+      setSelectedStudent(foundStudent);
+      toast({
+        title: "Student found via webcam!",
+        description: `${foundStudent.name} - K$ ${foundStudent.balance}`,
       });
     }
   };
@@ -234,7 +269,7 @@ const SalesTerminal: React.FC = () => {
               Student Scanner
             </CardTitle>
             <CardDescription>
-              Scan student barcode or enter manually
+              Scan student barcode (1234567890) or enter manually
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -248,6 +283,24 @@ const SalesTerminal: React.FC = () => {
               <Button onClick={scanBarcode} className="gradient-bg">
                 <ScanLine className="w-4 h-4" />
               </Button>
+            </div>
+
+            <div className="border-t pt-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium">Webcam Scanner</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowWebcam(!showWebcam)}
+                >
+                  <Camera className="w-4 h-4 mr-2" />
+                  {showWebcam ? 'Hide' : 'Show'} Camera
+                </Button>
+              </div>
+              
+              {showWebcam && (
+                <WebcamScanner onScan={handleWebcamScan} />
+              )}
             </div>
 
             {selectedStudent && (
