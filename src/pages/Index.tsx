@@ -39,7 +39,11 @@ const Index = () => {
 
   // Show student view
   if (showStudentView) {
-    return <StudentView onBack={handleBackFromStudent} />;
+    return (
+      <AppDataProvider>
+        <StudentView onBack={handleBackFromStudent} />
+      </AppDataProvider>
+    );
   }
 
   // Show login if not authenticated
@@ -61,9 +65,9 @@ const Index = () => {
           {activeTab === 'dashboard' && <Dashboard userRole={authUser.role} />}
           {activeTab === 'scan' && <BarcodeScanner />}
           {activeTab === 'sales' && <SalesTerminal />}
+          {activeTab === 'settings' && <Settings />}
           {activeTab === 'users' && authUser.role === 'admin' && <UserManagement />}
           {activeTab === 'products' && authUser.role === 'admin' && <ProductManagement />}
-          {activeTab === 'settings' && authUser.role === 'admin' && <Settings />}
         </main>
       </div>
     </AppDataProvider>

@@ -13,6 +13,7 @@ interface AppDataContextType {
   updateProduct: (productId: string, updates: Partial<Product>) => void;
   deleteProduct: (productId: string) => void;
   addTransaction: (transaction: Transaction) => void;
+  getUserByBarcode: (barcode: string) => User | undefined;
 }
 
 const AppDataContext = createContext<AppDataContextType | undefined>(undefined);
@@ -30,53 +31,8 @@ interface AppDataProviderProps {
 }
 
 export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) => {
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: '1',
-      name: 'John Doe',
-      email: 'john@school.com',
-      role: 'student',
-      balance: 0,
-      barcode: '1234567890',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      name: 'Jane Smith',
-      email: 'jane@school.com',
-      role: 'student',
-      balance: 0,
-      barcode: '0987654321',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '3',
-      name: 'Mike Johnson',
-      email: 'mike@school.com',
-      role: 'student',
-      balance: 0,
-      barcode: '1122334455',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '4',
-      name: 'Sarah Wilson',
-      email: 'sarah@school.com',
-      role: 'student',
-      balance: 0,
-      barcode: '5566778899',
-      createdAt: new Date().toISOString(),
-    }
-  ]);
-
-  const [products, setProducts] = useState<Product[]>([
-    { id: '1', name: 'Pen (Blue)', price: 5, stock: 0, category: 'Stationery', createdAt: new Date().toISOString() },
-    { id: '2', name: 'Pencil (HB)', price: 3, stock: 0, category: 'Stationery', createdAt: new Date().toISOString() },
-    { id: '3', name: 'Eraser', price: 2, stock: 0, category: 'Stationery', createdAt: new Date().toISOString() },
-    { id: '4', name: 'Ruler (30cm)', price: 8, stock: 0, category: 'Stationery', createdAt: new Date().toISOString() },
-    { id: '5', name: 'Sharpener', price: 4, stock: 0, category: 'Stationery', createdAt: new Date().toISOString() },
-  ]);
-
+  const [users, setUsers] = useState<User[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   const addUser = (user: User) => {
@@ -111,6 +67,10 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     setTransactions(prev => [...prev, transaction]);
   };
 
+  const getUserByBarcode = (barcode: string) => {
+    return users.find(user => user.barcode === barcode);
+  };
+
   const value = {
     users,
     products,
@@ -122,6 +82,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     updateProduct,
     deleteProduct,
     addTransaction,
+    getUserByBarcode,
   };
 
   return (

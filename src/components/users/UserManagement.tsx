@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Download, CreditCard } from 'lucide-react';
+import { Plus, Edit, Trash2, Download } from 'lucide-react';
 import { User } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { useAppData } from '@/contexts/AppDataContext';
@@ -18,7 +19,7 @@ const UserManagement: React.FC = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [newUser, setNewUser] = useState({ name: '', email: '', balance: 0 });
+  const [newUser, setNewUser] = useState({ name: '', email: '', balance: 0, grade: '' });
   const { toast } = useToast();
 
   const generateBarcode = () => {
@@ -26,7 +27,7 @@ const UserManagement: React.FC = () => {
   };
 
   const handleAddUser = () => {
-    if (!newUser.name || !newUser.email) {
+    if (!newUser.name || !newUser.email || !newUser.grade) {
       toast({
         title: "Error",
         description: "Please fill in all fields",
@@ -41,12 +42,13 @@ const UserManagement: React.FC = () => {
       email: newUser.email,
       role: 'student',
       balance: newUser.balance,
+      grade: newUser.grade,
       barcode: generateBarcode(),
       createdAt: new Date().toISOString(),
     };
 
     addUser(user);
-    setNewUser({ name: '', email: '', balance: 0 });
+    setNewUser({ name: '', email: '', balance: 0, grade: '' });
     setIsAddDialogOpen(false);
     
     toast({
@@ -75,20 +77,20 @@ const UserManagement: React.FC = () => {
   };
 
   const downloadBarcode = (user: User) => {
-    // Generate a simple barcode image URL (in real app, this would be a proper barcode generator)
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     canvas.width = 300;
-    canvas.height = 100;
+    canvas.height = 120;
     
     if (ctx) {
       ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, 300, 100);
+      ctx.fillRect(0, 0, 300, 120);
       ctx.fillStyle = 'black';
       ctx.font = '16px Arial';
       ctx.fillText(user.name, 10, 30);
-      ctx.fillText(`K$ ${user.balance}`, 10, 50);
-      ctx.fillText(user.barcode || '', 10, 70);
+      ctx.fillText(`Grade: ${user.grade || 'N/A'}`, 10, 50);
+      ctx.fillText(`K$ ${user.balance}`, 10, 70);
+      ctx.fillText(user.barcode || '', 10, 90);
     }
     
     const link = document.createElement('a');
@@ -145,6 +147,15 @@ const UserManagement: React.FC = () => {
                 />
               </div>
               <div>
+                <Label htmlFor="grade">Grade</Label>
+                <Input
+                  id="grade"
+                  value={newUser.grade}
+                  onChange={(e) => setNewUser({ ...newUser, grade: e.target.value })}
+                  placeholder="Enter student grade (e.g., Grade 5, 10th Grade)"
+                />
+              </div>
+              <div>
                 <Label htmlFor="balance">Initial Balance (K$)</Label>
                 <Input
                   id="balance"
@@ -170,59 +181,68 @@ const UserManagement: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Balance</TableHead>
-                <TableHead>Barcode</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {students.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary" className="gradient-bg text-white">
-                      K$ {user.balance}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="font-mono text-sm">{user.barcode}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setEditingUser(user);
-                          setIsEditDialogOpen(true);
-                        }}
-                      >
-                        <Edit className="w-3 h-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => downloadBarcode(user)}
-                      >
-                        <Download className="w-3 h-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDeleteUser(user.id)}
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          {students.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No students registered yet.</p>
+              <p className="text-sm text-muted-foreground">Add your first student to get started!</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Grade</TableHead>
+                  <TableHead>Balance</TableHead>
+                  <TableHead>Barcode</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {students.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell className="font-medium">{user.name}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.grade || 'N/A'}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className="gradient-bg text-white">
+                        K$ {user.balance}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="font-mono text-sm">{user.barcode}</TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingUser(user);
+                            setIsEditDialogOpen(true);
+                          }}
+                        >
+                          <Edit className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => downloadBarcode(user)}
+                        >
+                          <Download className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteUser(user.id)}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 

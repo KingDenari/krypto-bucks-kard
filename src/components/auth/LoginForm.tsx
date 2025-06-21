@@ -22,14 +22,26 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
     e.preventDefault();
     setLoading(true);
 
-    // Simple authentication logic
-    if (email === 'abeldena123@gmail.com' && password === 'admin123') {
+    // Basic validation
+    if (!email || !password) {
+      toast({
+        title: "Login failed",
+        description: "Please enter both email and password",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
+    // Simple authentication logic for demo
+    // In production, this would connect to your authentication system
+    if (email.includes('@admin') && password.length >= 6) {
       onLogin(email, 'admin');
       toast({
         title: "Welcome back!",
         description: "Logged in as Administrator",
       });
-    } else if (email && password === 'worker123') {
+    } else if (email.includes('@') && password.length >= 6) {
       onLogin(email, 'worker');
       toast({
         title: "Welcome!",
@@ -106,12 +118,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
               >
                 I'm a Student - View My Balance
               </Button>
-            </div>
-            
-            <div className="mt-4 text-sm text-muted-foreground">
-              <p><strong>Demo Credentials:</strong></p>
-              <p>Admin: abeldena123@gmail.com / admin123</p>
-              <p>Worker: any@email.com / worker123</p>
             </div>
           </CardContent>
         </Card>

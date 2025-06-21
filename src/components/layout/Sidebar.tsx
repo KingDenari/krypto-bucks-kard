@@ -24,10 +24,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, use
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'scan', label: 'Scanner', icon: ScanLine },
     { id: 'sales', label: 'Sales', icon: ShoppingCart },
+    { id: 'settings', label: 'Settings', icon: Settings },
     ...(userRole === 'admin' ? [
       { id: 'users', label: 'Students', icon: Users },
       { id: 'products', label: 'Products', icon: Package },
-      { id: 'settings', label: 'Settings', icon: Settings },
     ] : []),
   ];
 

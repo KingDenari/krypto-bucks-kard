@@ -6,6 +6,7 @@ export interface User {
   role: 'admin' | 'worker' | 'student';
   balance: number;
   barcode?: string;
+  grade?: string;
   createdAt: string;
 }
 
