@@ -9,6 +9,7 @@ import UserManagement from '@/components/users/UserManagement';
 import ProductManagement from '@/components/products/ProductManagement';
 import SalesTerminal from '@/components/sales/SalesTerminal';
 import Settings from '@/components/settings/Settings';
+import { AppDataProvider } from '@/contexts/AppDataContext';
 import { AuthUser } from '@/types';
 
 const Index = () => {
@@ -48,22 +49,24 @@ const Index = () => {
 
   // Show main application
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-purple-900">
-      <Sidebar 
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        onLogout={handleLogout}
-        userRole={authUser.role}
-      />
-      <main className="flex-1 p-6 overflow-auto">
-        {activeTab === 'dashboard' && <Dashboard userRole={authUser.role} />}
-        {activeTab === 'scan' && <BarcodeScanner />}
-        {activeTab === 'sales' && <SalesTerminal />}
-        {activeTab === 'users' && authUser.role === 'admin' && <UserManagement />}
-        {activeTab === 'products' && authUser.role === 'admin' && <ProductManagement />}
-        {activeTab === 'settings' && authUser.role === 'admin' && <Settings />}
-      </main>
-    </div>
+    <AppDataProvider>
+      <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-purple-900">
+        <Sidebar 
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onLogout={handleLogout}
+          userRole={authUser.role}
+        />
+        <main className="flex-1 p-6 overflow-auto">
+          {activeTab === 'dashboard' && <Dashboard userRole={authUser.role} />}
+          {activeTab === 'scan' && <BarcodeScanner />}
+          {activeTab === 'sales' && <SalesTerminal />}
+          {activeTab === 'users' && authUser.role === 'admin' && <UserManagement />}
+          {activeTab === 'products' && authUser.role === 'admin' && <ProductManagement />}
+          {activeTab === 'settings' && authUser.role === 'admin' && <Settings />}
+        </main>
+      </div>
+    </AppDataProvider>
   );
 };
 

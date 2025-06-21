@@ -4,48 +4,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import KryptoLogo from '@/components/KryptoLogo';
 import { TrendingUp, Users, Package, ShoppingCart } from 'lucide-react';
+import { useAppData } from '@/contexts/AppDataContext';
 
 interface DashboardProps {
   userRole: 'admin' | 'worker';
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
-  // Mock students data that matches other components
-  const mockStudents = [
-    { barcode: '1234567890', name: 'John Doe', balance: 0 },
-    { barcode: '0987654321', name: 'Jane Smith', balance: 0 },
-    { barcode: '1122334455', name: 'Mike Johnson', balance: 0 },
-    { barcode: '5566778899', name: 'Sarah Wilson', balance: 0 },
-  ];
+  const { users, products, transactions } = useAppData();
+  
+  // Filter students only
+  const students = users.filter(user => user.role === 'student');
 
-  // Mock products data that matches ProductManagement
-  const mockProducts = [
-    { id: '1', name: 'Pen (Blue)', price: 5, stock: 0, category: 'Stationery' },
-    { id: '2', name: 'Pencil (HB)', price: 3, stock: 0, category: 'Stationery' },
-    { id: '3', name: 'Eraser', price: 2, stock: 0, category: 'Stationery' },
-    { id: '4', name: 'Ruler (30cm)', price: 8, stock: 0, category: 'Stationery' },
-    { id: '5', name: 'Sharpener', price: 4, stock: 0, category: 'Stationery' },
-  ];
-
-  // Mock recent transactions - empty array to start
-  const mockTransactions: Array<{
-    id: string;
-    studentName: string;
-    type: 'purchase' | 'deposit' | 'deduction';
-    amount: number;
-    description: string;
-    time: string;
-  }> = [];
-
-  // Calculate dynamic stats
+  // Calculate dynamic stats from real data
   const stats = {
-    totalStudents: mockStudents.length,
-    totalBalance: mockStudents.reduce((sum, student) => sum + student.balance, 0),
-    totalProducts: mockProducts.length,
-    todaySales: mockTransactions
+    totalStudents: students.length,
+    totalBalance: students.reduce((sum, student) => sum + student.balance, 0),
+    totalProducts: products.length,
+    todaySales: transactions
       .filter(t => t.type === 'purchase')
       .reduce((sum, t) => sum + t.amount, 0),
-    recentTransactions: mockTransactions
+    recentTransactions: transactions.slice(-5) // Last 5 transactions
   };
 
   const getTransactionIcon = (type: string) => {
@@ -133,7 +112,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
           <CardContent>
             <div className="text-2xl font-bold">K$ {stats.todaySales}</div>
             <p className="text-xs text-muted-foreground">
-              From {mockTransactions.filter(t => t.type === 'purchase').length} transactions
+              From {transactions.filter(t => t.type === 'purchase').length} transactions
             </p>
           </CardContent>
         </Card>
@@ -163,7 +142,9 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
                       <p className={`font-medium text-sm ${getTransactionColor(transaction.type)}`}>
                         {transaction.type === 'purchase' || transaction.type === 'deduction' ? '-' : '+'}K$ {transaction.amount}
                       </p>
-                      <p className="text-xs text-muted-foreground">{transaction.time}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(transaction.createdAt).toLocaleTimeString()}
+                      </p>
                     </div>
                   </div>
                 ))
@@ -180,7 +161,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm">Active Students</span>
-              <Badge variant="default">{mockStudents.filter(s => s.balance > 0).length}</Badge>
+              <Badge variant="default">{students.filter(s => s.balance > 0).length}</Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm">Scanner Status</span>
@@ -188,14 +169,14 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm">Low Stock Items</span>
-              <Badge variant={mockProducts.filter(p => p.stock < 10 && p.stock > 0).length > 0 ? "secondary" : "default"}>
-                {mockProducts.filter(p => p.stock < 10 && p.stock > 0).length}
+              <Badge variant={products.filter(p => p.stock < 10 && p.stock > 0).length > 0 ? "secondary" : "default"}>
+                {products.filter(p => p.stock < 10 && p.stock > 0).length}
               </Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm">Out of Stock</span>
-              <Badge variant={mockProducts.filter(p => p.stock === 0).length > 0 ? "destructive" : "default"}>
-                {mockProducts.filter(p => p.stock === 0).length}
+              <Badge variant={products.filter(p => p.stock === 0).length > 0 ? "destructive" : "default"}>
+                {products.filter(p => p.stock === 0).length}
               </Badge>
             </div>
             <div className="flex items-center justify-between">

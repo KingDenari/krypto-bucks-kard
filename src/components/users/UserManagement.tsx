@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,28 +9,11 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Download, CreditCard } from 'lucide-react';
 import { User } from '@/types';
 import { useToast } from '@/hooks/use-toast';
+import { useAppData } from '@/contexts/AppDataContext';
 
 const UserManagement: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: '1',
-      name: 'John Doe',
-      email: 'john@school.com',
-      role: 'student',
-      balance: 150,
-      barcode: '1234567890',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      name: 'Jane Smith',
-      email: 'jane@school.com',
-      role: 'student',
-      balance: 75,
-      barcode: '1234567891',
-      createdAt: new Date().toISOString(),
-    }
-  ]);
+  const { users, addUser, updateUser, deleteUser } = useAppData();
+  const students = users.filter(user => user.role === 'student');
   
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -63,7 +45,7 @@ const UserManagement: React.FC = () => {
       createdAt: new Date().toISOString(),
     };
 
-    setUsers([...users, user]);
+    addUser(user);
     setNewUser({ name: '', email: '', balance: 0 });
     setIsAddDialogOpen(false);
     
@@ -74,9 +56,7 @@ const UserManagement: React.FC = () => {
   };
 
   const handleEditBalance = (userId: string, newBalance: number) => {
-    setUsers(users.map(user => 
-      user.id === userId ? { ...user, balance: newBalance } : user
-    ));
+    updateUser(userId, { balance: newBalance });
     setIsEditDialogOpen(false);
     setEditingUser(null);
     
@@ -87,7 +67,7 @@ const UserManagement: React.FC = () => {
   };
 
   const handleDeleteUser = (userId: string) => {
-    setUsers(users.filter(user => user.id !== userId));
+    deleteUser(userId);
     toast({
       title: "Success",
       description: "Student deleted successfully",
@@ -201,7 +181,7 @@ const UserManagement: React.FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
+              {students.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
