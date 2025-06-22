@@ -43,7 +43,7 @@ interface AppDataProviderProps {
 }
 
 // Helper functions for localStorage
-const loadFromStorage = <T>(key: string, defaultValue: T): T => {
+const loadFromStorage = (key: string, defaultValue: any) => {
   try {
     const item = localStorage.getItem(key);
     return item ? JSON.parse(item) : defaultValue;
@@ -53,7 +53,7 @@ const loadFromStorage = <T>(key: string, defaultValue: T): T => {
   }
 };
 
-const saveToStorage = <T>(key: string, value: T): void => {
+const saveToStorage = (key: string, value: any) => {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (error) {
