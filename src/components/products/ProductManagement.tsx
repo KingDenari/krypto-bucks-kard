@@ -10,51 +10,10 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Package } from 'lucide-react';
 import { Product } from '@/types';
 import { useToast } from '@/hooks/use-toast';
+import { useAppData } from '@/contexts/AppDataContext';
 
 const ProductManagement: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>([
-    {
-      id: '1',
-      name: 'Pen (Blue)',
-      price: 5,
-      stock: 50,
-      category: 'Stationery',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      name: 'Pencil (HB)',
-      price: 3,
-      stock: 75,
-      category: 'Stationery',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '3',
-      name: 'Eraser',
-      price: 2,
-      stock: 30,
-      category: 'Stationery',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '4',
-      name: 'Ruler (30cm)',
-      price: 8,
-      stock: 25,
-      category: 'Stationery',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '5',
-      name: 'Sharpener',
-      price: 4,
-      stock: 40,
-      category: 'Stationery',
-      createdAt: new Date().toISOString(),
-    }
-  ]);
-  
+  const { products, addProduct, updateProduct, deleteProduct } = useAppData();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -80,7 +39,7 @@ const ProductManagement: React.FC = () => {
       createdAt: new Date().toISOString(),
     };
 
-    setProducts([...products, product]);
+    addProduct(product);
     setNewProduct({ name: '', price: 0, stock: 0, category: '' });
     setIsAddDialogOpen(false);
     
@@ -93,9 +52,7 @@ const ProductManagement: React.FC = () => {
   const handleEditProduct = () => {
     if (!editingProduct) return;
 
-    setProducts(products.map(product => 
-      product.id === editingProduct.id ? editingProduct : product
-    ));
+    updateProduct(editingProduct.id, editingProduct);
     setIsEditDialogOpen(false);
     setEditingProduct(null);
     
@@ -106,7 +63,7 @@ const ProductManagement: React.FC = () => {
   };
 
   const handleDeleteProduct = (productId: string) => {
-    setProducts(products.filter(product => product.id !== productId));
+    deleteProduct(productId);
     toast({
       title: "Success",
       description: "Product deleted successfully",
@@ -129,7 +86,7 @@ const ProductManagement: React.FC = () => {
         
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="gradient-bg">
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
               <Plus className="w-4 h-4 mr-2" />
               Add Product
             </Button>
@@ -184,7 +141,7 @@ const ProductManagement: React.FC = () => {
                   />
                 </div>
               </div>
-              <Button onClick={handleAddProduct} className="w-full gradient-bg">
+              <Button onClick={handleAddProduct} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                 Add Product
               </Button>
             </div>
@@ -247,61 +204,68 @@ const ProductManagement: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Stock</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {products.map((product) => {
-                const stockStatus = getStockStatus(product.stock);
-                return (
-                  <TableRow key={product.id}>
-                    <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product.category}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="gradient-bg text-white">
-                        K$ {product.price}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{product.stock}</TableCell>
-                    <TableCell>
-                      <Badge variant={stockStatus.variant}>
-                        {stockStatus.text}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setEditingProduct(product);
-                            setIsEditDialogOpen(true);
-                          }}
-                        >
-                          <Edit className="w-3 h-3" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDeleteProduct(product.id)}
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+          {products.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No products added yet.</p>
+              <p className="text-sm text-muted-foreground">Add your first product to get started!</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Product Name</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Stock</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {products.map((product) => {
+                  const stockStatus = getStockStatus(product.stock);
+                  return (
+                    <TableRow key={product.id}>
+                      <TableCell className="font-medium">{product.name}</TableCell>
+                      <TableCell>{product.category}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="bg-blue-600 text-white">
+                          K$ {product.price}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{product.stock}</TableCell>
+                      <TableCell>
+                        <Badge variant={stockStatus.variant}>
+                          {stockStatus.text}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setEditingProduct(product);
+                              setIsEditDialogOpen(true);
+                            }}
+                          >
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDeleteProduct(product.id)}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
@@ -353,7 +317,7 @@ const ProductManagement: React.FC = () => {
                   />
                 </div>
               </div>
-              <Button onClick={handleEditProduct} className="w-full gradient-bg">
+              <Button onClick={handleEditProduct} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                 Update Product
               </Button>
             </div>

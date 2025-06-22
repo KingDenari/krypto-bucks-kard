@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,95 +10,21 @@ import { Separator } from '@/components/ui/separator';
 import { ScanLine, ShoppingCart, Plus, Minus, Trash2, Camera } from 'lucide-react';
 import { User, Product, Transaction } from '@/types';
 import { useToast } from '@/hooks/use-toast';
+import { useAppData } from '@/contexts/AppDataContext';
 import WebcamScanner from '@/components/settings/WebcamScanner';
 
 const SalesTerminal: React.FC = () => {
+  const { users, products, addTransaction, getUserByBarcode } = useAppData();
   const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
   const [barcodeInput, setBarcodeInput] = useState('');
   const [cart, setCart] = useState<{ product: Product; quantity: number }[]>([]);
   const [showWebcam, setShowWebcam] = useState(false);
   const { toast } = useToast();
 
-  // Mock data - reset to zero values
-  const students: User[] = [
-    {
-      id: '1',
-      name: 'John Doe',
-      email: 'john@school.com',
-      role: 'student',
-      balance: 0,
-      barcode: '1234567890',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      name: 'Jane Smith',
-      email: 'jane@school.com',
-      role: 'student',
-      balance: 0,
-      barcode: '1234567891',
-      createdAt: new Date().toISOString(),
-    }
-  ];
-
-  const products: Product[] = [
-    {
-      id: '1',
-      name: 'Pen (Blue)',
-      price: 0,
-      stock: 0,
-      category: 'Stationery',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      name: 'Pencil (HB)',
-      price: 0,
-      stock: 0,
-      category: 'Stationery',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '3',
-      name: 'Eraser',
-      price: 0,
-      stock: 0,
-      category: 'Stationery',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '4',
-      name: 'Ruler (30cm)',
-      price: 0,
-      stock: 0,
-      category: 'Stationery',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '5',
-      name: 'Sharpener',
-      price: 0,
-      stock: 0,
-      category: 'Stationery',
-      createdAt: new Date().toISOString(),
-    }
-  ];
-
-  const validateBarcode = (barcode: string) => {
-    return /^1234567890$/.test(barcode);
-  };
-
   const scanBarcode = () => {
-    if (!validateBarcode(barcodeInput)) {
-      toast({
-        title: "Invalid Barcode",
-        description: "Barcode must be exactly: 1234567890",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!barcodeInput.trim()) return;
 
-    const student = students.find(s => s.barcode === barcodeInput);
+    const student = getUserByBarcode(barcodeInput);
     if (student) {
       setSelectedStudent(student);
       setBarcodeInput('');
@@ -115,22 +42,19 @@ const SalesTerminal: React.FC = () => {
   };
 
   const handleWebcamScan = (scannedBarcode: string) => {
-    if (!validateBarcode(scannedBarcode)) {
-      toast({
-        title: "Invalid Barcode",
-        description: "Barcode must be exactly: 1234567890",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setBarcodeInput(scannedBarcode);
-    const foundStudent = students.find(s => s.barcode === scannedBarcode);
+    const foundStudent = getUserByBarcode(scannedBarcode);
     if (foundStudent) {
       setSelectedStudent(foundStudent);
       toast({
         title: "Student found via webcam!",
         description: `${foundStudent.name} - K$ ${foundStudent.balance}`,
+      });
+    } else {
+      toast({
+        title: "Student Not Found",
+        description: "Invalid barcode. Please try again.",
+        variant: "destructive",
       });
     }
   };
@@ -223,7 +147,6 @@ const SalesTerminal: React.FC = () => {
       return;
     }
 
-    // In a real app, this would update the database
     const transaction: Transaction = {
       id: Date.now().toString(),
       studentId: selectedStudent.id,
@@ -241,7 +164,7 @@ const SalesTerminal: React.FC = () => {
       createdBy: 'current-user@example.com'
     };
 
-    console.log('Transaction processed:', transaction);
+    addTransaction(transaction);
 
     // Reset cart and student
     setCart([]);
@@ -269,7 +192,7 @@ const SalesTerminal: React.FC = () => {
               Student Scanner
             </CardTitle>
             <CardDescription>
-              Scan student barcode (1234567890) or enter manually
+              Scan student barcode or enter manually
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -280,7 +203,7 @@ const SalesTerminal: React.FC = () => {
                 onChange={(e) => setBarcodeInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && scanBarcode()}
               />
-              <Button onClick={scanBarcode} className="gradient-bg">
+              <Button onClick={scanBarcode} className="bg-blue-600 hover:bg-blue-700 text-white">
                 <ScanLine className="w-4 h-4" />
               </Button>
             </div>
@@ -308,7 +231,7 @@ const SalesTerminal: React.FC = () => {
                 <h3 className="font-semibold text-green-800">{selectedStudent.name}</h3>
                 <p className="text-sm text-green-600">{selectedStudent.email}</p>
                 <div className="mt-2">
-                  <Badge className="gradient-bg text-white">
+                  <Badge className="bg-blue-600 text-white">
                     Balance: K$ {selectedStudent.balance}
                   </Badge>
                 </div>
@@ -372,14 +295,14 @@ const SalesTerminal: React.FC = () => {
                 
                 <div className="flex justify-between items-center font-bold text-lg">
                   <span>Total:</span>
-                  <Badge className="gradient-bg text-white text-lg px-3 py-1">
+                  <Badge className="bg-blue-600 text-white text-lg px-3 py-1">
                     K$ {getTotalAmount()}
                   </Badge>
                 </div>
                 
                 <Button 
                   onClick={processTransaction} 
-                  className="w-full gradient-bg mt-4"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-4"
                   disabled={!selectedStudent}
                 >
                   Process Transaction
@@ -399,32 +322,39 @@ const SalesTerminal: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {products.map((product) => (
-              <Card 
-                key={product.id} 
-                className="cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => addToCart(product)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-medium">{product.name}</h3>
-                    <Badge className="gradient-bg text-white">
-                      K$ {product.price}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-2">{product.category}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Stock: {product.stock}</span>
-                    <Button size="sm" className="gradient-bg">
-                      <Plus className="w-3 h-3 mr-1" />
-                      Add
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {products.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No products available.</p>
+              <p className="text-sm text-muted-foreground">Add products in the Product Management section.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {products.map((product) => (
+                <Card 
+                  key={product.id} 
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => addToCart(product)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-medium">{product.name}</h3>
+                      <Badge className="bg-blue-600 text-white">
+                        K$ {product.price}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-2">{product.category}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Stock: {product.stock}</span>
+                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                        <Plus className="w-3 h-3 mr-1" />
+                        Add
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

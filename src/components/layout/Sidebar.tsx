@@ -9,7 +9,8 @@ import {
   ShoppingCart, 
   ScanLine, 
   Settings, 
-  LogOut 
+  LogOut,
+  UserCheck
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -28,6 +29,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, use
     ...(userRole === 'admin' ? [
       { id: 'users', label: 'Students', icon: Users },
       { id: 'products', label: 'Products', icon: Package },
+      { id: 'workers', label: 'Workers', icon: UserCheck },
     ] : []),
   ];
 
@@ -37,7 +39,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, use
         <div className="flex items-center gap-3">
           <KryptoLogo size="lg" />
           <div>
-            <h1 className="text-xl font-bold gradient-bg bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-black to-blue-600 bg-clip-text text-transparent">
               Krypto Bucks
             </h1>
             <p className="text-sm text-muted-foreground capitalize">{userRole} Panel</p>
@@ -51,7 +53,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, use
             key={item.id}
             variant={activeTab === item.id ? 'default' : 'ghost'}
             className={`w-full justify-start ${
-              activeTab === item.id ? 'gradient-bg' : ''
+              activeTab === item.id ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''
             }`}
             onClick={() => onTabChange(item.id)}
           >

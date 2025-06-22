@@ -7,57 +7,26 @@ import { Badge } from '@/components/ui/badge';
 import KryptoLogo from '@/components/KryptoLogo';
 import WebcamScanner from '@/components/settings/WebcamScanner';
 import { useToast } from '@/hooks/use-toast';
+import { useAppData } from '@/contexts/AppDataContext';
 import { ScanLine, User, Wallet, Camera } from 'lucide-react';
 
 const BarcodeScanner: React.FC = () => {
+  const { getUserByBarcode } = useAppData();
   const [barcode, setBarcode] = useState('');
   const [student, setStudent] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [showWebcam, setShowWebcam] = useState(false);
   const { toast } = useToast();
 
-  // Mock student data - reset balances to zero
-  const mockStudents = [
-    {
-      id: '1',
-      name: 'John Doe',
-      email: 'john.doe@school.edu',
-      balance: 0,
-      barcode: '1234567890',
-      class: 'Grade 10A'
-    },
-    {
-      id: '2',
-      name: 'Jane Smith',
-      email: 'jane.smith@school.edu',
-      balance: 0,
-      barcode: '0987654321',
-      class: 'Grade 9B'
-    }
-  ];
-
-  const validateBarcode = (barcode: string) => {
-    return /^1234567890$/.test(barcode);
-  };
-
   const handleScan = (e: React.FormEvent) => {
     e.preventDefault();
     if (!barcode.trim()) return;
-
-    if (!validateBarcode(barcode)) {
-      toast({
-        title: "Invalid Barcode",
-        description: "Barcode must be exactly: 1234567890",
-        variant: "destructive",
-      });
-      return;
-    }
 
     setLoading(true);
     
     // Simulate scanning delay
     setTimeout(() => {
-      const foundStudent = mockStudents.find(s => s.barcode === barcode);
+      const foundStudent = getUserByBarcode(barcode);
       if (foundStudent) {
         setStudent(foundStudent);
         toast({
@@ -76,18 +45,9 @@ const BarcodeScanner: React.FC = () => {
   };
 
   const handleWebcamScan = (scannedBarcode: string) => {
-    if (!validateBarcode(scannedBarcode)) {
-      toast({
-        title: "Invalid Barcode",
-        description: "Barcode must be exactly: 1234567890",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setBarcode(scannedBarcode);
     // Auto-trigger the scan
-    const foundStudent = mockStudents.find(s => s.barcode === scannedBarcode);
+    const foundStudent = getUserByBarcode(scannedBarcode);
     if (foundStudent) {
       setStudent(foundStudent);
       toast({
@@ -119,7 +79,7 @@ const BarcodeScanner: React.FC = () => {
               Scanner
             </CardTitle>
             <CardDescription>
-              Use your webcam or enter barcode manually (1234567890)
+              Use your webcam or enter barcode manually
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -136,7 +96,7 @@ const BarcodeScanner: React.FC = () => {
               <div className="flex gap-2">
                 <Button 
                   type="submit" 
-                  className="flex-1 gradient-bg" 
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white" 
                   disabled={loading || !barcode.trim()}
                 >
                   {loading ? 'Scanning...' : 'Scan'}
@@ -164,15 +124,6 @@ const BarcodeScanner: React.FC = () => {
                 <WebcamScanner onScan={handleWebcamScan} />
               )}
             </div>
-
-            <div className="border-t pt-4">
-              <p className="text-sm text-muted-foreground mb-2">
-                <strong>Valid Barcode:</strong>
-              </p>
-              <div className="space-y-1 text-xs text-muted-foreground">
-                <p>1234567890 - John Doe</p>
-              </div>
-            </div>
           </CardContent>
         </Card>
 
@@ -189,7 +140,7 @@ const BarcodeScanner: React.FC = () => {
           <CardContent>
             {student ? (
               <div className="space-y-4">
-                <div className="krypto-card">
+                <div className="bg-gradient-to-r from-black to-blue-600 p-6 rounded-lg text-white">
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <p className="text-white/80 text-sm">Student Balance</p>
@@ -199,7 +150,7 @@ const BarcodeScanner: React.FC = () => {
                       </div>
                     </div>
                     <Badge className="bg-white/20 text-white">
-                      {student.class}
+                      {student.grade}
                     </Badge>
                   </div>
                   <div className="space-y-2">

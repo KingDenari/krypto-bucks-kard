@@ -2,10 +2,19 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { User, Product, Transaction } from '@/types';
 
+interface Worker {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  createdAt: string;
+}
+
 interface AppDataContextType {
   users: User[];
   products: Product[];
   transactions: Transaction[];
+  workers: Worker[];
   addUser: (user: User) => void;
   updateUser: (userId: string, updates: Partial<User>) => void;
   deleteUser: (userId: string) => void;
@@ -14,6 +23,9 @@ interface AppDataContextType {
   deleteProduct: (productId: string) => void;
   addTransaction: (transaction: Transaction) => void;
   getUserByBarcode: (barcode: string) => User | undefined;
+  addWorker: (worker: Worker) => void;
+  updateWorker: (workerId: string, updates: Partial<Worker>) => void;
+  deleteWorker: (workerId: string) => void;
 }
 
 const AppDataContext = createContext<AppDataContextType | undefined>(undefined);
@@ -34,6 +46,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   const [users, setUsers] = useState<User[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [workers, setWorkers] = useState<Worker[]>([]);
 
   const addUser = (user: User) => {
     setUsers(prev => [...prev, user]);
@@ -65,16 +78,52 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
 
   const addTransaction = (transaction: Transaction) => {
     setTransactions(prev => [...prev, transaction]);
+    
+    // Update user balance if it's a purchase, deposit, or deduction
+    if (transaction.type === 'purchase' || transaction.type === 'deduction') {
+      updateUser(transaction.studentId, { 
+        balance: users.find(u => u.id === transaction.studentId)!.balance - transaction.amount 
+      });
+    } else if (transaction.type === 'deposit') {
+      updateUser(transaction.studentId, { 
+        balance: users.find(u => u.id === transaction.studentId)!.balance + transaction.amount 
+      });
+    }
+
+    // Update product stock for purchases
+    if (transaction.type === 'purchase' && transaction.products) {
+      transaction.products.forEach(item => {
+        const product = products.find(p => p.id === item.productId);
+        if (product) {
+          updateProduct(item.productId, { stock: product.stock - item.quantity });
+        }
+      });
+    }
   };
 
   const getUserByBarcode = (barcode: string) => {
     return users.find(user => user.barcode === barcode);
   };
 
+  const addWorker = (worker: Worker) => {
+    setWorkers(prev => [...prev, worker]);
+  };
+
+  const updateWorker = (workerId: string, updates: Partial<Worker>) => {
+    setWorkers(prev => prev.map(worker => 
+      worker.id === workerId ? { ...worker, ...updates } : worker
+    ));
+  };
+
+  const deleteWorker = (workerId: string) => {
+    setWorkers(prev => prev.filter(worker => worker.id !== workerId));
+  };
+
   const value = {
     users,
     products,
     transactions,
+    workers,
     addUser,
     updateUser,
     deleteUser,
@@ -83,6 +132,9 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     deleteProduct,
     addTransaction,
     getUserByBarcode,
+    addWorker,
+    updateWorker,
+    deleteWorker,
   };
 
   return (

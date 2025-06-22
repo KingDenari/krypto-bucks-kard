@@ -7,6 +7,7 @@ import Dashboard from '@/components/dashboard/Dashboard';
 import BarcodeScanner from '@/components/scanner/BarcodeScanner';
 import UserManagement from '@/components/users/UserManagement';
 import ProductManagement from '@/components/products/ProductManagement';
+import WorkerManagement from '@/components/workers/WorkerManagement';
 import SalesTerminal from '@/components/sales/SalesTerminal';
 import Settings from '@/components/settings/Settings';
 import { AppDataProvider } from '@/contexts/AppDataContext';
@@ -68,6 +69,7 @@ const Index = () => {
           {activeTab === 'settings' && <Settings />}
           {activeTab === 'users' && authUser.role === 'admin' && <UserManagement />}
           {activeTab === 'products' && authUser.role === 'admin' && <ProductManagement />}
+          {activeTab === 'workers' && authUser.role === 'admin' && <WorkerManagement />}
         </main>
       </div>
     </AppDataProvider>

@@ -19,7 +19,7 @@ const UserManagement: React.FC = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [newUser, setNewUser] = useState({ name: '', email: '', balance: 0, grade: '' });
+  const [newUser, setNewUser] = useState({ name: '', email: '', balance: 0, grade: '', barcode: '' });
   const { toast } = useToast();
 
   const generateBarcode = () => {
@@ -36,6 +36,16 @@ const UserManagement: React.FC = () => {
       return;
     }
 
+    // Check if barcode already exists
+    if (newUser.barcode && users.some(u => u.barcode === newUser.barcode)) {
+      toast({
+        title: "Error",
+        description: "Barcode already exists. Please use a different barcode.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const user: User = {
       id: Date.now().toString(),
       name: newUser.name,
@@ -43,12 +53,12 @@ const UserManagement: React.FC = () => {
       role: 'student',
       balance: newUser.balance,
       grade: newUser.grade,
-      barcode: generateBarcode(),
+      barcode: newUser.barcode || generateBarcode(),
       createdAt: new Date().toISOString(),
     };
 
     addUser(user);
-    setNewUser({ name: '', email: '', balance: 0, grade: '' });
+    setNewUser({ name: '', email: '', balance: 0, grade: '', barcode: '' });
     setIsAddDialogOpen(false);
     
     toast({
@@ -114,7 +124,7 @@ const UserManagement: React.FC = () => {
         
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="gradient-bg">
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
               <Plus className="w-4 h-4 mr-2" />
               Add Student
             </Button>
@@ -156,6 +166,15 @@ const UserManagement: React.FC = () => {
                 />
               </div>
               <div>
+                <Label htmlFor="barcode">Barcode (optional)</Label>
+                <Input
+                  id="barcode"
+                  value={newUser.barcode}
+                  onChange={(e) => setNewUser({ ...newUser, barcode: e.target.value })}
+                  placeholder="Enter custom barcode or leave empty for auto-generated"
+                />
+              </div>
+              <div>
                 <Label htmlFor="balance">Initial Balance (K$)</Label>
                 <Input
                   id="balance"
@@ -165,7 +184,7 @@ const UserManagement: React.FC = () => {
                   placeholder="0"
                 />
               </div>
-              <Button onClick={handleAddUser} className="w-full gradient-bg">
+              <Button onClick={handleAddUser} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                 Create Student Account
               </Button>
             </div>
@@ -205,7 +224,7 @@ const UserManagement: React.FC = () => {
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{user.grade || 'N/A'}</TableCell>
                     <TableCell>
-                      <Badge variant="secondary" className="gradient-bg text-white">
+                      <Badge variant="secondary" className="bg-blue-600 text-white">
                         K$ {user.balance}
                       </Badge>
                     </TableCell>
@@ -258,7 +277,7 @@ const UserManagement: React.FC = () => {
             <div className="space-y-4">
               <div>
                 <Label>Current Balance</Label>
-                <div className="text-2xl font-bold gradient-bg bg-clip-text text-transparent">
+                <div className="text-2xl font-bold text-blue-600">
                   K$ {editingUser.balance}
                 </div>
               </div>
@@ -277,7 +296,7 @@ const UserManagement: React.FC = () => {
               </div>
               <Button
                 onClick={() => editingUser && handleEditBalance(editingUser.id, editingUser.balance)}
-                className="w-full gradient-bg"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
               >
                 Update Balance
               </Button>
