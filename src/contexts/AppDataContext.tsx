@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Product, Transaction } from '@/types';
 
 interface Worker {
@@ -42,11 +42,47 @@ interface AppDataProviderProps {
   children: ReactNode;
 }
 
+// Helper functions for localStorage
+const loadFromStorage = <T>(key: string, defaultValue: T): T => {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : defaultValue;
+  } catch (error) {
+    console.error(`Error loading ${key} from localStorage:`, error);
+    return defaultValue;
+  }
+};
+
+const saveToStorage = <T>(key: string, value: T): void => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.error(`Error saving ${key} to localStorage:`, error);
+  }
+};
+
 export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [workers, setWorkers] = useState<Worker[]>([]);
+  const [users, setUsers] = useState<User[]>(() => loadFromStorage('krypto-users', []));
+  const [products, setProducts] = useState<Product[]>(() => loadFromStorage('krypto-products', []));
+  const [transactions, setTransactions] = useState<Transaction[]>(() => loadFromStorage('krypto-transactions', []));
+  const [workers, setWorkers] = useState<Worker[]>(() => loadFromStorage('krypto-workers', []));
+
+  // Save to localStorage whenever state changes
+  useEffect(() => {
+    saveToStorage('krypto-users', users);
+  }, [users]);
+
+  useEffect(() => {
+    saveToStorage('krypto-products', products);
+  }, [products]);
+
+  useEffect(() => {
+    saveToStorage('krypto-transactions', transactions);
+  }, [transactions]);
+
+  useEffect(() => {
+    saveToStorage('krypto-workers', workers);
+  }, [workers]);
 
   const addUser = (user: User) => {
     setUsers(prev => [...prev, user]);
@@ -81,13 +117,19 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     
     // Update user balance if it's a purchase, deposit, or deduction
     if (transaction.type === 'purchase' || transaction.type === 'deduction') {
-      updateUser(transaction.studentId, { 
-        balance: users.find(u => u.id === transaction.studentId)!.balance - transaction.amount 
-      });
+      const user = users.find(u => u.id === transaction.studentId);
+      if (user) {
+        updateUser(transaction.studentId, { 
+          balance: user.balance - transaction.amount 
+        });
+      }
     } else if (transaction.type === 'deposit') {
-      updateUser(transaction.studentId, { 
-        balance: users.find(u => u.id === transaction.studentId)!.balance + transaction.amount 
-      });
+      const user = users.find(u => u.id === transaction.studentId);
+      if (user) {
+        updateUser(transaction.studentId, { 
+          balance: user.balance + transaction.amount 
+        });
+      }
     }
 
     // Update product stock for purchases
