@@ -1,8 +1,7 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Product, Transaction } from '@/types';
 
-interface Worker {
+interface Employee {
   id: string;
   name: string;
   email: string;
@@ -14,7 +13,7 @@ interface AppDataContextType {
   users: User[];
   products: Product[];
   transactions: Transaction[];
-  workers: Worker[];
+  employees: Employee[];
   addUser: (user: User) => void;
   updateUser: (userId: string, updates: Partial<User>) => void;
   deleteUser: (userId: string) => void;
@@ -23,8 +22,13 @@ interface AppDataContextType {
   deleteProduct: (productId: string) => void;
   addTransaction: (transaction: Transaction) => void;
   getUserByBarcode: (barcode: string) => User | undefined;
-  addWorker: (worker: Worker) => void;
-  updateWorker: (workerId: string, updates: Partial<Worker>) => void;
+  addEmployee: (employee: Employee) => void;
+  updateEmployee: (employeeId: string, updates: Partial<Employee>) => void;
+  deleteEmployee: (employeeId: string) => void;
+  // Keep workers for backward compatibility during transition
+  workers: Employee[];
+  addWorker: (worker: Employee) => void;
+  updateWorker: (workerId: string, updates: Partial<Employee>) => void;
   deleteWorker: (workerId: string) => void;
 }
 
@@ -65,7 +69,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   const [users, setUsers] = useState<User[]>(() => loadFromStorage('krypto-users', []));
   const [products, setProducts] = useState<Product[]>(() => loadFromStorage('krypto-products', []));
   const [transactions, setTransactions] = useState<Transaction[]>(() => loadFromStorage('krypto-transactions', []));
-  const [workers, setWorkers] = useState<Worker[]>(() => loadFromStorage('krypto-workers', []));
+  const [employees, setEmployees] = useState<Employee[]>(() => loadFromStorage('krypto-employees', []));
 
   // Save to localStorage whenever state changes
   useEffect(() => {
@@ -81,8 +85,8 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   }, [transactions]);
 
   useEffect(() => {
-    saveToStorage('krypto-workers', workers);
-  }, [workers]);
+    saveToStorage('krypto-employees', employees);
+  }, [employees]);
 
   const addUser = (user: User) => {
     setUsers(prev => [...prev, user]);
@@ -147,25 +151,25 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     return users.find(user => user.barcode === barcode);
   };
 
-  const addWorker = (worker: Worker) => {
-    setWorkers(prev => [...prev, worker]);
+  const addEmployee = (employee: Employee) => {
+    setEmployees(prev => [...prev, employee]);
   };
 
-  const updateWorker = (workerId: string, updates: Partial<Worker>) => {
-    setWorkers(prev => prev.map(worker => 
-      worker.id === workerId ? { ...worker, ...updates } : worker
+  const updateEmployee = (employeeId: string, updates: Partial<Employee>) => {
+    setEmployees(prev => prev.map(employee => 
+      employee.id === employeeId ? { ...employee, ...updates } : employee
     ));
   };
 
-  const deleteWorker = (workerId: string) => {
-    setWorkers(prev => prev.filter(worker => worker.id !== workerId));
+  const deleteEmployee = (employeeId: string) => {
+    setEmployees(prev => prev.filter(employee => employee.id !== employeeId));
   };
 
   const value = {
     users,
     products,
     transactions,
-    workers,
+    employees,
     addUser,
     updateUser,
     deleteUser,
@@ -174,9 +178,14 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     deleteProduct,
     addTransaction,
     getUserByBarcode,
-    addWorker,
-    updateWorker,
-    deleteWorker,
+    addEmployee,
+    updateEmployee,
+    deleteEmployee,
+    // Backward compatibility aliases
+    workers: employees,
+    addWorker: addEmployee,
+    updateWorker: updateEmployee,
+    deleteWorker: deleteEmployee,
   };
 
   return (

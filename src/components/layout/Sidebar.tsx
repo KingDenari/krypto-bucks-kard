@@ -29,7 +29,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, use
     ...(userRole === 'admin' ? [
       { id: 'users', label: 'Students', icon: Users },
       { id: 'products', label: 'Products', icon: Package },
-      { id: 'workers', label: 'Workers', icon: UserCheck },
+      { id: 'workers', label: 'Employees', icon: UserCheck },
     ] : []),
   ];
 
@@ -42,7 +42,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, use
             <h1 className="text-xl font-bold bg-gradient-to-r from-black to-blue-600 bg-clip-text text-transparent">
               Krypto Bucks
             </h1>
-            <p className="text-sm text-muted-foreground capitalize">{userRole} Panel</p>
+            <p className="text-sm text-muted-foreground capitalize">
+              {userRole === 'worker' ? 'Employee' : userRole} Panel
+            </p>
           </div>
         </div>
       </div>

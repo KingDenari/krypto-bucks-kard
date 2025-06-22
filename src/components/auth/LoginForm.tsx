@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import KryptoLogo from '@/components/KryptoLogo';
 import { useToast } from '@/hooks/use-toast';
+import { useAppData } from '@/contexts/AppDataContext';
 
 interface LoginFormProps {
   onLogin: (email: string, role: 'admin' | 'worker') => void;
@@ -17,6 +18,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { workers } = useAppData();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,27 +35,35 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
       return;
     }
 
-    // Simple authentication logic for demo
-    // In production, this would connect to your authentication system
+    // Check if user is admin (contains @admin)
     if (email.includes('@admin') && password.length >= 6) {
       onLogin(email, 'admin');
       toast({
         title: "Welcome back!",
         description: "Logged in as Administrator",
       });
-    } else if (email.includes('@') && password.length >= 6) {
+      setLoading(false);
+      return;
+    }
+
+    // Check if user is a registered employee
+    const employee = workers.find(w => w.email === email && w.password === password);
+    if (employee) {
       onLogin(email, 'worker');
       toast({
         title: "Welcome!",
-        description: "Logged in as Worker",
+        description: `Logged in as Employee - ${employee.name}`,
       });
-    } else {
-      toast({
-        title: "Login failed",
-        description: "Invalid email or password",
-        variant: "destructive",
-      });
+      setLoading(false);
+      return;
     }
+
+    // Invalid credentials
+    toast({
+      title: "Login failed",
+      description: "Invalid email or password. Please check your credentials or contact an administrator.",
+      variant: "destructive",
+    });
     
     setLoading(false);
   };

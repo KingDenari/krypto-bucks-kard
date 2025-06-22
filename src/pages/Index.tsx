@@ -7,7 +7,7 @@ import Dashboard from '@/components/dashboard/Dashboard';
 import BarcodeScanner from '@/components/scanner/BarcodeScanner';
 import UserManagement from '@/components/users/UserManagement';
 import ProductManagement from '@/components/products/ProductManagement';
-import WorkerManagement from '@/components/workers/WorkerManagement';
+import EmployeeManagement from '@/components/workers/EmployeeManagement';
 import SalesTerminal from '@/components/sales/SalesTerminal';
 import Settings from '@/components/settings/Settings';
 import { AppDataProvider } from '@/contexts/AppDataContext';
@@ -49,7 +49,11 @@ const Index = () => {
 
   // Show login if not authenticated
   if (!authUser) {
-    return <LoginForm onLogin={handleLogin} onStudentView={handleStudentView} />;
+    return (
+      <AppDataProvider>
+        <LoginForm onLogin={handleLogin} onStudentView={handleStudentView} />
+      </AppDataProvider>
+    );
   }
 
   // Show main application
@@ -69,7 +73,7 @@ const Index = () => {
           {activeTab === 'settings' && <Settings />}
           {activeTab === 'users' && authUser.role === 'admin' && <UserManagement />}
           {activeTab === 'products' && authUser.role === 'admin' && <ProductManagement />}
-          {activeTab === 'workers' && authUser.role === 'admin' && <WorkerManagement />}
+          {activeTab === 'workers' && authUser.role === 'admin' && <EmployeeManagement />}
         </main>
       </div>
     </AppDataProvider>
