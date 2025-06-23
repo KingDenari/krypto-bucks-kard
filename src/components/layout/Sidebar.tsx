@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import KryptoLogo from '@/components/KryptoLogo';
@@ -34,8 +33,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, use
       { id: 'users', label: 'Students', icon: Users },
       { id: 'products', label: 'Products', icon: Package },
       { id: 'workers', label: 'Employees', icon: UserCheck },
-      { id: 'transfers', label: 'Transfer Monitor', icon: ArrowLeftRight },
-      { id: 'sales-monitor', label: 'Sales Monitor', icon: BarChart3 },
+      { id: 'transfers', label: 'Transfer Monitor', icon: ArrowLeftRight, adminOnly: true },
+      { id: 'sales-monitor', label: 'Sales Monitor', icon: BarChart3, adminOnly: true },
     ] : []),
   ];
 
@@ -67,6 +66,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, use
           >
             <item.icon className="w-4 h-4 mr-3" />
             {item.label}
+            {(item as any).adminOnly && (
+              <span className="ml-auto text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
+                Admin
+              </span>
+            )}
           </Button>
         ))}
       </nav>

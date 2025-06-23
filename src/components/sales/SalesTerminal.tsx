@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,18 +6,26 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
-import { ScanLine, ShoppingCart, Plus, Minus, Trash2, Camera } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ScanLine, ShoppingCart, Plus, Minus, Trash2, Camera, Receipt, Copy } from 'lucide-react';
 import { User, Product, Transaction } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { useAppData } from '@/contexts/AppDataContext';
 import WebcamScanner from '@/components/settings/WebcamScanner';
+import TransactionReceipt from './TransactionReceipt';
 
-const SalesTerminal: React.FC = () => {
-  const { users, products, addTransaction, getUserByBarcode } = useAppData();
+interface SalesTerminalProps {
+  userEmail?: string;
+}
+
+const SalesTerminal: React.FC<SalesTerminalProps> = ({ userEmail = 'employee@example.com' }) => {
+  const { users, products, addTransaction, getUserByBarcode, exchangeRate } = useAppData();
   const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
   const [barcodeInput, setBarcodeInput] = useState('');
   const [cart, setCart] = useState<{ product: Product; quantity: number }[]>([]);
   const [showWebcam, setShowWebcam] = useState(false);
+  const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
+  const [showReceipt, setShowReceipt] = useState(false);
   const { toast } = useToast();
 
   const scanBarcode = () => {
@@ -161,10 +168,11 @@ const SalesTerminal: React.FC = () => {
         price: item.product.price
       })),
       createdAt: new Date().toISOString(),
-      createdBy: 'current-user@example.com'
+      createdBy: userEmail
     };
 
     addTransaction(transaction);
+    setLastTransaction(transaction);
 
     // Reset cart and student
     setCart([]);
@@ -300,13 +308,39 @@ const SalesTerminal: React.FC = () => {
                   </Badge>
                 </div>
                 
-                <Button 
-                  onClick={processTransaction} 
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-4"
-                  disabled={!selectedStudent}
-                >
-                  Process Transaction
-                </Button>
+                <div className="space-y-2">
+                  <Button 
+                    onClick={processTransaction} 
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    disabled={!selectedStudent}
+                  >
+                    Process Transaction
+                  </Button>
+                  
+                  {lastTransaction && (
+                    <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="w-full">
+                          <Receipt className="w-4 h-4 mr-2" />
+                          Get Receipt
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Transaction Receipt</DialogTitle>
+                          <DialogDescription>
+                            Receipt for transaction #{lastTransaction.id}
+                          </DialogDescription>
+                        </DialogHeader>
+                        <TransactionReceipt 
+                          transaction={lastTransaction} 
+                          exchangeRate={exchangeRate.kshToKrypto}
+                          servedBy={userEmail}
+                        />
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </div>
               </div>
             )}
           </CardContent>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import LoginForm from '@/components/auth/LoginForm';
 import StudentView from '@/components/student/StudentView';
@@ -72,7 +71,7 @@ const Index = () => {
         <main className="flex-1 p-6 overflow-auto">
           {activeTab === 'dashboard' && <Dashboard userRole={authUser.role} />}
           {activeTab === 'scan' && <BarcodeScanner />}
-          {activeTab === 'sales' && <SalesTerminal />}
+          {activeTab === 'sales' && <SalesTerminal userEmail={authUser.email} />}
           {activeTab === 'exchange' && <ExchangeRate userRole={authUser.role} />}
           {activeTab === 'settings' && <Settings />}
           {activeTab === 'users' && authUser.role === 'admin' && <UserManagement />}
