@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
 import KryptoLogo from '@/components/KryptoLogo';
 import { useToast } from '@/hooks/use-toast';
+import { User, Lock } from 'lucide-react';
 import { useAppData } from '@/contexts/AppDataContext';
 
 interface LoginFormProps {
@@ -20,52 +20,38 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
   const { toast } = useToast();
   const { employees } = useAppData();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    // Basic validation
-    if (!email || !password) {
-      toast({
-        title: "Login failed",
-        description: "Please enter both email and password",
-        variant: "destructive",
-      });
+    // Simulate API call delay
+    setTimeout(() => {
+      // Check admin credentials
+      if (email === 'admin@krypto.com' && password === 'admin123') {
+        onLogin(email, 'admin');
+        toast({
+          title: "Login successful!",
+          description: "Welcome back, Admin!",
+        });
+      } else {
+        // Check employee credentials
+        const employee = employees.find(emp => emp.email === email && emp.password === password);
+        if (employee) {
+          onLogin(email, 'worker');
+          toast({
+            title: "Login successful!",
+            description: `Welcome back, ${employee.name}!`,
+          });
+        } else {
+          toast({
+            title: "Login failed",
+            description: "Invalid email or password",
+            variant: "destructive",
+          });
+        }
+      }
       setLoading(false);
-      return;
-    }
-
-    // Check if user is admin (contains @admin)
-    if (email.includes('@admin') && password.length >= 6) {
-      onLogin(email, 'admin');
-      toast({
-        title: "Welcome back!",
-        description: "Logged in as Administrator",
-      });
-      setLoading(false);
-      return;
-    }
-
-    // Check if user is a registered employee
-    const employee = employees.find(w => w.email === email && w.password === password);
-    if (employee) {
-      onLogin(email, 'worker');
-      toast({
-        title: "Welcome!",
-        description: `Logged in as Employee - ${employee.name}`,
-      });
-      setLoading(false);
-      return;
-    }
-
-    // Invalid credentials
-    toast({
-      title: "Login failed",
-      description: "Invalid email or password. Please check your credentials or contact an administrator.",
-      variant: "destructive",
-    });
-    
-    setLoading(false);
+    }, 1000);
   };
 
   return (
@@ -79,7 +65,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
             <h1 className="text-3xl font-bold text-black">
               Krypto Bucks
             </h1>
-            <p className="text-gray-600">School Digital Currency System</p>
+            <p className="text-gray-600">Admin & Employee Portal</p>
           </div>
         </div>
 
@@ -93,46 +79,49 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-black">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="border-gray-300"
-                />
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="pl-10 border-gray-300"
+                  />
+                </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-black">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="border-gray-300"
-                />
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="pl-10 border-gray-300"
+                  />
+                </div>
               </div>
               <Button type="submit" className="w-full bg-black hover:bg-gray-800 text-white" disabled={loading}>
                 {loading ? 'Signing in...' : 'Sign In'}
               </Button>
             </form>
-            
-            <div className="mt-6 pt-4 border-t border-gray-200">
-              <Button 
-                variant="outline" 
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 text-lg font-semibold py-6 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200 animate-pulse" 
-                onClick={onStudentView}
-                type="button"
-              >
-                🎉 I'm a Student - Transfer Krypto Bucks! 💰
-              </Button>
-            </div>
           </CardContent>
         </Card>
+
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">or</p>
+          <Button 
+            variant="outline" 
+            onClick={onStudentView}
+            className="w-full border-2 border-black text-black hover:bg-black hover:text-white animate-pulse transition-all duration-1000"
+            style={{ animationDuration: '2s' }}
+          >
+            I'm a Student - Transfer Krypto Bucks
+          </Button>
+        </div>
       </div>
     </div>
   );

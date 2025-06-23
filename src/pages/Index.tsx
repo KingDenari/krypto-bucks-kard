@@ -11,6 +11,8 @@ import EmployeeManagement from '@/components/workers/EmployeeManagement';
 import SalesTerminal from '@/components/sales/SalesTerminal';
 import Settings from '@/components/settings/Settings';
 import ExchangeRate from '@/components/exchange/ExchangeRate';
+import TransferMonitoring from '@/components/transfers/TransferMonitoring';
+import SalesMonitoring from '@/components/sales/SalesMonitoring';
 import { AppDataProvider } from '@/contexts/AppDataContext';
 import { AuthUser } from '@/types';
 
@@ -76,6 +78,8 @@ const Index = () => {
           {activeTab === 'users' && authUser.role === 'admin' && <UserManagement />}
           {activeTab === 'products' && authUser.role === 'admin' && <ProductManagement />}
           {activeTab === 'workers' && authUser.role === 'admin' && <EmployeeManagement />}
+          {activeTab === 'transfers' && authUser.role === 'admin' && <TransferMonitoring />}
+          {activeTab === 'sales-monitor' && authUser.role === 'admin' && <SalesMonitoring />}
         </main>
       </div>
     </AppDataProvider>

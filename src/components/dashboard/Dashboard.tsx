@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import KryptoLogo from '@/components/KryptoLogo';
@@ -12,19 +12,50 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
   const { users, products, transactions } = useAppData();
+  const [lastRefresh, setLastRefresh] = useState<string>(() => {
+    return localStorage.getItem('dashboard-last-refresh') || new Date().toISOString();
+  });
   
   // Filter students only
   const students = users.filter(user => user.role === 'student');
+
+  // Check if 24 hours have passed and refresh data
+  useEffect(() => {
+    const checkRefresh = () => {
+      const now = new Date();
+      const lastRefreshDate = new Date(lastRefresh);
+      const hoursDiff = (now.getTime() - lastRefreshDate.getTime()) / (1000 * 60 * 60);
+      
+      if (hoursDiff >= 24) {
+        setLastRefresh(now.toISOString());
+        localStorage.setItem('dashboard-last-refresh', now.toISOString());
+      }
+    };
+
+    checkRefresh();
+    // Check every hour
+    const interval = setInterval(checkRefresh, 60 * 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, [lastRefresh]);
+
+  // Filter transactions for today's sales (reset at midnight)
+  const today = new Date().toDateString();
+  const todayTransactions = transactions.filter(t => 
+    new Date(t.createdAt).toDateString() === today
+  );
 
   // Calculate dynamic stats from real data
   const stats = {
     totalStudents: students.length,
     totalBalance: students.reduce((sum, student) => sum + student.balance, 0),
     totalProducts: products.length,
-    todaySales: transactions
+    todaySales: todayTransactions
       .filter(t => t.type === 'purchase')
       .reduce((sum, t) => sum + t.amount, 0),
-    recentTransactions: transactions.slice(-5) // Last 5 transactions
+    recentTransactions: transactions
+      .slice(-5)
+      .reverse() // Show most recent first
   };
 
   const getTransactionIcon = (type: string) => {
@@ -35,6 +66,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
         return '💰';
       case 'deduction':
         return '❌';
+      case 'transfer':
+        return '↔️';
       default:
         return '📝';
     }
@@ -48,6 +81,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
         return 'text-green-600';
       case 'deduction':
         return 'text-orange-600';
+      case 'transfer':
+        return 'text-blue-600';
       default:
         return 'text-gray-600';
     }
@@ -59,6 +94,9 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
         <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
         <p className="text-muted-foreground">
           Welcome back! Here's what's happening with Krypto Bucks today.
+        </p>
+        <p className="text-xs text-muted-foreground mt-1">
+          Last refreshed: {new Date(lastRefresh).toLocaleString()} • Auto-refresh: Every 24 hours
         </p>
       </div>
 
@@ -84,7 +122,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
           <CardContent>
             <div className="text-2xl font-bold">K$ {stats.totalBalance.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
-              KES {(stats.totalBalance / 10).toFixed(2)}
+              KES {(stats.totalBalance / 51).toFixed(2)}
             </p>
           </CardContent>
         </Card>
@@ -112,7 +150,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
           <CardContent>
             <div className="text-2xl font-bold">K$ {stats.todaySales}</div>
             <p className="text-xs text-muted-foreground">
-              From {transactions.filter(t => t.type === 'purchase').length} transactions
+              From {todayTransactions.filter(t => t.type === 'purchase').length} transactions
             </p>
           </CardContent>
         </Card>
@@ -122,7 +160,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
         <Card className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Latest transactions in the system</CardDescription>
+            <CardDescription>Latest transactions in the system (refreshes daily)</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -140,7 +178,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
                     </div>
                     <div className="text-right">
                       <p className={`font-medium text-sm ${getTransactionColor(transaction.type)}`}>
-                        {transaction.type === 'purchase' || transaction.type === 'deduction' ? '-' : '+'}K$ {transaction.amount}
+                        {transaction.type === 'purchase' || transaction.type === 'deduction' || (transaction.type === 'transfer' && transaction.amount < 0) ? '' : '+'}K$ {Math.abs(transaction.amount)}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {new Date(transaction.createdAt).toLocaleTimeString()}

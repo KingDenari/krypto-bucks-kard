@@ -11,7 +11,9 @@ import {
   Settings, 
   LogOut,
   UserCheck,
-  TrendingUp
+  TrendingUp,
+  ArrowLeftRight,
+  BarChart3
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -32,6 +34,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, use
       { id: 'users', label: 'Students', icon: Users },
       { id: 'products', label: 'Products', icon: Package },
       { id: 'workers', label: 'Employees', icon: UserCheck },
+      { id: 'transfers', label: 'Transfer Monitor', icon: ArrowLeftRight },
+      { id: 'sales-monitor', label: 'Sales Monitor', icon: BarChart3 },
     ] : []),
   ];
 
