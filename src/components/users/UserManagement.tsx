@@ -19,18 +19,22 @@ const UserManagement: React.FC = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [newUser, setNewUser] = useState({ name: '', email: '', balance: 0, grade: '', barcode: '' });
+  const [newUser, setNewUser] = useState({ name: '', email: '', balance: 0, grade: '', barcode: '', secretCode: '' });
   const { toast } = useToast();
 
   const generateBarcode = () => {
     return Date.now().toString() + Math.random().toString(36).substr(2, 5);
   };
 
+  const generateSecretCode = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  };
+
   const handleAddUser = () => {
     if (!newUser.name || !newUser.email || !newUser.grade) {
       toast({
         title: "Error",
-        description: "Please fill in all fields",
+        description: "Please fill in all required fields",
         variant: "destructive",
       });
       return;
@@ -46,19 +50,30 @@ const UserManagement: React.FC = () => {
       return;
     }
 
+    // Check if secret code already exists
+    if (newUser.secretCode && users.some(u => u.secretCode === newUser.secretCode)) {
+      toast({
+        title: "Error",
+        description: "Secret code already exists. Please use a different secret code.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const user: User = {
       id: Date.now().toString(),
       name: newUser.name,
       email: newUser.email,
       role: 'student',
-      balance: newUser.balance,
+      balance: Number(newUser.balance),
       grade: newUser.grade,
       barcode: newUser.barcode || generateBarcode(),
+      secretCode: newUser.secretCode || generateSecretCode(),
       createdAt: new Date().toISOString(),
     };
 
     addUser(user);
-    setNewUser({ name: '', email: '', balance: 0, grade: '', barcode: '' });
+    setNewUser({ name: '', email: '', balance: 0, grade: '', barcode: '', secretCode: '' });
     setIsAddDialogOpen(false);
     
     toast({
@@ -138,7 +153,7 @@ const UserManagement: React.FC = () => {
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">Name *</Label>
                 <Input
                   id="name"
                   value={newUser.name}
@@ -147,7 +162,7 @@ const UserManagement: React.FC = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Email *</Label>
                 <Input
                   id="email"
                   type="email"
@@ -157,7 +172,7 @@ const UserManagement: React.FC = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="grade">Grade</Label>
+                <Label htmlFor="grade">Grade *</Label>
                 <Input
                   id="grade"
                   value={newUser.grade}
@@ -175,13 +190,23 @@ const UserManagement: React.FC = () => {
                 />
               </div>
               <div>
+                <Label htmlFor="secretCode">Secret Code (optional)</Label>
+                <Input
+                  id="secretCode"
+                  value={newUser.secretCode}
+                  onChange={(e) => setNewUser({ ...newUser, secretCode: e.target.value })}
+                  placeholder="Enter custom secret code or leave empty for auto-generated"
+                />
+              </div>
+              <div>
                 <Label htmlFor="balance">Initial Balance (K$)</Label>
                 <Input
                   id="balance"
                   type="number"
+                  step="0.01"
                   value={newUser.balance}
-                  onChange={(e) => setNewUser({ ...newUser, balance: Number(e.target.value) })}
-                  placeholder="0"
+                  onChange={(e) => setNewUser({ ...newUser, balance: parseFloat(e.target.value) || 0 })}
+                  placeholder="0.00"
                 />
               </div>
               <Button onClick={handleAddUser} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
@@ -214,6 +239,7 @@ const UserManagement: React.FC = () => {
                   <TableHead>Grade</TableHead>
                   <TableHead>Balance</TableHead>
                   <TableHead>Barcode</TableHead>
+                  <TableHead>Secret Code</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -229,6 +255,7 @@ const UserManagement: React.FC = () => {
                       </Badge>
                     </TableCell>
                     <TableCell className="font-mono text-sm">{user.barcode}</TableCell>
+                    <TableCell className="font-mono text-sm">{user.secretCode}</TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
                         <Button
@@ -286,10 +313,11 @@ const UserManagement: React.FC = () => {
                 <Input
                   id="newBalance"
                   type="number"
+                  step="0.01"
                   defaultValue={editingUser.balance}
                   onChange={(e) => {
                     if (editingUser) {
-                      setEditingUser({ ...editingUser, balance: Number(e.target.value) });
+                      setEditingUser({ ...editingUser, balance: parseFloat(e.target.value) || 0 });
                     }
                   }}
                 />

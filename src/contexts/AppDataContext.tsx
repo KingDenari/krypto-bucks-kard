@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, Product, Transaction } from '@/types';
+import { User, Product, Transaction, ExchangeRate } from '@/types';
 
 interface Employee {
   id: string;
@@ -14,6 +14,7 @@ interface AppDataContextType {
   products: Product[];
   transactions: Transaction[];
   employees: Employee[];
+  exchangeRate: ExchangeRate;
   addUser: (user: User) => void;
   updateUser: (userId: string, updates: Partial<User>) => void;
   deleteUser: (userId: string) => void;
@@ -22,9 +23,12 @@ interface AppDataContextType {
   deleteProduct: (productId: string) => void;
   addTransaction: (transaction: Transaction) => void;
   getUserByBarcode: (barcode: string) => User | undefined;
+  getUserBySecretCode: (secretCode: string) => User | undefined;
   addEmployee: (employee: Employee) => void;
   updateEmployee: (employeeId: string, updates: Partial<Employee>) => void;
   deleteEmployee: (employeeId: string) => void;
+  updateExchangeRate: (rate: number, updatedBy: string) => void;
+  transferKryptoBucks: (fromUserId: string, toUserId: string, amount: number, transferredBy: string) => boolean;
   // Keep workers for backward compatibility during transition
   workers: Employee[];
   addWorker: (worker: Employee) => void;
@@ -70,6 +74,13 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   const [products, setProducts] = useState<Product[]>(() => loadFromStorage('krypto-products', []));
   const [transactions, setTransactions] = useState<Transaction[]>(() => loadFromStorage('krypto-transactions', []));
   const [employees, setEmployees] = useState<Employee[]>(() => loadFromStorage('krypto-employees', []));
+  const [exchangeRate, setExchangeRate] = useState<ExchangeRate>(() => 
+    loadFromStorage('krypto-exchange-rate', {
+      kshToKrypto: 51,
+      lastUpdated: new Date().toISOString(),
+      updatedBy: 'system'
+    })
+  );
 
   // Save to localStorage whenever state changes
   useEffect(() => {
@@ -87,6 +98,10 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   useEffect(() => {
     saveToStorage('krypto-employees', employees);
   }, [employees]);
+
+  useEffect(() => {
+    saveToStorage('krypto-exchange-rate', exchangeRate);
+  }, [exchangeRate]);
 
   const addUser = (user: User) => {
     setUsers(prev => [...prev, user]);
@@ -151,6 +166,52 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     return users.find(user => user.barcode === barcode);
   };
 
+  const getUserBySecretCode = (secretCode: string) => {
+    return users.find(user => user.secretCode === secretCode);
+  };
+
+  const transferKryptoBucks = (fromUserId: string, toUserId: string, amount: number, transferredBy: string) => {
+    const fromUser = users.find(u => u.id === fromUserId);
+    const toUser = users.find(u => u.id === toUserId);
+    
+    if (!fromUser || !toUser || fromUser.balance < amount) {
+      return false;
+    }
+
+    // Update balances
+    updateUser(fromUserId, { balance: fromUser.balance - amount });
+    updateUser(toUserId, { balance: toUser.balance + amount });
+
+    // Add transaction record
+    const transaction: Transaction = {
+      id: Date.now().toString(),
+      studentId: fromUserId,
+      studentName: fromUser.name,
+      type: 'transfer',
+      amount: -amount,
+      description: `Transfer to ${toUser.name}`,
+      transferTo: toUserId,
+      createdAt: new Date().toISOString(),
+      createdBy: transferredBy,
+    };
+
+    // Add corresponding transaction for recipient
+    const recipientTransaction: Transaction = {
+      id: (Date.now() + 1).toString(),
+      studentId: toUserId,
+      studentName: toUser.name,
+      type: 'transfer',
+      amount: amount,
+      description: `Transfer from ${fromUser.name}`,
+      transferFrom: fromUserId,
+      createdAt: new Date().toISOString(),
+      createdBy: transferredBy,
+    };
+
+    setTransactions(prev => [...prev, transaction, recipientTransaction]);
+    return true;
+  };
+
   const addEmployee = (employee: Employee) => {
     setEmployees(prev => [...prev, employee]);
   };
@@ -165,11 +226,20 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     setEmployees(prev => prev.filter(employee => employee.id !== employeeId));
   };
 
+  const updateExchangeRate = (rate: number, updatedBy: string) => {
+    setExchangeRate({
+      kshToKrypto: rate,
+      lastUpdated: new Date().toISOString(),
+      updatedBy
+    });
+  };
+
   const value = {
     users,
     products,
     transactions,
     employees,
+    exchangeRate,
     addUser,
     updateUser,
     deleteUser,
@@ -178,9 +248,12 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     deleteProduct,
     addTransaction,
     getUserByBarcode,
+    getUserBySecretCode,
+    transferKryptoBucks,
     addEmployee,
     updateEmployee,
     deleteEmployee,
+    updateExchangeRate,
     // Backward compatibility aliases
     workers: employees,
     addWorker: addEmployee,

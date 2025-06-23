@@ -18,7 +18,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const { workers } = useAppData();
+  const { employees } = useAppData();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +47,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
     }
 
     // Check if user is a registered employee
-    const employee = workers.find(w => w.email === email && w.password === password);
+    const employee = employees.find(w => w.email === email && w.password === password);
     if (employee) {
       onLogin(email, 'worker');
       toast({
@@ -69,31 +69,31 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-white">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-4">
           <div className="flex justify-center">
             <KryptoLogo size="xl" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold gradient-bg bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold text-black">
               Krypto Bucks
             </h1>
-            <p className="text-muted-foreground">School Digital Currency System</p>
+            <p className="text-gray-600">School Digital Currency System</p>
           </div>
         </div>
 
-        <Card className="animate-fade-in">
+        <Card className="animate-fade-in border-gray-200">
           <CardHeader>
-            <CardTitle>Sign In</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-black">Sign In</CardTitle>
+            <CardDescription className="text-gray-600">
               Enter your credentials to access the system
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-black">Email</Label>
                 <Input
                   id="email"
                   type="email"
@@ -101,10 +101,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  className="border-gray-300"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-black">Password</Label>
                 <Input
                   id="password"
                   type="password"
@@ -112,21 +113,22 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  className="border-gray-300"
                 />
               </div>
-              <Button type="submit" className="w-full gradient-bg" disabled={loading}>
+              <Button type="submit" className="w-full bg-black hover:bg-gray-800 text-white" disabled={loading}>
                 {loading ? 'Signing in...' : 'Sign In'}
               </Button>
             </form>
             
-            <div className="mt-6 pt-4 border-t">
+            <div className="mt-6 pt-4 border-t border-gray-200">
               <Button 
                 variant="outline" 
-                className="w-full" 
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 text-lg font-semibold py-6 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200 animate-pulse" 
                 onClick={onStudentView}
                 type="button"
               >
-                I'm a Student - View My Balance
+                🎉 I'm a Student - Transfer Krypto Bucks! 💰
               </Button>
             </div>
           </CardContent>

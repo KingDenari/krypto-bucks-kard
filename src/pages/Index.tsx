@@ -10,6 +10,7 @@ import ProductManagement from '@/components/products/ProductManagement';
 import EmployeeManagement from '@/components/workers/EmployeeManagement';
 import SalesTerminal from '@/components/sales/SalesTerminal';
 import Settings from '@/components/settings/Settings';
+import ExchangeRate from '@/components/exchange/ExchangeRate';
 import { AppDataProvider } from '@/contexts/AppDataContext';
 import { AuthUser } from '@/types';
 
@@ -70,6 +71,7 @@ const Index = () => {
           {activeTab === 'dashboard' && <Dashboard userRole={authUser.role} />}
           {activeTab === 'scan' && <BarcodeScanner />}
           {activeTab === 'sales' && <SalesTerminal />}
+          {activeTab === 'exchange' && <ExchangeRate userRole={authUser.role} />}
           {activeTab === 'settings' && <Settings />}
           {activeTab === 'users' && authUser.role === 'admin' && <UserManagement />}
           {activeTab === 'products' && authUser.role === 'admin' && <ProductManagement />}

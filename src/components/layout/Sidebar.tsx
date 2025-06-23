@@ -10,7 +10,8 @@ import {
   ScanLine, 
   Settings, 
   LogOut,
-  UserCheck
+  UserCheck,
+  TrendingUp
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -25,6 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, use
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'scan', label: 'Scanner', icon: ScanLine },
     { id: 'sales', label: 'Sales', icon: ShoppingCart },
+    { id: 'exchange', label: 'Exchange Rate', icon: TrendingUp },
     { id: 'settings', label: 'Settings', icon: Settings },
     ...(userRole === 'admin' ? [
       { id: 'users', label: 'Students', icon: Users },
