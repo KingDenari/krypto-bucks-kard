@@ -20,6 +20,18 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
   const { toast } = useToast();
   const { employees } = useAppData();
 
+  // Admin accounts configuration
+  const adminAccounts = [
+    'abel@admin.com',
+    'hilary@admin.com',
+    'taher@admin.com',
+    'john@admin.com',
+    'mary@admin.com',
+    'peterson@admin.com'
+  ];
+
+  const adminPasswords = ['admin123', 'admin321', 'admin101'];
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -27,7 +39,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
     // Simulate API call delay
     setTimeout(() => {
       // Check admin credentials
-      if (email === 'admin@krypto.com' && password === 'admin123') {
+      if (adminAccounts.includes(email) && adminPasswords.includes(password)) {
         onLogin(email, 'admin');
         toast({
           title: "Login successful!",
@@ -117,7 +129,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
             variant="outline" 
             onClick={onStudentView}
             className="w-full border-2 border-black text-black hover:bg-black hover:text-white animate-pulse transition-all duration-1000"
-            style={{ animationDuration: '2s' }}
+            style={{ animationDuration: '3s' }}
           >
             I'm a Student - Transfer Krypto Bucks
           </Button>
