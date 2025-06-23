@@ -35,17 +35,17 @@ const ExchangeRate: React.FC<ExchangeRateProps> = ({ userRole }) => {
     setIsEditing(false);
     toast({
       title: "Success",
-      description: `Exchange rate updated to 1 K$ = ${newRate} KSH`,
+      description: `Exchange rate updated to 1 KSH = ${newRate} K$`,
     });
   };
 
   const calculateFromKsh = (ksh: number) => {
-    const krypto = ksh / exchangeRate.kshToKrypto;
+    const krypto = ksh * exchangeRate.kshToKrypto;
     setKryptoAmount(parseFloat(krypto.toFixed(2)));
   };
 
   const calculateFromKrypto = (krypto: number) => {
-    const ksh = krypto * exchangeRate.kshToKrypto;
+    const ksh = krypto / exchangeRate.kshToKrypto;
     setKshAmount(parseFloat(ksh.toFixed(2)));
   };
 
@@ -67,14 +67,14 @@ const ExchangeRate: React.FC<ExchangeRateProps> = ({ userRole }) => {
               Current Exchange Rate
             </CardTitle>
             <CardDescription>
-              Current conversion rate between Krypto Bucks and Kenyan Shillings
+              Current conversion rate between Kenyan Shillings and Krypto Bucks
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-center p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
               <div className="text-sm text-muted-foreground">Exchange Rate</div>
               <div className="text-3xl font-bold text-blue-600">
-                1 K$ = {exchangeRate.kshToKrypto} KSH
+                1 KSH = {exchangeRate.kshToKrypto} K$
               </div>
               <div className="text-sm text-muted-foreground mt-2">
                 Last updated: {new Date(exchangeRate.lastUpdated).toLocaleString()}
@@ -97,7 +97,7 @@ const ExchangeRate: React.FC<ExchangeRateProps> = ({ userRole }) => {
                   </Button>
                 ) : (
                   <div className="space-y-3">
-                    <Label htmlFor="newRate">New Rate (KSH per 1 K$)</Label>
+                    <Label htmlFor="newRate">New Rate (K$ per 1 KSH)</Label>
                     <Input
                       id="newRate"
                       type="number"
@@ -142,7 +142,7 @@ const ExchangeRate: React.FC<ExchangeRateProps> = ({ userRole }) => {
               Currency Calculator
             </CardTitle>
             <CardDescription>
-              Convert between Krypto Bucks and Kenyan Shillings
+              Convert between Kenyan Shillings and Krypto Bucks
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -190,10 +190,10 @@ const ExchangeRate: React.FC<ExchangeRateProps> = ({ userRole }) => {
                 Conversion Summary
               </div>
               <div className="text-center font-medium">
-                {kryptoAmount} K$ = {kshAmount} KSH
+                {kshAmount} KSH = {kryptoAmount} K$
               </div>
               <div className="text-xs text-muted-foreground text-center mt-1">
-                Rate: 1 K$ = {exchangeRate.kshToKrypto} KSH
+                Rate: 1 KSH = {exchangeRate.kshToKrypto} K$
               </div>
             </div>
 

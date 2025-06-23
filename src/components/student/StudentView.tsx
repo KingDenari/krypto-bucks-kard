@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -100,8 +99,8 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
   // Get other students for transfer
   const otherStudents = users.filter(u => u.role === 'student' && u.id !== student?.id);
   
-  // Calculate KSH equivalent
-  const kshEquivalent = student ? (student.balance * exchangeRate.kshToKrypto).toFixed(2) : '0.00';
+  // Calculate KSH equivalent - now 1 KSH = 51 K$, so we divide K$ by the rate to get KSH
+  const kshEquivalent = student ? (student.balance / exchangeRate.kshToKrypto).toFixed(2) : '0.00';
 
   if (student) {
     // Get student's transactions
@@ -189,7 +188,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                     className="border-gray-300"
                   />
                   <p className="text-xs text-gray-600 mt-1">
-                    ≈ KSH {(transferAmount * exchangeRate.kshToKrypto).toFixed(2)}
+                    ≈ KSH {(transferAmount / exchangeRate.kshToKrypto).toFixed(2)}
                   </p>
                 </div>
                 <Button 
