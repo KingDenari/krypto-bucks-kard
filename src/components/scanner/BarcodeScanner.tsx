@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -44,10 +44,12 @@ const BarcodeScanner: React.FC = () => {
     }, 1000);
   };
 
-  const handleWebcamScan = (scannedBarcode: string) => {
-    setBarcode(scannedBarcode);
+  const handleWebcamScan = (scannedNumber: string) => {
+    // Auto-fill the input when number is detected
+    setBarcode(scannedNumber);
+    
     // Auto-trigger the scan
-    const foundStudent = getUserByBarcode(scannedBarcode);
+    const foundStudent = getUserByBarcode(scannedNumber);
     if (foundStudent) {
       setStudent(foundStudent);
       toast({

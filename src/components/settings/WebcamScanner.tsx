@@ -54,9 +54,9 @@ const WebcamScanner: React.FC<WebcamScannerProps> = ({ onScan }) => {
   };
 
   const simulateScan = () => {
-    // Only simulate scanning the valid barcode
-    const validBarcode = '1234567890';
-    const validStudent = mockStudents.find(s => s.barcode === validBarcode);
+    // Simulate scanning the number below the barcode
+    const validNumber = '1234567890';
+    const validStudent = mockStudents.find(s => s.barcode === validNumber);
     
     if (validStudent) {
       setScannedData(validStudent.barcode);
@@ -67,7 +67,7 @@ const WebcamScanner: React.FC<WebcamScannerProps> = ({ onScan }) => {
       }
       
       toast({
-        title: "Barcode Scanned",
+        title: "Number Detected",
         description: `Found: ${validStudent.name} - K$ ${validStudent.balance}`,
       });
     }
@@ -91,6 +91,15 @@ const WebcamScanner: React.FC<WebcamScannerProps> = ({ onScan }) => {
         {!isScanning && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
             <Camera className="w-12 h-12 text-white/50" />
+          </div>
+        )}
+        {isScanning && (
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <div className="w-48 h-32 border-2 border-red-500 rounded-lg flex items-center justify-center">
+                <div className="w-full h-0.5 bg-red-500 animate-pulse"></div>
+              </div>
+            </div>
           </div>
         )}
       </div>
