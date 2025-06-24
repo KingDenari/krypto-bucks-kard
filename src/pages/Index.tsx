@@ -14,6 +14,7 @@ import TransferMonitoring from '@/components/transfers/TransferMonitoring';
 import SalesMonitoring from '@/components/sales/SalesMonitoring';
 import { AppDataProvider } from '@/contexts/AppDataContext';
 import { AuthUser } from '@/types';
+import Scanner from '@/components/scanner/Scanner';
 
 const Index = () => {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
@@ -68,12 +69,12 @@ const Index = () => {
           onLogout={handleLogout}
           userRole={authUser.role}
         />
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 overflow-auto">
           {activeTab === 'dashboard' && <Dashboard userRole={authUser.role} />}
-          {activeTab === 'scan' && <BarcodeScanner />}
+          {activeTab === 'scan' && <Scanner />}
           {activeTab === 'sales' && <SalesTerminal userEmail={authUser.email} />}
           {activeTab === 'exchange' && <ExchangeRate userRole={authUser.role} />}
-          {activeTab === 'settings' && <Settings />}
+          {activeTab === 'settings' && <Settings userEmail={authUser.email} userRole={authUser.role} />}
           {activeTab === 'users' && authUser.role === 'admin' && <UserManagement />}
           {activeTab === 'products' && authUser.role === 'admin' && <ProductManagement />}
           {activeTab === 'workers' && authUser.role === 'admin' && <EmployeeManagement />}

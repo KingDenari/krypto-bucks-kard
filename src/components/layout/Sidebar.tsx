@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import KryptoLogo from '@/components/KryptoLogo';
@@ -39,12 +40,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, use
   ];
 
   return (
-    <div className="w-64 bg-white border-r border-border h-screen flex flex-col">
-      <div className="p-6 border-b border-border">
+    <div className="w-16 md:w-64 bg-white dark:bg-slate-800 border-r border-border h-screen flex flex-col">
+      <div className="p-3 md:p-6 border-b border-border">
         <div className="flex items-center gap-3">
           <KryptoLogo size="lg" />
-          <div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-black to-blue-600 bg-clip-text text-transparent">
+          <div className="hidden md:block">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-black to-blue-600 dark:from-white dark:to-blue-400 bg-clip-text text-transparent">
               Krypto Bucks
             </h1>
             <p className="text-sm text-muted-foreground capitalize">
@@ -54,20 +55,21 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, use
         </div>
       </div>
 
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-2 md:p-4 space-y-1 md:space-y-2">
         {menuItems.map((item) => (
           <Button
             key={item.id}
             variant={activeTab === item.id ? 'default' : 'ghost'}
             className={`w-full justify-start ${
               activeTab === item.id ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''
-            }`}
+            } px-2 md:px-3`}
             onClick={() => onTabChange(item.id)}
+            size="sm"
           >
-            <item.icon className="w-4 h-4 mr-3" />
-            {item.label}
+            <item.icon className="w-4 h-4 md:mr-3" />
+            <span className="hidden md:inline">{item.label}</span>
             {(item as any).adminOnly && (
-              <span className="ml-auto text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
+              <span className="hidden md:inline ml-auto text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
                 Admin
               </span>
             )}
@@ -75,10 +77,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, use
         ))}
       </nav>
 
-      <div className="p-4 border-t border-border">
-        <Button variant="outline" className="w-full" onClick={onLogout}>
-          <LogOut className="w-4 h-4 mr-2" />
-          Sign Out
+      <div className="p-2 md:p-4 border-t border-border">
+        <Button variant="outline" className="w-full px-2 md:px-3" onClick={onLogout} size="sm">
+          <LogOut className="w-4 h-4 md:mr-2" />
+          <span className="hidden md:inline">Sign Out</span>
         </Button>
       </div>
     </div>
