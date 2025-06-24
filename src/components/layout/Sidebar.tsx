@@ -1,15 +1,6 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { 
-  Sidebar, 
-  SidebarContent, 
-  SidebarFooter, 
-  SidebarHeader, 
-  SidebarMenu, 
-  SidebarMenuButton, 
-  SidebarMenuItem 
-} from '@/components/ui/sidebar';
 import KryptoLogo from '@/components/KryptoLogo';
 import { 
   LayoutDashboard, 
@@ -32,7 +23,7 @@ interface SidebarProps {
   userRole: 'admin' | 'worker';
 }
 
-const AppSidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, userRole }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, userRole }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'scan', label: 'Scanner', icon: ScanLine },
@@ -49,8 +40,8 @@ const AppSidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, 
   ];
 
   return (
-    <Sidebar>
-      <SidebarHeader className="p-3 md:p-6 border-b border-border">
+    <div className="w-16 md:w-64 bg-white dark:bg-slate-800 border-r border-border h-screen flex flex-col">
+      <div className="p-3 md:p-6 border-b border-border">
         <div className="flex items-center gap-3">
           <KryptoLogo size="lg" />
           <div className="hidden md:block">
@@ -62,40 +53,38 @@ const AppSidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, 
             </p>
           </div>
         </div>
-      </SidebarHeader>
+      </div>
 
-      <SidebarContent className="p-2 md:p-4">
-        <SidebarMenu className="space-y-1 md:space-y-2">
-          {menuItems.map((item) => (
-            <SidebarMenuItem key={item.id}>
-              <SidebarMenuButton
-                isActive={activeTab === item.id}
-                className={`w-full justify-start ${
-                  activeTab === item.id ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''
-                } px-2 md:px-3`}
-                onClick={() => onTabChange(item.id)}
-              >
-                <item.icon className="w-4 h-4 md:mr-3" />
-                <span className="hidden md:inline">{item.label}</span>
-                {(item as any).adminOnly && (
-                  <span className="hidden md:inline ml-auto text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
-                    Admin
-                  </span>
-                )}
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarContent>
+      <nav className="flex-1 p-2 md:p-4 space-y-1 md:space-y-2">
+        {menuItems.map((item) => (
+          <Button
+            key={item.id}
+            variant={activeTab === item.id ? 'default' : 'ghost'}
+            className={`w-full justify-start ${
+              activeTab === item.id ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''
+            } px-2 md:px-3`}
+            onClick={() => onTabChange(item.id)}
+            size="sm"
+          >
+            <item.icon className="w-4 h-4 md:mr-3" />
+            <span className="hidden md:inline">{item.label}</span>
+            {(item as any).adminOnly && (
+              <span className="hidden md:inline ml-auto text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
+                Admin
+              </span>
+            )}
+          </Button>
+        ))}
+      </nav>
 
-      <SidebarFooter className="p-2 md:p-4 border-t border-border">
+      <div className="p-2 md:p-4 border-t border-border">
         <Button variant="outline" className="w-full px-2 md:px-3" onClick={onLogout} size="sm">
           <LogOut className="w-4 h-4 md:mr-2" />
           <span className="hidden md:inline">Sign Out</span>
         </Button>
-      </SidebarFooter>
-    </Sidebar>
+      </div>
+    </div>
   );
 };
 
-export default AppSidebar;
+export default Sidebar;

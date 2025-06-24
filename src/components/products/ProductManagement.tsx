@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Plus, Edit, Trash2, Package } from 'lucide-react';
 import { Product } from '@/types';
 import { useToast } from '@/hooks/use-toast';
@@ -19,9 +19,6 @@ const ProductManagement: React.FC = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [newProduct, setNewProduct] = useState({ name: '', price: 0, stock: 0, category: '' });
   const { toast } = useToast();
-
-  // Exchange rate K$ to KSH (assuming 1 K$ = 2 KSH based on typical school currency)
-  const EXCHANGE_RATE = 2;
 
   const handleAddProduct = () => {
     if (!newProduct.name || !newProduct.category || newProduct.price <= 0) {
@@ -80,263 +77,254 @@ const ProductManagement: React.FC = () => {
   };
 
   return (
-    <TooltipProvider>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">Product Management</h1>
-            <p className="text-muted-foreground">Manage inventory, pricing, and stock levels</p>
-          </div>
-          
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Product
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add New Product</DialogTitle>
-                <DialogDescription>
-                  Add a new product to the school store inventory
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="productName">Product Name</Label>
-                  <Input
-                    id="productName"
-                    value={newProduct.name}
-                    onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                    placeholder="Enter product name"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="category">Category</Label>
-                  <Input
-                    id="category"
-                    value={newProduct.category}
-                    onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-                    placeholder="e.g., Stationery, Books, etc."
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="price">Price (K$)</Label>
-                    <Input
-                      id="price"
-                      type="number"
-                      min="1"
-                      value={newProduct.price}
-                      onChange={(e) => setNewProduct({ ...newProduct, price: Number(e.target.value) })}
-                      placeholder="0"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="stock">Initial Stock</Label>
-                    <Input
-                      id="stock"
-                      type="number"
-                      min="0"
-                      value={newProduct.stock}
-                      onChange={(e) => setNewProduct({ ...newProduct, stock: Number(e.target.value) })}
-                      placeholder="0"
-                    />
-                  </div>
-                </div>
-                <Button onClick={handleAddProduct} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                  Add Product
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Product Management</h1>
+          <p className="text-muted-foreground">Manage inventory, pricing, and stock levels</p>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Package className="h-8 w-8 text-blue-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Total Products</p>
-                  <p className="text-2xl font-bold">{products.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Package className="h-8 w-8 text-green-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">In Stock</p>
-                  <p className="text-2xl font-bold">{products.filter(p => p.stock > 0).length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Package className="h-8 w-8 text-yellow-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Low Stock</p>
-                  <p className="text-2xl font-bold">{products.filter(p => p.stock > 0 && p.stock < 10).length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Package className="h-8 w-8 text-red-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Out of Stock</p>
-                  <p className="text-2xl font-bold">{products.filter(p => p.stock === 0).length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Product Inventory</CardTitle>
-            <CardDescription>
-              Manage products, pricing, and stock levels
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {products.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">No products added yet.</p>
-                <p className="text-sm text-muted-foreground">Add your first product to get started!</p>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Product Name</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Stock</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {products.map((product) => {
-                    const stockStatus = getStockStatus(product.stock);
-                    return (
-                      <TableRow key={product.id}>
-                        <TableCell className="font-medium">{product.name}</TableCell>
-                        <TableCell>{product.category}</TableCell>
-                        <TableCell>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Badge variant="secondary" className="bg-blue-600 text-white cursor-help">
-                                K$ {product.price}
-                              </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>KSH {(product.price * EXCHANGE_RATE).toFixed(2)}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TableCell>
-                        <TableCell>{product.stock}</TableCell>
-                        <TableCell>
-                          <Badge variant={stockStatus.variant}>
-                            {stockStatus.text}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setEditingProduct(product);
-                                setIsEditDialogOpen(true);
-                              }}
-                            >
-                              <Edit className="w-3 h-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDeleteProduct(product.id)}
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-
-        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Product
+            </Button>
+          </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Edit Product</DialogTitle>
+              <DialogTitle>Add New Product</DialogTitle>
               <DialogDescription>
-                Update product information, pricing, and stock
+                Add a new product to the school store inventory
               </DialogDescription>
             </DialogHeader>
-            {editingProduct && (
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="editName">Product Name</Label>
-                  <Input
-                    id="editName"
-                    value={editingProduct.name}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="editCategory">Category</Label>
-                  <Input
-                    id="editCategory"
-                    value={editingProduct.category}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="editPrice">Price (K$)</Label>
-                    <Input
-                      id="editPrice"
-                      type="number"
-                      min="1"
-                      value={editingProduct.price}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, price: Number(e.target.value) })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="editStock">Stock</Label>
-                    <Input
-                      id="editStock"
-                      type="number"
-                      min="0"
-                      value={editingProduct.stock}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, stock: Number(e.target.value) })}
-                    />
-                  </div>
-                </div>
-                <Button onClick={handleEditProduct} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                  Update Product
-                </Button>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="productName">Product Name</Label>
+                <Input
+                  id="productName"
+                  value={newProduct.name}
+                  onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                  placeholder="Enter product name"
+                />
               </div>
-            )}
+              <div>
+                <Label htmlFor="category">Category</Label>
+                <Input
+                  id="category"
+                  value={newProduct.category}
+                  onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
+                  placeholder="e.g., Stationery, Books, etc."
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="price">Price (K$)</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    min="1"
+                    value={newProduct.price}
+                    onChange={(e) => setNewProduct({ ...newProduct, price: Number(e.target.value) })}
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="stock">Initial Stock</Label>
+                  <Input
+                    id="stock"
+                    type="number"
+                    min="0"
+                    value={newProduct.stock}
+                    onChange={(e) => setNewProduct({ ...newProduct, stock: Number(e.target.value) })}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <Button onClick={handleAddProduct} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                Add Product
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
-    </TooltipProvider>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <Package className="h-8 w-8 text-blue-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-muted-foreground">Total Products</p>
+                <p className="text-2xl font-bold">{products.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <Package className="h-8 w-8 text-green-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-muted-foreground">In Stock</p>
+                <p className="text-2xl font-bold">{products.filter(p => p.stock > 0).length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <Package className="h-8 w-8 text-yellow-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-muted-foreground">Low Stock</p>
+                <p className="text-2xl font-bold">{products.filter(p => p.stock > 0 && p.stock < 10).length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <Package className="h-8 w-8 text-red-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-muted-foreground">Out of Stock</p>
+                <p className="text-2xl font-bold">{products.filter(p => p.stock === 0).length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Product Inventory</CardTitle>
+          <CardDescription>
+            Manage products, pricing, and stock levels
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {products.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No products added yet.</p>
+              <p className="text-sm text-muted-foreground">Add your first product to get started!</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Product Name</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Stock</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {products.map((product) => {
+                  const stockStatus = getStockStatus(product.stock);
+                  return (
+                    <TableRow key={product.id}>
+                      <TableCell className="font-medium">{product.name}</TableCell>
+                      <TableCell>{product.category}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="bg-blue-600 text-white">
+                          K$ {product.price}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{product.stock}</TableCell>
+                      <TableCell>
+                        <Badge variant={stockStatus.variant}>
+                          {stockStatus.text}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setEditingProduct(product);
+                              setIsEditDialogOpen(true);
+                            }}
+                          >
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDeleteProduct(product.id)}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Product</DialogTitle>
+            <DialogDescription>
+              Update product information, pricing, and stock
+            </DialogDescription>
+          </DialogHeader>
+          {editingProduct && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="editName">Product Name</Label>
+                <Input
+                  id="editName"
+                  value={editingProduct.name}
+                  onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="editCategory">Category</Label>
+                <Input
+                  id="editCategory"
+                  value={editingProduct.category}
+                  onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="editPrice">Price (K$)</Label>
+                  <Input
+                    id="editPrice"
+                    type="number"
+                    min="1"
+                    value={editingProduct.price}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, price: Number(e.target.value) })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editStock">Stock</Label>
+                  <Input
+                    id="editStock"
+                    type="number"
+                    min="0"
+                    value={editingProduct.stock}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, stock: Number(e.target.value) })}
+                  />
+                </div>
+              </div>
+              <Button onClick={handleEditProduct} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                Update Product
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 

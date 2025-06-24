@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import LoginForm from '@/components/auth/LoginForm';
 import StudentView from '@/components/student/StudentView';
@@ -16,7 +15,6 @@ import SalesMonitoring from '@/components/sales/SalesMonitoring';
 import { AppDataProvider } from '@/contexts/AppDataContext';
 import { AuthUser } from '@/types';
 import Scanner from '@/components/scanner/Scanner';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 
 const Index = () => {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
@@ -64,33 +62,26 @@ const Index = () => {
   // Show main application
   return (
     <AppDataProvider>
-      <SidebarProvider>
-        <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-purple-900 w-full">
-          <Sidebar 
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            onLogout={handleLogout}
-            userRole={authUser.role}
-          />
-          <main className="flex-1 overflow-auto">
-            <div className="p-4">
-              <div className="mb-4">
-                <SidebarTrigger />
-              </div>
-              {activeTab === 'dashboard' && <Dashboard userRole={authUser.role} />}
-              {activeTab === 'scan' && <Scanner />}
-              {activeTab === 'sales' && <SalesTerminal userEmail={authUser.email} />}
-              {activeTab === 'exchange' && <ExchangeRate userRole={authUser.role} />}
-              {activeTab === 'settings' && <Settings userEmail={authUser.email} userRole={authUser.role} />}
-              {activeTab === 'users' && authUser.role === 'admin' && <UserManagement />}
-              {activeTab === 'products' && authUser.role === 'admin' && <ProductManagement />}
-              {activeTab === 'workers' && authUser.role === 'admin' && <EmployeeManagement />}
-              {activeTab === 'transfers' && authUser.role === 'admin' && <TransferMonitoring />}
-              {activeTab === 'sales-monitor' && authUser.role === 'admin' && <SalesMonitoring />}
-            </div>
-          </main>
-        </div>
-      </SidebarProvider>
+      <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-purple-900">
+        <Sidebar 
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onLogout={handleLogout}
+          userRole={authUser.role}
+        />
+        <main className="flex-1 overflow-auto">
+          {activeTab === 'dashboard' && <Dashboard userRole={authUser.role} />}
+          {activeTab === 'scan' && <Scanner />}
+          {activeTab === 'sales' && <SalesTerminal userEmail={authUser.email} />}
+          {activeTab === 'exchange' && <ExchangeRate userRole={authUser.role} />}
+          {activeTab === 'settings' && <Settings userEmail={authUser.email} userRole={authUser.role} />}
+          {activeTab === 'users' && authUser.role === 'admin' && <UserManagement />}
+          {activeTab === 'products' && authUser.role === 'admin' && <ProductManagement />}
+          {activeTab === 'workers' && authUser.role === 'admin' && <EmployeeManagement />}
+          {activeTab === 'transfers' && authUser.role === 'admin' && <TransferMonitoring />}
+          {activeTab === 'sales-monitor' && authUser.role === 'admin' && <SalesMonitoring />}
+        </main>
+      </div>
     </AppDataProvider>
   );
 };
