@@ -279,7 +279,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
             <form onSubmit={handleSecretCodeSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Input
-                  type="text"
+                  type="password"
                   placeholder="Enter your 6-digit secret code"
                   value={secretCode}
                   onChange={(e) => setSecretCode(e.target.value)}
