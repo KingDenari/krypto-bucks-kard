@@ -1,7 +1,6 @@
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/toaster';
 import Index from '@/pages/Index';
 import NotFound from '@/pages/NotFound';
@@ -11,7 +10,7 @@ const queryClient = new QueryClient();
 
 function App() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+    <div className="dark">
       <QueryClientProvider client={queryClient}>
         <Router>
           <Routes>
@@ -21,7 +20,7 @@ function App() {
           <Toaster />
         </Router>
       </QueryClientProvider>
-    </ThemeProvider>
+    </div>
   );
 }
 

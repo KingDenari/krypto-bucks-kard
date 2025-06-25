@@ -95,7 +95,7 @@ const Scanner: React.FC = () => {
               <div className="flex gap-2">
                 <Button 
                   type="submit" 
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white" 
+                  className="flex-1 bg-white hover:bg-gray-200 text-black" 
                   disabled={loading || !barcode.trim()}
                 >
                   {loading ? 'Scanning...' : 'Scan'}
@@ -139,7 +139,7 @@ const Scanner: React.FC = () => {
           <CardContent>
             {student ? (
               <div className="space-y-4">
-                <div className="bg-gradient-to-r from-black to-blue-600 p-4 md:p-6 rounded-lg text-white">
+                <div className="bg-black border border-white p-4 md:p-6 rounded-lg text-white">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-2">
                     <div>
                       <p className="text-white/80 text-sm">Student Balance</p>
@@ -148,7 +148,7 @@ const Scanner: React.FC = () => {
                         <span className="text-xl md:text-2xl font-bold">K$ {student.balance}</span>
                       </div>
                     </div>
-                    <Badge className="bg-white/20 text-white self-start">
+                    <Badge className="bg-white text-black self-start">
                       {student.grade}
                     </Badge>
                   </div>

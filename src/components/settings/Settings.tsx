@@ -1,12 +1,9 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useTheme } from 'next-themes';
-import { Moon, Sun, Camera, User, Mail } from 'lucide-react';
+import { Camera, User, Mail } from 'lucide-react';
 import WebcamScanner from './WebcamScanner';
 
 interface SettingsProps {
@@ -15,7 +12,6 @@ interface SettingsProps {
 }
 
 const Settings: React.FC<SettingsProps> = ({ userEmail, userRole }) => {
-  const { theme, setTheme } = useTheme();
   const [showWebcamScanner, setShowWebcamScanner] = React.useState(false);
 
   // Extract name from email or show role-based name
@@ -37,7 +33,7 @@ const Settings: React.FC<SettingsProps> = ({ userEmail, userRole }) => {
         <p className="text-muted-foreground">System configuration and preferences</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2">
         {/* Account Info */}
         <Card>
           <CardHeader>
@@ -65,36 +61,8 @@ const Settings: React.FC<SettingsProps> = ({ userEmail, userRole }) => {
           </CardContent>
         </Card>
 
-        {/* Theme Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              {theme === 'dark' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-              Appearance
-            </CardTitle>
-            <CardDescription>
-              Customize the look and feel of the application
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="dark-mode" className="text-sm font-medium">
-                Dark Mode
-              </Label>
-              <Switch
-                id="dark-mode"
-                checked={theme === 'dark'}
-                onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
-              />
-            </div>
-            <div className="text-sm text-muted-foreground">
-              Toggle between light and dark themes. App starts in dark mode by default.
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Webcam Scanner */}
-        <Card className="md:col-span-2 lg:col-span-1">
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Camera className="w-5 h-5" />
@@ -107,7 +75,7 @@ const Settings: React.FC<SettingsProps> = ({ userEmail, userRole }) => {
           <CardContent className="space-y-4">
             <Button 
               onClick={() => setShowWebcamScanner(!showWebcamScanner)}
-              className="w-full gradient-bg"
+              className="w-full bg-white text-black hover:bg-gray-200"
               size="sm"
             >
               {showWebcamScanner ? 'Close' : 'Open'} Webcam Scanner
