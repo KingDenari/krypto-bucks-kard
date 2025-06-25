@@ -102,38 +102,27 @@
   }
 }
 
-/* Remove all gradient and colorful components */
+/* Remove all gradient or colorful cards */
 .gradient-bg,
 .dark .gradient-bg,
 .krypto-card,
 .dark .krypto-card {
-  background: none;
-  color: inherit;
-  box-shadow: none;
-  border-radius: 0;
-  padding: 0;
+  background: none !important;
+  color: inherit !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
 }
 
-/* Override any yellow colors to black text or bg */
-.text-yellow-500,
-.text-yellow-600,
-.text-yellow-700,
-.text-yellow-800,
-.text-yellow-900 {
-  @apply text-black;
-}
-
-.bg-yellow-100,
-.bg-yellow-200,
-.bg-yellow-300,
-.bg-yellow-400,
-.bg-yellow-500 {
-  @apply bg-black text-white;
-}
-
-.border-yellow-200,
-.border-yellow-300,
-.border-yellow-400,
-.border-yellow-500 {
-  @apply border-black;
+/* HARD override: kill all yellow Tailwind classes */
+[class*="text-yellow"],
+[class*="bg-yellow"],
+[class*="border-yellow"],
+[class*="ring-yellow"],
+[class*="from-yellow"],
+[class*="via-yellow"],
+[class*="to-yellow"] {
+  color: black !important;
+  background-color: white !important;
+  border-color: black !important;
 }
