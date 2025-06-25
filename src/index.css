@@ -1,89 +1,88 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
+/* Clean black and white design system. No gradients, no colors. */
 
 @layer base {
   :root {
-    --background: 248 250 252;
-    --foreground: 15 23 42;
+    --background: 255 255 255; /* white */
+    --foreground: 0 0 0;       /* black */
 
     --card: 255 255 255;
-    --card-foreground: 15 23 42;
+    --card-foreground: 0 0 0;
 
     --popover: 255 255 255;
-    --popover-foreground: 15 23 42;
+    --popover-foreground: 0 0 0;
 
-    --primary: 59 130 246;
-    --primary-foreground: 255 255 255;
+    --primary: 0 0 0; /* black */
+    --primary-foreground: 255 255 255; /* white */
 
-    --secondary: 241 245 249;
-    --secondary-foreground: 15 23 42;
+    --secondary: 255 255 255;
+    --secondary-foreground: 0 0 0;
 
-    --muted: 241 245 249;
-    --muted-foreground: 100 116 139;
+    --muted: 255 255 255;
+    --muted-foreground: 0 0 0;
 
-    --accent: 241 245 249;
-    --accent-foreground: 15 23 42;
+    --accent: 255 255 255;
+    --accent-foreground: 0 0 0;
 
-    --destructive: 239 68 68;
+    --destructive: 0 0 0;
     --destructive-foreground: 255 255 255;
 
-    --border: 226 232 240;
-    --input: 226 232 240;
-    --ring: 59 130 246;
+    --border: 0 0 0;
+    --input: 0 0 0;
+    --ring: 0 0 0;
 
     --radius: 0.5rem;
 
     --sidebar-background: 255 255 255;
-    --sidebar-foreground: 15 23 42;
-    --sidebar-primary: 59 130 246;
+    --sidebar-foreground: 0 0 0;
+    --sidebar-primary: 0 0 0;
     --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 241 245 249;
-    --sidebar-accent-foreground: 15 23 42;
-    --sidebar-border: 226 232 240;
-    --sidebar-ring: 59 130 246;
+    --sidebar-accent: 255 255 255;
+    --sidebar-accent-foreground: 0 0 0;
+    --sidebar-border: 0 0 0;
+    --sidebar-ring: 0 0 0;
   }
 
   .dark {
-    --background: 2 6 23;
-    --foreground: 248 250 252;
+    --background: 0 0 0; /* black */
+    --foreground: 255 255 255; /* white */
 
-    --card: 15 23 42;
-    --card-foreground: 248 250 252;
+    --card: 0 0 0;
+    --card-foreground: 255 255 255;
 
-    --popover: 15 23 42;
-    --popover-foreground: 248 250 252;
+    --popover: 0 0 0;
+    --popover-foreground: 255 255 255;
 
-    --primary: 147 51 234;
-    --primary-foreground: 255 255 255;
+    --primary: 255 255 255; /* white */
+    --primary-foreground: 0 0 0; /* black */
 
-    --secondary: 30 41 59;
-    --secondary-foreground: 248 250 252;
+    --secondary: 0 0 0;
+    --secondary-foreground: 255 255 255;
 
-    --muted: 30 41 59;
-    --muted-foreground: 148 163 184;
+    --muted: 0 0 0;
+    --muted-foreground: 255 255 255;
 
-    --accent: 30 41 59;
-    --accent-foreground: 248 250 252;
+    --accent: 0 0 0;
+    --accent-foreground: 255 255 255;
 
-    --destructive: 220 38 38;
-    --destructive-foreground: 248 250 252;
+    --destructive: 255 255 255;
+    --destructive-foreground: 0 0 0;
 
-    --border: 30 41 59;
-    --input: 30 41 59;
-    --ring: 147 51 234;
-    
-    --sidebar-background: 2 6 23;
-    --sidebar-foreground: 248 250 252;
-    --sidebar-primary: 147 51 234;
-    --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 30 41 59;
-    --sidebar-accent-foreground: 248 250 252;
-    --sidebar-border: 30 41 59;
-    --sidebar-ring: 147 51 234;
+    --border: 255 255 255;
+    --input: 255 255 255;
+    --ring: 255 255 255;
+
+    --sidebar-background: 0 0 0;
+    --sidebar-foreground: 255 255 255;
+    --sidebar-primary: 255 255 255;
+    --sidebar-primary-foreground: 0 0 0;
+    --sidebar-accent: 0 0 0;
+    --sidebar-accent-foreground: 255 255 255;
+    --sidebar-border: 255 255 255;
+    --sidebar-ring: 255 255 255;
   }
 }
 
@@ -94,56 +93,36 @@
 
   body {
     @apply bg-background text-foreground;
-    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    background: none;
     min-height: 100vh;
   }
 
   .dark body {
-    background: linear-gradient(135deg, #020617 0%, #581c87 100%);
+    background: none;
   }
 }
 
-.gradient-bg {
-  background: linear-gradient(135deg, #3b82f6 0%, #9333ea 100%);
-}
-
-.dark .gradient-bg {
-  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-}
-
-.krypto-card {
-  background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
-  border-radius: 16px;
-  padding: 24px;
-  color: white;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-
+/* Remove all gradient or colorful cards */
+.gradient-bg,
+.dark .gradient-bg,
+.krypto-card,
 .dark .krypto-card {
-  background: linear-gradient(135deg, #312e81 0%, #581c87 100%);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  background: none !important;
+  color: inherit !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
 }
 
-/* Override any yellow colors to black */
-.text-yellow-500,
-.text-yellow-600,
-.text-yellow-700,
-.text-yellow-800,
-.text-yellow-900 {
-  @apply text-black;
-}
-
-.bg-yellow-100,
-.bg-yellow-200,
-.bg-yellow-300,
-.bg-yellow-400,
-.bg-yellow-500 {
-  @apply bg-black text-white;
-}
-
-.border-yellow-200,
-.border-yellow-300,
-.border-yellow-400,
-.border-yellow-500 {
-  @apply border-black;
+/* HARD override: kill all yellow Tailwind classes */
+[class*="text-yellow"],
+[class*="bg-yellow"],
+[class*="border-yellow"],
+[class*="ring-yellow"],
+[class*="from-yellow"],
+[class*="via-yellow"],
+[class*="to-yellow"] {
+  color: black !important;
+  background-color: white !important;
+  border-color: black !important;
 }
