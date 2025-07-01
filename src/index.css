@@ -10,11 +10,11 @@
     --background: 0 0 0;
     --foreground: 255 255 255;
 
-    --card: 0 0 0;
-    --card-foreground: 255 255 255;
+    --card: 255 255 255;
+    --card-foreground: 0 0 0;
 
-    --popover: 0 0 0;
-    --popover-foreground: 255 255 255;
+    --popover: 255 255 255;
+    --popover-foreground: 0 0 0;
 
     --primary: 255 255 255;
     --primary-foreground: 0 0 0;
@@ -66,15 +66,15 @@
 }
 
 .krypto-card {
-  background: #000000;
-  border: 1px solid #ffffff;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 16px;
   padding: 24px;
-  color: white;
-  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
+  color: #000000;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-/* Override any yellow colors to black */
+/* Remove all yellow colors and replace with gray/blue hover effects */
 .text-yellow-500,
 .text-yellow-600,
 .text-yellow-700,
@@ -97,8 +97,8 @@
 [style*="background: #ffff00"],
 [style*="background: #ffff08"],
 [style*="background: #fffoo"] {
-  background-color: #000000 !important;
-  color: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
 }
 
 .border-yellow-200,
@@ -108,7 +108,29 @@
 [style*="border-color: #ffff00"],
 [style*="border-color: #ffff08"],
 [style*="border-color: #fffoo"] {
-  border-color: #000000 !important;
+  border-color: #e5e7eb !important;
+}
+
+/* Better hover effects - use blue instead of yellow */
+button:hover,
+.hover\:bg-yellow-50:hover,
+.hover\:bg-yellow-100:hover,
+.hover\:bg-yellow-200:hover {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Card hover effects */
+.hover\:shadow-lg:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Outline focus states */
+*:focus,
+*:focus-visible {
+  outline: 2px solid #3b82f6 !important;
+  outline-offset: 2px !important;
 }
 
 /* Force all text to be either black or white */
@@ -120,7 +142,7 @@
 .text-gray-500,
 .text-gray-600,
 .text-gray-700 {
-  color: #9ca3af !important;
+  color: #6b7280 !important;
 }
 
 .text-gray-400 {
@@ -129,10 +151,29 @@
 
 .bg-gray-100,
 .bg-gray-200 {
-  background-color: #374151 !important;
+  background-color: #f3f4f6 !important;
+  color: #000000 !important;
 }
 
 .bg-gray-800,
 .bg-gray-900 {
-  background-color: #000000 !important;
+  background-color: #1f2937 !important;
+  color: #ffffff !important;
+}
+
+/* Specific card styling overrides */
+.card {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.card * {
+  color: #000000 !important;
+}
+
+.card .text-muted-foreground,
+.card .text-gray-300,
+.card .text-gray-400 {
+  color: #6b7280 !important;
 }
