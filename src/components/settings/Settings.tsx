@@ -31,9 +31,9 @@ const Settings: React.FC<SettingsProps> = ({ userEmail, userRole }) => {
   };
 
   return (
-    <div className="space-y-6 p-4 md:p-6 bg-background min-h-screen">
+    <div className="space-y-6 p-4 md:p-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Settings</h1>
+        <h1 className="text-2xl md:text-3xl font-bold">Settings</h1>
         <p className="text-muted-foreground">System configuration and preferences</p>
       </div>
 
@@ -88,7 +88,7 @@ const Settings: React.FC<SettingsProps> = ({ userEmail, userRole }) => {
               />
             </div>
             <div className="text-sm text-muted-foreground">
-              Toggle between light and dark themes. Changes the entire app appearance.
+              Toggle between light and dark themes. App starts in dark mode by default.
             </div>
           </CardContent>
         </Card>
@@ -107,7 +107,7 @@ const Settings: React.FC<SettingsProps> = ({ userEmail, userRole }) => {
           <CardContent className="space-y-4">
             <Button 
               onClick={() => setShowWebcamScanner(!showWebcamScanner)}
-              className="w-full"
+              className="w-full gradient-bg"
               size="sm"
             >
               {showWebcamScanner ? 'Close' : 'Open'} Webcam Scanner

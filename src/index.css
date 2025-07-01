@@ -7,82 +7,43 @@
 
 @layer base {
   :root {
-    --background: 255 255 255;
-    --foreground: 0 0 0;
-
-    --card: 0 0 0;
-    --card-foreground: 255 255 255;
-
-    --popover: 255 255 255;
-    --popover-foreground: 0 0 0;
-
-    --primary: 0 0 0;
-    --primary-foreground: 255 255 255;
-
-    --secondary: 245 245 245;
-    --secondary-foreground: 0 0 0;
-
-    --muted: 245 245 245;
-    --muted-foreground: 115 115 115;
-
-    --accent: 245 245 245;
-    --accent-foreground: 0 0 0;
-
-    --destructive: 220 38 38;
-    --destructive-foreground: 255 255 255;
-
-    --border: 229 229 229;
-    --input: 255 255 255;
-    --ring: 0 0 0;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 255 255 255;
-    --sidebar-foreground: 0 0 0;
-    --sidebar-primary: 0 0 0;
-    --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 245 245 245;
-    --sidebar-accent-foreground: 0 0 0;
-    --sidebar-border: 229 229 229;
-    --sidebar-ring: 0 0 0;
-  }
-
-  .dark {
     --background: 0 0 0;
     --foreground: 255 255 255;
 
     --card: 255 255 255;
     --card-foreground: 0 0 0;
 
-    --popover: 0 0 0;
-    --popover-foreground: 255 255 255;
+    --popover: 255 255 255;
+    --popover-foreground: 0 0 0;
 
     --primary: 255 255 255;
     --primary-foreground: 0 0 0;
 
-    --secondary: 38 38 38;
+    --secondary: 64 64 64;
     --secondary-foreground: 255 255 255;
 
-    --muted: 38 38 38;
-    --muted-foreground: 163 163 163;
+    --muted: 64 64 64;
+    --muted-foreground: 156 163 175;
 
-    --accent: 38 38 38;
+    --accent: 64 64 64;
     --accent-foreground: 255 255 255;
 
     --destructive: 220 38 38;
     --destructive-foreground: 255 255 255;
 
-    --border: 38 38 38;
-    --input: 38 38 38;
+    --border: 255 255 255;
+    --input: 255 255 255;
     --ring: 255 255 255;
+
+    --radius: 0.5rem;
 
     --sidebar-background: 0 0 0;
     --sidebar-foreground: 255 255 255;
     --sidebar-primary: 255 255 255;
     --sidebar-primary-foreground: 0 0 0;
-    --sidebar-accent: 38 38 38;
+    --sidebar-accent: 64 64 64;
     --sidebar-accent-foreground: 255 255 255;
-    --sidebar-border: 38 38 38;
+    --sidebar-border: 255 255 255;
     --sidebar-ring: 255 255 255;
   }
 }
@@ -94,36 +55,35 @@
 
   body {
     @apply bg-background text-foreground;
+    background: #000000;
     min-height: 100vh;
+    color: #ffffff;
   }
 }
 
 .gradient-bg {
-  @apply bg-background;
+  background: #000000;
 }
 
 .krypto-card {
-  @apply bg-card text-card-foreground;
-  border: 1px solid rgb(var(--border));
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 16px;
   padding: 24px;
+  color: #000000;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-/* Remove all yellow and pink colors */
+/* Remove all yellow colors and replace with gray/blue hover effects */
 .text-yellow-500,
 .text-yellow-600,
 .text-yellow-700,
 .text-yellow-800,
 .text-yellow-900,
-.text-pink-500,
-.text-pink-600,
-.text-pink-700,
 [style*="#ffff00"],
 [style*="#ffff08"],
-[style*="#fffoo"],
-[style*="pink"] {
-  @apply text-foreground !important;
+[style*="#fffoo"] {
+  color: #000000 !important;
 }
 
 .bg-yellow-100,
@@ -131,54 +91,34 @@
 .bg-yellow-300,
 .bg-yellow-400,
 .bg-yellow-500,
-.bg-pink-100,
-.bg-pink-200,
-.bg-pink-300,
-.bg-pink-400,
-.bg-pink-500,
 [style*="background-color: #ffff00"],
 [style*="background-color: #ffff08"],
 [style*="background-color: #fffoo"],
 [style*="background: #ffff00"],
 [style*="background: #ffff08"],
-[style*="background: #fffoo"],
-[style*="pink"] {
-  @apply bg-primary text-primary-foreground !important;
+[style*="background: #fffoo"] {
+  background-color: #ffffff !important;
+  color: #000000 !important;
 }
 
 .border-yellow-200,
 .border-yellow-300,
 .border-yellow-400,
 .border-yellow-500,
-.border-pink-200,
-.border-pink-300,
-.border-pink-400,
-.border-pink-500,
 [style*="border-color: #ffff00"],
 [style*="border-color: #ffff08"],
-[style*="border-color: #fffoo"],
-[style*="pink"] {
-  @apply border-border !important;
+[style*="border-color: #fffoo"] {
+  border-color: #e5e7eb !important;
 }
 
-/* Better hover effects - use blue instead of yellow/pink */
+/* Better hover effects - use blue instead of yellow */
 button:hover,
 .hover\:bg-yellow-50:hover,
 .hover\:bg-yellow-100:hover,
-.hover\:bg-yellow-200:hover,
-.hover\:bg-pink-50:hover,
-.hover\:bg-pink-100:hover {
-  @apply bg-blue-50 text-blue-900 !important;
+.hover\:bg-yellow-200:hover {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
   transition: all 0.2s ease-in-out;
-}
-
-.dark button:hover,
-.dark .hover\:bg-yellow-50:hover,
-.dark .hover\:bg-yellow-100:hover,
-.dark .hover\:bg-yellow-200:hover,
-.dark .hover\:bg-pink-50:hover,
-.dark .hover\:bg-pink-100:hover {
-  @apply bg-blue-900 text-blue-100 !important;
 }
 
 /* Card hover effects */
@@ -193,22 +133,47 @@ button:hover,
   outline-offset: 2px !important;
 }
 
+/* Force all text to be either black or white */
+* {
+  color: inherit;
+}
+
 /* Ensure proper contrast */
 .text-gray-500,
-.text-gray-600 {
-  @apply text-muted-foreground !important;
+.text-gray-600,
+.text-gray-700 {
+  color: #6b7280 !important;
 }
 
 .text-gray-400 {
-  @apply text-muted-foreground !important;
+  color: #9ca3af !important;
 }
 
 .bg-gray-100,
 .bg-gray-200 {
-  @apply bg-muted text-muted-foreground !important;
+  background-color: #f3f4f6 !important;
+  color: #000000 !important;
 }
 
 .bg-gray-800,
 .bg-gray-900 {
-  @apply bg-card text-card-foreground !important;
+  background-color: #1f2937 !important;
+  color: #ffffff !important;
+}
+
+/* Specific card styling overrides */
+.card {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.card * {
+  color: #000000 !important;
+}
+
+.card .text-muted-foreground,
+.card .text-gray-300,
+.card .text-gray-400 {
+  color: #6b7280 !important;
 }
