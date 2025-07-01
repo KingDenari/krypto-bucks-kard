@@ -101,55 +101,55 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="animate-fade-in bg-white border-gray-300">
+        <Card className="animate-fade-in">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-black">Total Students</CardTitle>
-            <Users className="h-4 w-4 text-gray-600" />
+            <CardTitle className="text-sm font-medium text-white">Total Students</CardTitle>
+            <Users className="h-4 w-4 text-gray-300" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-black">{stats.totalStudents}</div>
-            <p className="text-xs text-gray-600">
+            <div className="text-2xl font-bold text-white">{stats.totalStudents}</div>
+            <p className="text-xs text-gray-300">
               Active registered students
             </p>
           </CardContent>
         </Card>
 
-        <Card className="animate-fade-in bg-white border-gray-300" style={{ animationDelay: '0.1s' }}>
+        <Card className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-black">Total K$ in System</CardTitle>
+            <CardTitle className="text-sm font-medium text-white">Total K$ in System</CardTitle>
             <KryptoLogo size="sm" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-black">K$ {stats.totalBalance.toLocaleString()}</div>
-            <p className="text-xs text-gray-600">
+            <div className="text-2xl font-bold text-white">K$ {stats.totalBalance.toLocaleString()}</div>
+            <p className="text-xs text-gray-300">
               KES {(stats.totalBalance / 51).toFixed(2)}
             </p>
           </CardContent>
         </Card>
 
         {userRole === 'admin' && (
-          <Card className="animate-fade-in bg-white border-gray-300" style={{ animationDelay: '0.2s' }}>
+          <Card className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-black">Products</CardTitle>
-              <Package className="h-4 w-4 text-gray-600" />
+              <CardTitle className="text-sm font-medium text-white">Products</CardTitle>
+              <Package className="h-4 w-4 text-gray-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-black">{stats.totalProducts}</div>
-              <p className="text-xs text-gray-600">
+              <div className="text-2xl font-bold text-white">{stats.totalProducts}</div>
+              <p className="text-xs text-gray-300">
                 Available in store
               </p>
             </CardContent>
           </Card>
         )}
 
-        <Card className="animate-fade-in bg-white border-gray-300" style={{ animationDelay: '0.3s' }}>
+        <Card className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-black">Today's Sales</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-gray-600" />
+            <CardTitle className="text-sm font-medium text-white">Today's Sales</CardTitle>
+            <ShoppingCart className="h-4 w-4 text-gray-300" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-black">K$ {stats.todaySales}</div>
-            <p className="text-xs text-gray-600">
+            <div className="text-2xl font-bold text-white">K$ {stats.todaySales}</div>
+            <p className="text-xs text-gray-300">
               From {todayTransactions.filter(t => t.type === 'purchase').length} transactions
             </p>
           </CardContent>
@@ -157,30 +157,30 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Card className="animate-fade-in bg-white border-gray-300" style={{ animationDelay: '0.4s' }}>
+        <Card className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
           <CardHeader>
-            <CardTitle className="text-black">Recent Activity</CardTitle>
-            <CardDescription className="text-gray-600">Latest transactions in the system (refreshes daily)</CardDescription>
+            <CardTitle className="text-white">Recent Activity</CardTitle>
+            <CardDescription className="text-gray-300">Latest transactions in the system (refreshes daily)</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {stats.recentTransactions.length === 0 ? (
-                <p className="text-gray-600 text-center py-4">No recent transactions</p>
+                <p className="text-gray-300 text-center py-4">No recent transactions</p>
               ) : (
                 stats.recentTransactions.map((transaction) => (
-                  <div key={transaction.id} className="flex items-center justify-between p-3 bg-gray-100 rounded-lg border border-gray-200">
+                  <div key={transaction.id} className="flex items-center justify-between p-3 bg-gray-900 rounded-lg border border-gray-700">
                     <div className="flex items-center space-x-3">
                       <span className="text-lg">{getTransactionIcon(transaction.type)}</span>
                       <div>
-                        <p className="font-medium text-sm text-black">{transaction.studentName}</p>
-                        <p className="text-xs text-gray-600">{transaction.description}</p>
+                        <p className="font-medium text-sm text-white">{transaction.studentName}</p>
+                        <p className="text-xs text-gray-300">{transaction.description}</p>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className={`font-medium text-sm ${getTransactionColor(transaction.type)}`}>
                         {transaction.type === 'purchase' || transaction.type === 'deduction' || (transaction.type === 'transfer' && transaction.amount < 0) ? '' : '+'}K$ {Math.abs(transaction.amount)}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-400">
                         {new Date(transaction.createdAt).toLocaleTimeString()}
                       </p>
                     </div>
@@ -191,35 +191,35 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
           </CardContent>
         </Card>
 
-        <Card className="animate-fade-in bg-white border-gray-300" style={{ animationDelay: '0.5s' }}>
+        <Card className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
           <CardHeader>
-            <CardTitle className="text-black">System Overview</CardTitle>
-            <CardDescription className="text-gray-600">Quick system health check</CardDescription>
+            <CardTitle className="text-white">System Overview</CardTitle>
+            <CardDescription className="text-gray-300">Quick system health check</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-black">Active Students</span>
-              <Badge variant="secondary" className="bg-gray-800 text-white">{students.filter(s => s.balance > 0).length}</Badge>
+              <span className="text-sm text-white">Active Students</span>
+              <Badge variant="secondary" className="bg-white text-black">{students.filter(s => s.balance > 0).length}</Badge>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-black">Scanner Status</span>
-              <Badge variant="secondary" className="bg-gray-800 text-white">Ready</Badge>
+              <span className="text-sm text-white">Scanner Status</span>
+              <Badge variant="secondary" className="bg-white text-black">Ready</Badge>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-black">Low Stock Items</span>
-              <Badge variant="secondary" className="bg-gray-800 text-white">
+              <span className="text-sm text-white">Low Stock Items</span>
+              <Badge variant={products.filter(p => p.stock < 10 && p.stock > 0).length > 0 ? "secondary" : "secondary"} className="bg-white text-black">
                 {products.filter(p => p.stock < 10 && p.stock > 0).length}
               </Badge>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-black">Out of Stock</span>
-              <Badge variant={products.filter(p => p.stock === 0).length > 0 ? "destructive" : "secondary"} className={products.filter(p => p.stock === 0).length > 0 ? "bg-red-600 text-white" : "bg-gray-800 text-white"}>
+              <span className="text-sm text-white">Out of Stock</span>
+              <Badge variant={products.filter(p => p.stock === 0).length > 0 ? "destructive" : "secondary"} className={products.filter(p => p.stock === 0).length > 0 ? "bg-red-600 text-white" : "bg-white text-black"}>
                 {products.filter(p => p.stock === 0).length}
               </Badge>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-black">System Health</span>
-              <Badge variant="secondary" className="bg-gray-800 text-white">Excellent</Badge>
+              <span className="text-sm text-white">System Health</span>
+              <Badge variant="secondary" className="bg-white text-black">Excellent</Badge>
             </div>
           </CardContent>
         </Card>
