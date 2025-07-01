@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import LoginForm from '@/components/auth/LoginForm';
 import StudentView from '@/components/student/StudentView';
@@ -62,14 +63,14 @@ const Index = () => {
   // Show main application
   return (
     <AppDataProvider>
-      <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-purple-900">
+      <div className="flex min-h-screen bg-black">
         <Sidebar 
           activeTab={activeTab}
           onTabChange={setActiveTab}
           onLogout={handleLogout}
           userRole={authUser.role}
         />
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto bg-black">
           {activeTab === 'dashboard' && <Dashboard userRole={authUser.role} />}
           {activeTab === 'scan' && <Scanner />}
           {activeTab === 'sales' && <SalesTerminal userEmail={authUser.email} />}
