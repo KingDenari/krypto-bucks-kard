@@ -110,66 +110,66 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
       .slice(0, 5);
 
     return (
-      <div className="min-h-screen p-4 bg-white">
+      <div className="min-h-screen p-4 bg-black">
         <div className="max-w-4xl mx-auto space-y-6">
           <div className="flex items-center gap-4">
-            <Button variant="outline" onClick={onBack} className="border-gray-300 text-black hover:bg-gray-100">
+            <Button variant="outline" onClick={onBack} className="border-white text-white hover:bg-white hover:text-black bg-black">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Login
             </Button>
             <div className="flex items-center gap-2">
               <KryptoLogo size="md" />
-              <h1 className="text-2xl font-bold text-black">Student Transfer Portal</h1>
+              <h1 className="text-2xl font-bold text-white">Student Transfer Portal</h1>
             </div>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
-            <Card className="border-gray-200">
+            <Card className="border-white bg-black">
               <CardHeader>
-                <CardTitle className="text-black">Student Information</CardTitle>
-                <CardDescription className="text-gray-600">Your account details</CardDescription>
+                <CardTitle className="text-white">Student Information</CardTitle>
+                <CardDescription className="text-gray-300">Your account details</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm text-gray-600">Name</p>
-                    <p className="font-semibold text-black">{student.name}</p>
+                    <p className="text-sm text-gray-300">Name</p>
+                    <p className="font-semibold text-white">{student.name}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Grade</p>
-                    <p className="font-semibold text-black">{student.grade}</p>
+                    <p className="text-sm text-gray-300">Grade</p>
+                    <p className="font-semibold text-white">{student.grade}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Barcode</p>
-                    <p className="font-mono text-black">{student.barcode}</p>
+                    <p className="text-sm text-gray-300">Barcode</p>
+                    <p className="font-mono text-white">{student.barcode}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Current Balance</p>
+                    <p className="text-sm text-gray-300">Current Balance</p>
                     <div className="flex items-center gap-2">
                       <KryptoLogo size="sm" />
-                      <span className="text-2xl font-bold text-black">K$ {student.balance}</span>
+                      <span className="text-2xl font-bold text-white">K$ {student.balance}</span>
                     </div>
-                    <p className="text-sm text-gray-600">≈ KSH {kshEquivalent}</p>
+                    <p className="text-sm text-gray-300">≈ KSH {kshEquivalent}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-gray-200">
+            <Card className="border-white bg-black">
               <CardHeader>
-                <CardTitle className="text-black">Transfer Krypto Bucks</CardTitle>
-                <CardDescription className="text-gray-600">Send money to other students</CardDescription>
+                <CardTitle className="text-white">Transfer Krypto Bucks</CardTitle>
+                <CardDescription className="text-gray-300">Send money to other students</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-black">Select Recipient</label>
+                  <label className="text-sm font-medium text-white">Select Recipient</label>
                   <Select value={selectedRecipient} onValueChange={setSelectedRecipient}>
-                    <SelectTrigger className="border-gray-300">
+                    <SelectTrigger className="border-white bg-black text-white">
                       <SelectValue placeholder="Choose a student" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-black border-white">
                       {otherStudents.map((user) => (
-                        <SelectItem key={user.id} value={user.id}>
+                        <SelectItem key={user.id} value={user.id} className="text-white hover:bg-gray-800">
                           {user.name} - {user.grade}
                         </SelectItem>
                       ))}
@@ -177,7 +177,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-black">Amount (K$)</label>
+                  <label className="text-sm font-medium text-white">Amount (K$)</label>
                   <Input
                     type="number"
                     step="0.01"
@@ -185,16 +185,16 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                     onChange={(e) => setTransferAmount(parseFloat(e.target.value) || 0)}
                     placeholder="0.00"
                     max={student.balance}
-                    className="border-gray-300"
+                    className="border-white bg-black text-white placeholder:text-gray-400"
                   />
-                  <p className="text-xs text-gray-600 mt-1">
+                  <p className="text-xs text-gray-300 mt-1">
                     ≈ KSH {(transferAmount / exchangeRate.kshToKrypto).toFixed(2)}
                   </p>
                 </div>
                 <Button 
                   onClick={handleTransfer}
                   disabled={transferLoading || !selectedRecipient || transferAmount <= 0}
-                  className="w-full bg-black hover:bg-gray-800 text-white"
+                  className="w-full bg-white hover:bg-gray-200 text-black"
                 >
                   {transferLoading ? 'Transferring...' : 'Transfer Money'}
                 </Button>
@@ -202,39 +202,39 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
             </Card>
           </div>
 
-          <Card className="border-gray-200">
+          <Card className="border-white bg-black">
             <CardHeader>
-              <CardTitle className="text-black">Recent Transactions</CardTitle>
-              <CardDescription className="text-gray-600">Your latest Krypto Bucks activity</CardDescription>
+              <CardTitle className="text-white">Recent Transactions</CardTitle>
+              <CardDescription className="text-gray-300">Your latest Krypto Bucks activity</CardDescription>
             </CardHeader>
             <CardContent>
               {studentTransactions.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-gray-600">No transactions yet.</p>
-                  <p className="text-sm text-gray-500">Your transaction history will appear here.</p>
+                  <p className="text-gray-300">No transactions yet.</p>
+                  <p className="text-sm text-gray-400">Your transaction history will appear here.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {studentTransactions.map((transaction) => (
-                    <div key={transaction.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                    <div key={transaction.id} className="flex items-center justify-between p-3 border border-white rounded-lg bg-black">
                       <div className="flex items-center gap-3">
                         <div className={`w-2 h-2 rounded-full ${
                           transaction.amount > 0 ? 'bg-green-500' : 'bg-red-500'
                         }`} />
                         <div>
-                          <p className="font-medium text-black">{transaction.description}</p>
-                          <p className="text-sm text-gray-600">
+                          <p className="font-medium text-white">{transaction.description}</p>
+                          <p className="text-sm text-gray-300">
                             {new Date(transaction.createdAt).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className={`font-semibold ${
-                          transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
+                          transaction.amount > 0 ? 'text-green-400' : 'text-red-400'
                         }`}>
                           {transaction.amount > 0 ? '+' : ''}K$ {Math.abs(transaction.amount)}
                         </p>
-                        <Badge variant={transaction.amount > 0 ? 'default' : 'secondary'} className="bg-gray-100 text-gray-800">
+                        <Badge variant={transaction.amount > 0 ? 'default' : 'secondary'} className="bg-white text-black">
                           {transaction.type}
                         </Badge>
                       </div>
@@ -250,10 +250,10 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-white">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-black">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-4">
-          <Button variant="outline" onClick={onBack} className="mb-4 border-gray-300 text-black hover:bg-gray-100">
+          <Button variant="outline" onClick={onBack} className="mb-4 border-white text-white hover:bg-white hover:text-black bg-black">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Login
           </Button>
@@ -261,17 +261,17 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
             <KryptoLogo size="xl" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-black">
+            <h1 className="text-3xl font-bold text-white">
               Student Transfer Portal
             </h1>
-            <p className="text-gray-600">Enter your secret code to transfer Krypto Bucks</p>
+            <p className="text-gray-300">Enter your secret code to transfer Krypto Bucks</p>
           </div>
         </div>
 
-        <Card className="animate-fade-in border-gray-200">
+        <Card className="animate-fade-in border-white bg-black">
           <CardHeader>
-            <CardTitle className="text-black">Enter Your Secret Code</CardTitle>
-            <CardDescription className="text-gray-600">
+            <CardTitle className="text-white">Enter Your Secret Code</CardTitle>
+            <CardDescription className="text-gray-300">
               Use the 6-digit secret code provided by your school
             </CardDescription>
           </CardHeader>
@@ -284,11 +284,11 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                   value={secretCode}
                   onChange={(e) => setSecretCode(e.target.value)}
                   required
-                  className="text-center text-lg font-mono border-gray-300"
+                  className="text-center text-lg font-mono border-white bg-black text-white placeholder:text-gray-400"
                   maxLength={6}
                 />
               </div>
-              <Button type="submit" className="w-full bg-black hover:bg-gray-800 text-white" disabled={loading}>
+              <Button type="submit" className="w-full bg-white hover:bg-gray-200 text-black" disabled={loading}>
                 {loading ? 'Verifying...' : 'Access Account'}
               </Button>
             </form>
