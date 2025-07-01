@@ -63,14 +63,14 @@ const Index = () => {
   // Show main application
   return (
     <AppDataProvider>
-      <div className="flex min-h-screen bg-black">
+      <div className="flex min-h-screen bg-background">
         <Sidebar 
           activeTab={activeTab}
           onTabChange={setActiveTab}
           onLogout={handleLogout}
           userRole={authUser.role}
         />
-        <main className="flex-1 overflow-auto bg-black">
+        <main className="flex-1 overflow-auto bg-background">
           {activeTab === 'dashboard' && <Dashboard userRole={authUser.role} />}
           {activeTab === 'scan' && <Scanner />}
           {activeTab === 'sales' && <SalesTerminal userEmail={authUser.email} />}
