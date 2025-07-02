@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -110,66 +111,66 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
       .slice(0, 5);
 
     return (
-      <div className="min-h-screen p-4 bg-black">
+      <div className="min-h-screen p-4 bg-background">
         <div className="max-w-4xl mx-auto space-y-6">
           <div className="flex items-center gap-4">
-            <Button variant="outline" onClick={onBack} className="border-white text-white hover:bg-white hover:text-black bg-black">
+            <Button variant="outline" onClick={onBack}>
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Login
             </Button>
             <div className="flex items-center gap-2">
               <KryptoLogo size="md" />
-              <h1 className="text-2xl font-bold text-white">Student Transfer Portal</h1>
+              <h1 className="text-2xl font-bold">Student Transfer Portal</h1>
             </div>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
-            <Card className="border-white bg-black">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-white">Student Information</CardTitle>
-                <CardDescription className="text-gray-300">Your account details</CardDescription>
+                <CardTitle>Student Information</CardTitle>
+                <CardDescription>Your account details</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm text-gray-300">Name</p>
-                    <p className="font-semibold text-white">{student.name}</p>
+                    <p className="text-sm text-muted-foreground">Name</p>
+                    <p className="font-semibold">{student.name}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-300">Grade</p>
-                    <p className="font-semibold text-white">{student.grade}</p>
+                    <p className="text-sm text-muted-foreground">Grade</p>
+                    <p className="font-semibold">{student.grade}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-300">Barcode</p>
-                    <p className="font-mono text-white">{student.barcode}</p>
+                    <p className="text-sm text-muted-foreground">Barcode</p>
+                    <p className="font-mono">{student.barcode}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-300">Current Balance</p>
+                    <p className="text-sm text-muted-foreground">Current Balance</p>
                     <div className="flex items-center gap-2">
                       <KryptoLogo size="sm" />
-                      <span className="text-2xl font-bold text-white">K$ {student.balance}</span>
+                      <span className="text-2xl font-bold">K$ {student.balance}</span>
                     </div>
-                    <p className="text-sm text-gray-300">≈ KSH {kshEquivalent}</p>
+                    <p className="text-sm text-muted-foreground">≈ KSH {kshEquivalent}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-white bg-black">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-white">Transfer Krypto Bucks</CardTitle>
-                <CardDescription className="text-gray-300">Send money to other students</CardDescription>
+                <CardTitle>Transfer Krypto Bucks</CardTitle>
+                <CardDescription>Send money to other students</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-white">Select Recipient</label>
+                  <label className="text-sm font-medium">Select Recipient</label>
                   <Select value={selectedRecipient} onValueChange={setSelectedRecipient}>
-                    <SelectTrigger className="border-white bg-black text-white">
+                    <SelectTrigger>
                       <SelectValue placeholder="Choose a student" />
                     </SelectTrigger>
-                    <SelectContent className="bg-black border-white">
+                    <SelectContent>
                       {otherStudents.map((user) => (
-                        <SelectItem key={user.id} value={user.id} className="text-white hover:bg-gray-800">
+                        <SelectItem key={user.id} value={user.id}>
                           {user.name} - {user.grade}
                         </SelectItem>
                       ))}
@@ -177,7 +178,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-white">Amount (K$)</label>
+                  <label className="text-sm font-medium">Amount (K$)</label>
                   <Input
                     type="number"
                     step="0.01"
@@ -185,16 +186,15 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                     onChange={(e) => setTransferAmount(parseFloat(e.target.value) || 0)}
                     placeholder="0.00"
                     max={student.balance}
-                    className="border-white bg-black text-white placeholder:text-gray-400"
                   />
-                  <p className="text-xs text-gray-300 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     ≈ KSH {(transferAmount / exchangeRate.kshToKrypto).toFixed(2)}
                   </p>
                 </div>
                 <Button 
                   onClick={handleTransfer}
                   disabled={transferLoading || !selectedRecipient || transferAmount <= 0}
-                  className="w-full bg-white hover:bg-gray-200 text-black"
+                  className="w-full"
                 >
                   {transferLoading ? 'Transferring...' : 'Transfer Money'}
                 </Button>
@@ -202,39 +202,39 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
             </Card>
           </div>
 
-          <Card className="border-white bg-black">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-white">Recent Transactions</CardTitle>
-              <CardDescription className="text-gray-300">Your latest Krypto Bucks activity</CardDescription>
+              <CardTitle>Recent Transactions</CardTitle>
+              <CardDescription>Your latest Krypto Bucks activity</CardDescription>
             </CardHeader>
             <CardContent>
               {studentTransactions.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-gray-300">No transactions yet.</p>
-                  <p className="text-sm text-gray-400">Your transaction history will appear here.</p>
+                  <p className="text-muted-foreground">No transactions yet.</p>
+                  <p className="text-sm text-muted-foreground">Your transaction history will appear here.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {studentTransactions.map((transaction) => (
-                    <div key={transaction.id} className="flex items-center justify-between p-3 border border-white rounded-lg bg-black">
+                    <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg bg-muted">
                       <div className="flex items-center gap-3">
                         <div className={`w-2 h-2 rounded-full ${
                           transaction.amount > 0 ? 'bg-green-500' : 'bg-red-500'
                         }`} />
                         <div>
-                          <p className="font-medium text-white">{transaction.description}</p>
-                          <p className="text-sm text-gray-300">
+                          <p className="font-medium">{transaction.description}</p>
+                          <p className="text-sm text-muted-foreground">
                             {new Date(transaction.createdAt).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className={`font-semibold ${
-                          transaction.amount > 0 ? 'text-green-400' : 'text-red-400'
+                          transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
                         }`}>
                           {transaction.amount > 0 ? '+' : ''}K$ {Math.abs(transaction.amount)}
                         </p>
-                        <Badge variant={transaction.amount > 0 ? 'default' : 'secondary'} className="bg-white text-black">
+                        <Badge variant={transaction.amount > 0 ? 'default' : 'secondary'}>
                           {transaction.type}
                         </Badge>
                       </div>
@@ -250,10 +250,10 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-black">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-4">
-          <Button variant="outline" onClick={onBack} className="mb-4 border-white text-white hover:bg-white hover:text-black bg-black">
+          <Button variant="outline" onClick={onBack} className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Login
           </Button>
@@ -261,17 +261,17 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
             <KryptoLogo size="xl" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-white">
+            <h1 className="text-3xl font-bold">
               Student Transfer Portal
             </h1>
-            <p className="text-gray-300">Enter your secret code to transfer Krypto Bucks</p>
+            <p className="text-muted-foreground">Enter your secret code to transfer Krypto Bucks</p>
           </div>
         </div>
 
-        <Card className="animate-fade-in border-white bg-black">
+        <Card className="animate-fade-in">
           <CardHeader>
-            <CardTitle className="text-white">Enter Your Secret Code</CardTitle>
-            <CardDescription className="text-gray-300">
+            <CardTitle>Enter Your Secret Code</CardTitle>
+            <CardDescription>
               Use the 6-digit secret code provided by your school
             </CardDescription>
           </CardHeader>
@@ -284,11 +284,11 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                   value={secretCode}
                   onChange={(e) => setSecretCode(e.target.value)}
                   required
-                  className="text-center text-lg font-mono border-white bg-black text-white placeholder:text-gray-400"
+                  className="text-center text-lg font-mono"
                   maxLength={6}
                 />
               </div>
-              <Button type="submit" className="w-full bg-white hover:bg-gray-200 text-black" disabled={loading}>
+              <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 'Verifying...' : 'Access Account'}
               </Button>
             </form>
