@@ -44,3 +44,19 @@ export interface ExchangeRate {
   lastUpdated: string;
   updatedBy: string;
 }
+
+export interface Worker {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  createdAt: string;
+}
+
+export interface Employee {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  createdAt: string;
+}
