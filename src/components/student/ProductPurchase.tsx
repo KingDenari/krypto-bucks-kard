@@ -145,10 +145,10 @@ const ProductPurchase: React.FC<ProductPurchaseProps> = ({ student, setStudent }
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="hover:shadow-lg transition-all duration-200">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5" />
+          <CardTitle className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
+            <ShoppingCart className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             Product Store
           </CardTitle>
           <CardDescription>Purchase products using your Krypto Bucks</CardDescription>
@@ -156,39 +156,39 @@ const ProductPurchase: React.FC<ProductPurchaseProps> = ({ student, setStudent }
         <CardContent>
           {products.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">No products available.</p>
+              <p className="text-slate-600 dark:text-slate-400">No products available.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {products.map((product) => (
-                <Card key={product.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                <Card key={product.id} className="cursor-pointer hover:shadow-md hover:-translate-y-1 transition-all duration-200">
                   <CardContent className="p-4">
                     <div className="space-y-3">
                       <div>
-                        <h3 className="font-semibold">{product.name}</h3>
-                        <p className="text-sm text-muted-foreground">{product.category}</p>
+                        <h3 className="font-semibold text-slate-800 dark:text-slate-200">{product.name}</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">{product.category}</p>
                       </div>
                       
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-1">
                             <KryptoLogo size="sm" />
-                            <span className="font-bold">K$ {product.price}</span>
+                            <span className="font-bold text-slate-800 dark:text-slate-200">K$ {product.price}</span>
                           </div>
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-sm text-slate-600 dark:text-slate-400">
                             KSH {(product.price / exchangeRate.kshToKrypto).toFixed(2)}
                           </span>
                         </div>
                         
                         <div className="flex items-center justify-between">
-                          <Badge variant={product.stock > 0 ? "default" : "destructive"}>
+                          <Badge variant={product.stock > 0 ? "default" : "destructive"} className={product.stock > 0 ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : ""}>
                             Stock: {product.stock}
                           </Badge>
                           <Button
                             size="sm"
                             onClick={() => addToCart(product)}
                             disabled={product.stock <= 0}
-                            className="bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+                            className="hover:shadow-md transition-all duration-200"
                           >
                             <Plus className="w-3 h-3 mr-1" />
                             Add
@@ -206,17 +206,17 @@ const ProductPurchase: React.FC<ProductPurchaseProps> = ({ student, setStudent }
 
       {/* Shopping Cart */}
       {cart.length > 0 && (
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-200">
           <CardHeader>
-            <CardTitle>Shopping Cart</CardTitle>
+            <CardTitle className="text-slate-800 dark:text-slate-200">Shopping Cart</CardTitle>
             <CardDescription>Review your items before purchase</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {cart.map((item) => (
-              <div key={item.product.id} className="flex items-center justify-between p-3 border rounded-lg">
+              <div key={item.product.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
                 <div>
-                  <h4 className="font-medium">{item.product.name}</h4>
-                  <p className="text-sm text-muted-foreground">
+                  <h4 className="font-medium text-slate-800 dark:text-slate-200">{item.product.name}</h4>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
                     K$ {item.product.price} each (KSH {(item.product.price / exchangeRate.kshToKrypto).toFixed(2)})
                   </p>
                 </div>
@@ -226,14 +226,16 @@ const ProductPurchase: React.FC<ProductPurchaseProps> = ({ student, setStudent }
                       size="sm"
                       variant="outline"
                       onClick={() => updateQuantity(item.product.id, -1)}
+                      className="h-8 w-8 p-0"
                     >
                       <Minus className="w-3 h-3" />
                     </Button>
-                    <span className="w-8 text-center">{item.quantity}</span>
+                    <span className="w-8 text-center text-slate-800 dark:text-slate-200">{item.quantity}</span>
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => updateQuantity(item.product.id, 1)}
+                      className="h-8 w-8 p-0"
                     >
                       <Plus className="w-3 h-3" />
                     </Button>
@@ -249,15 +251,15 @@ const ProductPurchase: React.FC<ProductPurchaseProps> = ({ student, setStudent }
               </div>
             ))}
             
-            <div className="border-t pt-4">
+            <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
               <div className="flex justify-between items-center mb-4">
-                <span className="text-lg font-semibold">Total:</span>
+                <span className="text-lg font-semibold text-slate-800 dark:text-slate-200">Total:</span>
                 <div className="text-right">
                   <div className="flex items-center gap-1">
                     <KryptoLogo size="sm" />
-                    <span className="text-xl font-bold">K$ {getTotalAmount()}</span>
+                    <span className="text-xl font-bold text-slate-800 dark:text-slate-200">K$ {getTotalAmount()}</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
                     KSH {(getTotalAmount() / exchangeRate.kshToKrypto).toFixed(2)}
                   </p>
                 </div>
@@ -265,7 +267,7 @@ const ProductPurchase: React.FC<ProductPurchaseProps> = ({ student, setStudent }
               
               <Button 
                 onClick={processPurchase}
-                className="w-full bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+                className="w-full"
               >
                 Purchase Items
               </Button>
@@ -276,9 +278,9 @@ const ProductPurchase: React.FC<ProductPurchaseProps> = ({ student, setStudent }
 
       {/* Digital Receipt Dialog */}
       <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
               <Receipt className="w-5 h-5" />
               Digital Receipt
             </DialogTitle>
@@ -300,7 +302,7 @@ const ProductPurchase: React.FC<ProductPurchaseProps> = ({ student, setStudent }
       <div className="fixed bottom-4 right-4">
         <Button
           onClick={() => setShowHistory(true)}
-          className="bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 shadow-lg"
+          className="shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
         >
           <History className="w-4 h-4 mr-2" />
           Receipt History
