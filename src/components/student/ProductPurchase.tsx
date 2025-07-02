@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { ShoppingCart, Plus, Minus, Receipt, Download, History } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAppData } from '@/contexts/AppDataContext';
@@ -265,12 +266,28 @@ const ProductPurchase: React.FC<ProductPurchaseProps> = ({ student, setStudent }
                 </div>
               </div>
               
-              <Button 
-                onClick={processPurchase}
-                className="w-full"
-              >
-                Purchase Items
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button className="w-full">
+                    Purchase Items
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Confirm Purchase</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to purchase these items for K$ {getTotalAmount()}?
+                      This will deduct the amount from your balance.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>No, Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={processPurchase}>
+                      Yes, Purchase
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </CardContent>
         </Card>

@@ -1,264 +1,152 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, Product, Transaction, ExchangeRate } from '@/types';
-
-interface Employee {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-  createdAt: string;
-}
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { User, Product, Transaction } from '@/types';
+import { initialUsers, initialProducts } from '@/data/data';
 
 interface AppDataContextType {
   users: User[];
   products: Product[];
   transactions: Transaction[];
-  employees: Employee[];
-  exchangeRate: ExchangeRate;
-  addUser: (user: User) => void;
-  updateUser: (userId: string, updates: Partial<User>) => void;
-  deleteUser: (userId: string) => void;
-  addProduct: (product: Product) => void;
-  updateProduct: (productId: string, updates: Partial<Product>) => void;
-  deleteProduct: (productId: string) => void;
-  addTransaction: (transaction: Transaction) => void;
-  getUserByBarcode: (barcode: string) => User | undefined;
+  exchangeRate: { kshToKrypto: number };
   getUserBySecretCode: (secretCode: string) => User | undefined;
-  addEmployee: (employee: Employee) => void;
-  updateEmployee: (employeeId: string, updates: Partial<Employee>) => void;
-  deleteEmployee: (employeeId: string) => void;
-  updateExchangeRate: (rate: number, updatedBy: string) => void;
-  transferKryptoBucks: (fromUserId: string, toUserId: string, amount: number, transferredBy: string) => boolean;
-  // Keep workers for backward compatibility during transition
-  workers: Employee[];
-  addWorker: (worker: Employee) => void;
-  updateWorker: (workerId: string, updates: Partial<Employee>) => void;
-  deleteWorker: (workerId: string) => void;
+  getUserByBarcode: (barcode: string) => User | undefined;
+  updateUser: (id: string, updates: Partial<User>) => void;
+  addProduct: (product: Product) => void;
+  updateProduct: (id: string, updates: Partial<Product>) => void;
+  deleteProduct: (id: string) => void;
+  addTransaction: (transaction: Transaction) => void;
+  transferKryptoBucks: (fromUserId: string, toUserId: string, amount: number, createdBy: string) => boolean;
+  clearTransferHistory: () => void;
+  clearSalesHistory: () => void;
 }
 
 const AppDataContext = createContext<AppDataContextType | undefined>(undefined);
 
-export const useAppData = () => {
-  const context = useContext(AppDataContext);
-  if (context === undefined) {
-    throw new Error('useAppData must be used within an AppDataProvider');
-  }
-  return context;
-};
+export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [users, setUsers] = useState<User[]>(() => {
+    const storedUsers = localStorage.getItem('users');
+    return storedUsers ? JSON.parse(storedUsers) : initialUsers;
+  });
+  const [products, setProducts] = useState<Product[]>(() => {
+    const storedProducts = localStorage.getItem('products');
+    return storedProducts ? JSON.parse(storedProducts) : initialProducts;
+  });
+  const [transactions, setTransactions] = useState<Transaction[]>(() => {
+    const storedTransactions = localStorage.getItem('transactions');
+    return storedTransactions ? JSON.parse(storedTransactions) : [];
+  });
+  const [exchangeRate, setExchangeRate] = useState({ kshToKrypto: 0.5 });
 
-interface AppDataProviderProps {
-  children: ReactNode;
-}
-
-// Helper functions for localStorage
-const loadFromStorage = (key: string, defaultValue: any) => {
-  try {
-    const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : defaultValue;
-  } catch (error) {
-    console.error(`Error loading ${key} from localStorage:`, error);
-    return defaultValue;
-  }
-};
-
-const saveToStorage = (key: string, value: any) => {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch (error) {
-    console.error(`Error saving ${key} to localStorage:`, error);
-  }
-};
-
-export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) => {
-  const [users, setUsers] = useState<User[]>(() => loadFromStorage('krypto-users', []));
-  const [products, setProducts] = useState<Product[]>(() => loadFromStorage('krypto-products', []));
-  const [transactions, setTransactions] = useState<Transaction[]>(() => loadFromStorage('krypto-transactions', []));
-  const [employees, setEmployees] = useState<Employee[]>(() => loadFromStorage('krypto-employees', []));
-  const [exchangeRate, setExchangeRate] = useState<ExchangeRate>(() => 
-    loadFromStorage('krypto-exchange-rate', {
-      kshToKrypto: 51,
-      lastUpdated: new Date().toISOString(),
-      updatedBy: 'system'
-    })
-  );
-
-  // Save to localStorage whenever state changes
   useEffect(() => {
-    saveToStorage('krypto-users', users);
+    localStorage.setItem('users', JSON.stringify(users));
   }, [users]);
 
   useEffect(() => {
-    saveToStorage('krypto-products', products);
+    localStorage.setItem('products', JSON.stringify(products));
   }, [products]);
 
   useEffect(() => {
-    saveToStorage('krypto-transactions', transactions);
+    localStorage.setItem('transactions', JSON.stringify(transactions));
   }, [transactions]);
 
-  useEffect(() => {
-    saveToStorage('krypto-employees', employees);
-  }, [employees]);
-
-  useEffect(() => {
-    saveToStorage('krypto-exchange-rate', exchangeRate);
-  }, [exchangeRate]);
-
-  const addUser = (user: User) => {
-    setUsers(prev => [...prev, user]);
-  };
-
-  const updateUser = (userId: string, updates: Partial<User>) => {
-    setUsers(prev => prev.map(user => 
-      user.id === userId ? { ...user, ...updates } : user
-    ));
-  };
-
-  const deleteUser = (userId: string) => {
-    setUsers(prev => prev.filter(user => user.id !== userId));
-  };
-
-  const addProduct = (product: Product) => {
-    setProducts(prev => [...prev, product]);
-  };
-
-  const updateProduct = (productId: string, updates: Partial<Product>) => {
-    setProducts(prev => prev.map(product => 
-      product.id === productId ? { ...product, ...updates } : product
-    ));
-  };
-
-  const deleteProduct = (productId: string) => {
-    setProducts(prev => prev.filter(product => product.id !== productId));
-  };
-
-  const addTransaction = (transaction: Transaction) => {
-    setTransactions(prev => [...prev, transaction]);
-    
-    // Update user balance if it's a purchase, deposit, or deduction
-    if (transaction.type === 'purchase' || transaction.type === 'deduction') {
-      const user = users.find(u => u.id === transaction.studentId);
-      if (user) {
-        updateUser(transaction.studentId, { 
-          balance: user.balance - transaction.amount 
-        });
-      }
-    } else if (transaction.type === 'deposit') {
-      const user = users.find(u => u.id === transaction.studentId);
-      if (user) {
-        updateUser(transaction.studentId, { 
-          balance: user.balance + transaction.amount 
-        });
-      }
-    }
-
-    // Update product stock for purchases
-    if (transaction.type === 'purchase' && transaction.products) {
-      transaction.products.forEach(item => {
-        const product = products.find(p => p.id === item.productId);
-        if (product) {
-          updateProduct(item.productId, { stock: product.stock - item.quantity });
-        }
-      });
-    }
+  const getUserBySecretCode = (secretCode: string) => {
+    return users.find(user => user.secretCode === secretCode);
   };
 
   const getUserByBarcode = (barcode: string) => {
     return users.find(user => user.barcode === barcode);
   };
 
-  const getUserBySecretCode = (secretCode: string) => {
-    return users.find(user => user.secretCode === secretCode);
+  const updateUser = (id: string, updates: Partial<User>) => {
+    setUsers(users.map(user => user.id === id ? { ...user, ...updates } : user));
   };
 
-  const transferKryptoBucks = (fromUserId: string, toUserId: string, amount: number, transferredBy: string) => {
-    const fromUser = users.find(u => u.id === fromUserId);
-    const toUser = users.find(u => u.id === toUserId);
-    
+  const addProduct = (product: Product) => {
+    setProducts([...products, product]);
+  };
+
+  const updateProduct = (id: string, updates: Partial<Product>) => {
+    setProducts(products.map(product => product.id === id ? { ...product, ...updates } : product));
+  };
+
+  const deleteProduct = (id: string) => {
+    setProducts(products.filter(product => product.id !== id));
+  };
+
+  const addTransaction = (transaction: Transaction) => {
+    setTransactions([transaction, ...transactions]);
+  };
+
+  const transferKryptoBucks = (fromUserId: string, toUserId: string, amount: number, createdBy: string) => {
+    const fromUser = users.find(user => user.id === fromUserId);
+    const toUser = users.find(user => user.id === toUserId);
+
     if (!fromUser || !toUser || fromUser.balance < amount) {
       return false;
     }
 
-    // Update balances
-    updateUser(fromUserId, { balance: fromUser.balance - amount });
-    updateUser(toUserId, { balance: toUser.balance + amount });
-
-    // Add transaction record
-    const transaction: Transaction = {
+    const transferTransaction: Transaction = {
       id: Date.now().toString(),
       studentId: fromUserId,
       studentName: fromUser.name,
       type: 'transfer',
       amount: -amount,
       description: `Transfer to ${toUser.name}`,
-      transferTo: toUserId,
+      products: [],
       createdAt: new Date().toISOString(),
-      createdBy: transferredBy,
+      createdBy: createdBy,
+      transferTo: toUserId
     };
 
-    // Add corresponding transaction for recipient
-    const recipientTransaction: Transaction = {
-      id: (Date.now() + 1).toString(),
+    const receiveTransaction: Transaction = {
+      id: Date.now().toString(),
       studentId: toUserId,
       studentName: toUser.name,
       type: 'transfer',
       amount: amount,
       description: `Transfer from ${fromUser.name}`,
-      transferFrom: fromUserId,
+      products: [],
       createdAt: new Date().toISOString(),
-      createdBy: transferredBy,
+      createdBy: createdBy,
+      transferFrom: fromUserId
     };
 
-    setTransactions(prev => [...prev, transaction, recipientTransaction]);
+    setUsers(users.map(user => {
+      if (user.id === fromUserId) {
+        return { ...user, balance: user.balance - amount };
+      } else if (user.id === toUserId) {
+        return { ...user, balance: user.balance + amount };
+      }
+      return user;
+    }));
+
+    addTransaction(transferTransaction);
+    addTransaction(receiveTransaction);
     return true;
   };
 
-  const addEmployee = (employee: Employee) => {
-    setEmployees(prev => [...prev, employee]);
+  const clearTransferHistory = () => {
+    setTransactions(prev => prev.filter(t => t.type !== 'transfer'));
   };
 
-  const updateEmployee = (employeeId: string, updates: Partial<Employee>) => {
-    setEmployees(prev => prev.map(employee => 
-      employee.id === employeeId ? { ...employee, ...updates } : employee
-    ));
-  };
-
-  const deleteEmployee = (employeeId: string) => {
-    setEmployees(prev => prev.filter(employee => employee.id !== employeeId));
-  };
-
-  const updateExchangeRate = (rate: number, updatedBy: string) => {
-    setExchangeRate({
-      kshToKrypto: rate,
-      lastUpdated: new Date().toISOString(),
-      updatedBy
-    });
+  const clearSalesHistory = () => {
+    setTransactions(prev => prev.filter(t => t.type !== 'purchase'));
   };
 
   const value = {
     users,
     products,
     transactions,
-    employees,
     exchangeRate,
-    addUser,
+    getUserBySecretCode,
+    getUserByBarcode,
     updateUser,
-    deleteUser,
     addProduct,
     updateProduct,
     deleteProduct,
     addTransaction,
-    getUserByBarcode,
-    getUserBySecretCode,
     transferKryptoBucks,
-    addEmployee,
-    updateEmployee,
-    deleteEmployee,
-    updateExchangeRate,
-    // Backward compatibility aliases
-    workers: employees,
-    addWorker: addEmployee,
-    updateWorker: updateEmployee,
-    deleteWorker: deleteEmployee,
+    clearTransferHistory,
+    clearSalesHistory,
   };
 
   return (
@@ -266,4 +154,12 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
       {children}
     </AppDataContext.Provider>
   );
+};
+
+export const useAppData = () => {
+  const context = useContext(AppDataContext);
+  if (context === undefined) {
+    throw new Error("useAppData must be used within an AppDataProvider");
+  }
+  return context;
 };

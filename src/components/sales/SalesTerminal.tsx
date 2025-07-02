@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { ScanLine, ShoppingCart, Plus, Minus, Trash2, Camera, Receipt, Copy } from 'lucide-react';
 import { User, Product, Transaction } from '@/types';
 import { useToast } from '@/hooks/use-toast';
@@ -19,7 +20,7 @@ interface SalesTerminalProps {
 }
 
 const SalesTerminal: React.FC<SalesTerminalProps> = ({ userEmail = 'employee@example.com' }) => {
-  const { users, products, addTransaction, getUserByBarcode, exchangeRate } = useAppData();
+  const { users, products, addTransaction, getUserByBarcode, exchangeRate, clearSalesHistory } = useAppData();
   const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
   const [barcodeInput, setBarcodeInput] = useState('');
   const [cart, setCart] = useState<{ product: Product; quantity: number }[]>([]);
@@ -184,11 +185,44 @@ const SalesTerminal: React.FC<SalesTerminalProps> = ({ userEmail = 'employee@exa
     });
   };
 
+  const handleClearSalesHistory = () => {
+    clearSalesHistory();
+    toast({
+      title: "Sales History Cleared",
+      description: "All sales history has been cleared successfully.",
+    });
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Sales Terminal</h1>
-        <p className="text-muted-foreground">Process student purchases and manage transactions</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Sales Terminal</h1>
+          <p className="text-muted-foreground">Process student purchases and manage transactions</p>
+        </div>
+        
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" className="flex items-center gap-2">
+              <Trash2 className="w-4 h-4" />
+              Clear Sales History
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Clear Sales History</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to clear all sales history? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>No, Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleClearSalesHistory} className="bg-red-600 hover:bg-red-700">
+                Yes, Clear History
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

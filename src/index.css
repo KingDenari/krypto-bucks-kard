@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -16,7 +15,7 @@
     --popover: 255 255 255;
     --popover-foreground: 30 41 59;
 
-    --primary: 59 130 246; /* Blue accent */
+    --primary: 55 65 81; /* Gray-blackish accent */
     --primary-foreground: 255 255 255;
 
     --secondary: 241 245 249; /* Light grey */
@@ -25,7 +24,7 @@
     --muted: 241 245 249;
     --muted-foreground: 100 116 139; /* Medium grey */
 
-    --accent: 59 130 246; /* Blue accent */
+    --accent: 55 65 81; /* Gray-blackish accent */
     --accent-foreground: 255 255 255;
 
     --destructive: 239 68 68;
@@ -33,18 +32,18 @@
 
     --border: 226 232 240; /* Light border */
     --input: 255 255 255;
-    --ring: 59 130 246; /* Blue focus rings */
+    --ring: 55 65 81; /* Gray-blackish focus rings */
 
     --radius: 0.75rem; /* More rounded corners */
 
     --sidebar-background: 255 255 255;
     --sidebar-foreground: 30 41 59;
-    --sidebar-primary: 59 130 246;
+    --sidebar-primary: 55 65 81;
     --sidebar-primary-foreground: 255 255 255;
     --sidebar-accent: 241 245 249;
     --sidebar-accent-foreground: 30 41 59;
     --sidebar-border: 226 232 240;
-    --sidebar-ring: 59 130 246;
+    --sidebar-ring: 55 65 81;
   }
 
   .dark {
@@ -57,7 +56,7 @@
     --popover: 30 41 59;
     --popover-foreground: 248 250 252;
 
-    --primary: 96 165 250; /* Lighter blue for dark mode */
+    --primary: 156 163 175; /* Light gray for dark mode */
     --primary-foreground: 15 23 42;
 
     --secondary: 51 65 85;
@@ -66,7 +65,7 @@
     --muted: 51 65 85;
     --muted-foreground: 148 163 184;
 
-    --accent: 96 165 250;
+    --accent: 156 163 175;
     --accent-foreground: 15 23 42;
 
     --destructive: 239 68 68;
@@ -74,16 +73,16 @@
 
     --border: 51 65 85;
     --input: 30 41 59;
-    --ring: 96 165 250;
+    --ring: 156 163 175;
 
     --sidebar-background: 30 41 59;
     --sidebar-foreground: 248 250 252;
-    --sidebar-primary: 96 165 250;
+    --sidebar-primary: 156 163 175;
     --sidebar-primary-foreground: 15 23 42;
     --sidebar-accent: 51 65 85;
     --sidebar-accent-foreground: 248 250 252;
     --sidebar-border: 51 65 85;
-    --sidebar-ring: 96 165 250;
+    --sidebar-ring: 156 163 175;
   }
 }
 

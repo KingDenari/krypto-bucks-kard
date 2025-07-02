@@ -1,13 +1,16 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useAppData } from '@/contexts/AppDataContext';
-import { ArrowLeftRight, TrendingUp, TrendingDown } from 'lucide-react';
+import { ArrowLeftRight, TrendingUp, TrendingDown, Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const TransferMonitoring: React.FC = () => {
-  const { transactions, users } = useAppData();
+  const { transactions, users, clearTransferHistory } = useAppData();
+  const { toast } = useToast();
 
   // Filter only transfer transactions
   const transferTransactions = transactions
@@ -29,13 +32,46 @@ const TransferMonitoring: React.FC = () => {
     );
   };
 
+  const handleClearHistory = () => {
+    clearTransferHistory();
+    toast({
+      title: "History Cleared",
+      description: "All transfer history has been cleared successfully.",
+    });
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Transfer Monitoring</h1>
-        <p className="text-muted-foreground">
-          Monitor all Krypto Bucks transfers between students
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Transfer Monitoring</h1>
+          <p className="text-muted-foreground">
+            Monitor all Krypto Bucks transfers between students
+          </p>
+        </div>
+        
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" className="flex items-center gap-2">
+              <Trash2 className="w-4 h-4" />
+              Clear History
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Clear Transfer History</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to clear all transfer history? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>No, Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleClearHistory} className="bg-red-600 hover:bg-red-700">
+                Yes, Clear History
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
