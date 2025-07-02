@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft } from 'lucide-react';
 import { useAppData } from '@/contexts/AppDataContext';
 import { User } from '@/types';
+import ProductPurchase from './ProductPurchase';
 
 interface StudentViewProps {
   onBack: () => void;
@@ -100,7 +101,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
   // Get other students for transfer
   const otherStudents = users.filter(u => u.role === 'student' && u.id !== student?.id);
   
-  // Calculate KSH equivalent - now 1 KSH = 51 K$, so we divide K$ by the rate to get KSH
+  // Calculate KSH equivalent
   const kshEquivalent = student ? (student.balance / exchangeRate.kshToKrypto).toFixed(2) : '0.00';
 
   if (student) {
@@ -111,20 +112,21 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
       .slice(0, 5);
 
     return (
-      <div className="min-h-screen p-4 bg-background">
-        <div className="max-w-4xl mx-auto space-y-6">
+      <div className="min-h-screen p-4 bg-white dark:bg-black">
+        <div className="max-w-6xl mx-auto space-y-6">
           <div className="flex items-center gap-4">
-            <Button variant="outline" onClick={onBack}>
+            <Button variant="outline" onClick={onBack} className="border-2 border-black dark:border-white">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Login
             </Button>
             <div className="flex items-center gap-2">
               <KryptoLogo size="md" />
-              <h1 className="text-2xl font-bold">Student Transfer Portal</h1>
+              <h1 className="text-2xl font-bold">Student Portal</h1>
             </div>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Student Information Card */}
             <Card>
               <CardHeader>
                 <CardTitle>Student Information</CardTitle>
@@ -156,6 +158,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
               </CardContent>
             </Card>
 
+            {/* Transfer Money Card */}
             <Card>
               <CardHeader>
                 <CardTitle>Transfer Krypto Bucks</CardTitle>
@@ -165,7 +168,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                 <div>
                   <label className="text-sm font-medium">Select Recipient</label>
                   <Select value={selectedRecipient} onValueChange={setSelectedRecipient}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-2 border-black dark:border-white">
                       <SelectValue placeholder="Choose a student" />
                     </SelectTrigger>
                     <SelectContent>
@@ -186,6 +189,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                     onChange={(e) => setTransferAmount(parseFloat(e.target.value) || 0)}
                     placeholder="0.00"
                     max={student.balance}
+                    className="border-2 border-black dark:border-white"
                   />
                   <p className="text-xs text-muted-foreground mt-1">
                     ≈ KSH {(transferAmount / exchangeRate.kshToKrypto).toFixed(2)}
@@ -194,66 +198,67 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                 <Button 
                   onClick={handleTransfer}
                   disabled={transferLoading || !selectedRecipient || transferAmount <= 0}
-                  className="w-full"
+                  className="w-full bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
                 >
                   {transferLoading ? 'Transferring...' : 'Transfer Money'}
                 </Button>
               </CardContent>
             </Card>
-          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Transactions</CardTitle>
-              <CardDescription>Your latest Krypto Bucks activity</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {studentTransactions.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">No transactions yet.</p>
-                  <p className="text-sm text-muted-foreground">Your transaction history will appear here.</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {studentTransactions.map((transaction) => (
-                    <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg bg-muted">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-2 h-2 rounded-full ${
-                          transaction.amount > 0 ? 'bg-green-500' : 'bg-red-500'
-                        }`} />
-                        <div>
-                          <p className="font-medium">{transaction.description}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(transaction.createdAt).toLocaleDateString()}
+            {/* Recent Transactions Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Transactions</CardTitle>
+                <CardDescription>Your latest activity</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {studentTransactions.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No transactions yet.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {studentTransactions.map((transaction) => (
+                      <div key={transaction.id} className="flex items-center justify-between p-3 border-2 border-black dark:border-white rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-2 h-2 rounded-full ${
+                            transaction.amount > 0 ? 'bg-black dark:bg-white' : 'bg-gray-500'
+                          }`} />
+                          <div>
+                            <p className="font-medium">{transaction.description}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {new Date(transaction.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold">
+                            {transaction.amount > 0 ? '+' : ''}K$ {Math.abs(transaction.amount)}
                           </p>
+                          <Badge variant="outline" className="border-black dark:border-white">
+                            {transaction.type}
+                          </Badge>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className={`font-semibold ${
-                          transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
-                        }`}>
-                          {transaction.amount > 0 ? '+' : ''}K$ {Math.abs(transaction.amount)}
-                        </p>
-                        <Badge variant={transaction.amount > 0 ? 'default' : 'secondary'}>
-                          {transaction.type}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Product Purchase Section */}
+          <ProductPurchase student={student} setStudent={setStudent} />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-white dark:bg-black">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-4">
-          <Button variant="outline" onClick={onBack} className="mb-4">
+          <Button variant="outline" onClick={onBack} className="mb-4 border-2 border-black dark:border-white">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Login
           </Button>
@@ -261,14 +266,12 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
             <KryptoLogo size="xl" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold">
-              Student Transfer Portal
-            </h1>
-            <p className="text-muted-foreground">Enter your secret code to transfer Krypto Bucks</p>
+            <h1 className="text-3xl font-bold">Student Portal</h1>
+            <p className="text-muted-foreground">Enter your secret code to access your account</p>
           </div>
         </div>
 
-        <Card className="animate-fade-in">
+        <Card className="animate-fade-in border-2 border-black dark:border-white">
           <CardHeader>
             <CardTitle>Enter Your Secret Code</CardTitle>
             <CardDescription>
@@ -284,11 +287,15 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                   value={secretCode}
                   onChange={(e) => setSecretCode(e.target.value)}
                   required
-                  className="text-center text-lg font-mono"
+                  className="text-center text-lg font-mono border-2 border-black dark:border-white"
                   maxLength={6}
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button 
+                type="submit" 
+                className="w-full bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200" 
+                disabled={loading}
+              >
                 {loading ? 'Verifying...' : 'Access Account'}
               </Button>
             </form>

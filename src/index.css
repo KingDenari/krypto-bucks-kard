@@ -19,16 +19,16 @@
     --primary: 0 0 0;
     --primary-foreground: 255 255 255;
 
-    --secondary: 245 245 245;
+    --secondary: 243 244 246;
     --secondary-foreground: 0 0 0;
 
-    --muted: 245 245 245;
-    --muted-foreground: 115 115 115;
+    --muted: 243 244 246;
+    --muted-foreground: 75 85 99;
 
-    --accent: 245 245 245;
+    --accent: 243 244 246;
     --accent-foreground: 0 0 0;
 
-    --destructive: 220 38 38;
+    --destructive: 239 68 68;
     --destructive-foreground: 255 255 255;
 
     --border: 0 0 0;
@@ -41,7 +41,7 @@
     --sidebar-foreground: 0 0 0;
     --sidebar-primary: 0 0 0;
     --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 245 245 245;
+    --sidebar-accent: 243 244 246;
     --sidebar-accent-foreground: 0 0 0;
     --sidebar-border: 0 0 0;
     --sidebar-ring: 0 0 0;
@@ -60,16 +60,16 @@
     --primary: 255 255 255;
     --primary-foreground: 0 0 0;
 
-    --secondary: 38 38 38;
+    --secondary: 31 41 55;
     --secondary-foreground: 255 255 255;
 
-    --muted: 38 38 38;
-    --muted-foreground: 163 163 163;
+    --muted: 31 41 55;
+    --muted-foreground: 156 163 175;
 
-    --accent: 38 38 38;
+    --accent: 31 41 55;
     --accent-foreground: 255 255 255;
 
-    --destructive: 220 38 38;
+    --destructive: 239 68 68;
     --destructive-foreground: 255 255 255;
 
     --border: 255 255 255;
@@ -80,7 +80,7 @@
     --sidebar-foreground: 255 255 255;
     --sidebar-primary: 255 255 255;
     --sidebar-primary-foreground: 0 0 0;
-    --sidebar-accent: 38 38 38;
+    --sidebar-accent: 31 41 55;
     --sidebar-accent-foreground: 255 255 255;
     --sidebar-border: 255 255 255;
     --sidebar-ring: 255 255 255;
@@ -106,18 +106,16 @@
   @apply bg-card text-card-foreground border border-border rounded-2xl p-6 shadow-lg;
 }
 
-/* Better hover effects - use blue instead of any yellow */
-button:hover,
-.hover\:bg-blue-50:hover {
-  background-color: rgb(239 246 255) !important;
-  color: rgb(59 130 246) !important;
+/* Black and white hover effects only */
+button:hover {
+  background-color: rgb(243 244 246) !important;
+  color: rgb(0 0 0) !important;
   transition: all 0.2s ease-in-out;
 }
 
-.dark button:hover,
-.dark .hover\:bg-blue-50:hover {
-  background-color: rgb(30 58 138) !important;
-  color: rgb(147 197 253) !important;
+.dark button:hover {
+  background-color: rgb(31 41 55) !important;
+  color: rgb(255 255 255) !important;
 }
 
 /* Card hover effects */
@@ -125,10 +123,16 @@ button:hover,
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
 }
 
-/* Outline focus states */
+/* Black outline focus states */
 *:focus,
 *:focus-visible {
-  outline: 2px solid rgb(59 130 246) !important;
+  outline: 2px solid rgb(0 0 0) !important;
+  outline-offset: 2px !important;
+}
+
+.dark *:focus,
+.dark *:focus-visible {
+  outline: 2px solid rgb(255 255 255) !important;
   outline-offset: 2px !important;
 }
 
@@ -146,4 +150,22 @@ button:hover,
 
 .animate-fade-in {
   animation: fade-in 0.5s ease-out forwards;
+}
+
+/* Ensure all backgrounds are white/black */
+.bg-green-50, .bg-blue-50, .bg-yellow-50, .bg-pink-50 {
+  background-color: rgb(243 244 246) !important;
+}
+
+.dark .bg-green-50, .dark .bg-blue-50, .dark .bg-yellow-50, .dark .bg-pink-50 {
+  background-color: rgb(31 41 55) !important;
+}
+
+/* Remove any yellow/pink text colors */
+.text-green-800, .text-blue-600, .text-yellow-600, .text-pink-600 {
+  color: rgb(0 0 0) !important;
+}
+
+.dark .text-green-800, .dark .text-blue-600, .dark .text-yellow-600, .dark .text-pink-600 {
+  color: rgb(255 255 255) !important;
 }

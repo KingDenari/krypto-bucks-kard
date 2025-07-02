@@ -210,8 +210,9 @@ const SalesTerminal: React.FC<SalesTerminalProps> = ({ userEmail = 'employee@exa
                 value={barcodeInput}
                 onChange={(e) => setBarcodeInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && scanBarcode()}
+                className="border-2 border-black dark:border-white"
               />
-              <Button onClick={scanBarcode} className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Button onClick={scanBarcode} className="bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200">
                 <ScanLine className="w-4 h-4" />
               </Button>
             </div>
@@ -223,6 +224,7 @@ const SalesTerminal: React.FC<SalesTerminalProps> = ({ userEmail = 'employee@exa
                   variant="outline"
                   size="sm"
                   onClick={() => setShowWebcam(!showWebcam)}
+                  className="border-2 border-black dark:border-white"
                 >
                   <Camera className="w-4 h-4 mr-2" />
                   {showWebcam ? 'Hide' : 'Show'} Camera
@@ -235,11 +237,11 @@ const SalesTerminal: React.FC<SalesTerminalProps> = ({ userEmail = 'employee@exa
             </div>
 
             {selectedStudent && (
-              <div className="p-4 border rounded-lg bg-green-50">
-                <h3 className="font-semibold text-green-800">{selectedStudent.name}</h3>
-                <p className="text-sm text-green-600">{selectedStudent.email}</p>
+              <div className="p-4 border-2 border-black dark:border-white rounded-lg bg-white dark:bg-black">
+                <h3 className="font-semibold">{selectedStudent.name}</h3>
+                <p className="text-sm text-muted-foreground">{selectedStudent.email}</p>
                 <div className="mt-2">
-                  <Badge className="bg-blue-600 text-white">
+                  <Badge className="bg-black text-white dark:bg-white dark:text-black">
                     Balance: K$ {selectedStudent.balance}
                   </Badge>
                 </div>
@@ -267,7 +269,7 @@ const SalesTerminal: React.FC<SalesTerminalProps> = ({ userEmail = 'employee@exa
             ) : (
               <div className="space-y-2">
                 {cart.map((item) => (
-                  <div key={item.product.id} className="flex items-center justify-between p-2 border rounded">
+                  <div key={item.product.id} className="flex items-center justify-between p-2 border-2 border-black dark:border-white rounded">
                     <div>
                       <p className="font-medium">{item.product.name}</p>
                       <p className="text-sm text-muted-foreground">K$ {item.product.price} each</p>
@@ -303,7 +305,7 @@ const SalesTerminal: React.FC<SalesTerminalProps> = ({ userEmail = 'employee@exa
                 
                 <div className="flex justify-between items-center font-bold text-lg">
                   <span>Total:</span>
-                  <Badge className="bg-blue-600 text-white text-lg px-3 py-1">
+                  <Badge className="bg-black text-white dark:bg-white dark:text-black text-lg px-3 py-1">
                     K$ {getTotalAmount()}
                   </Badge>
                 </div>
@@ -311,7 +313,7 @@ const SalesTerminal: React.FC<SalesTerminalProps> = ({ userEmail = 'employee@exa
                 <div className="space-y-2">
                   <Button 
                     onClick={processTransaction} 
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    className="w-full bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
                     disabled={!selectedStudent}
                   >
                     Process Transaction
@@ -320,7 +322,7 @@ const SalesTerminal: React.FC<SalesTerminalProps> = ({ userEmail = 'employee@exa
                   {lastTransaction && (
                     <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
                       <DialogTrigger asChild>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full border-2 border-black dark:border-white">
                           <Receipt className="w-4 h-4 mr-2" />
                           Get Receipt
                         </Button>
@@ -366,20 +368,20 @@ const SalesTerminal: React.FC<SalesTerminalProps> = ({ userEmail = 'employee@exa
               {products.map((product) => (
                 <Card 
                   key={product.id} 
-                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  className="cursor-pointer hover:shadow-md transition-shadow border-2 border-black dark:border-white"
                   onClick={() => addToCart(product)}
                 >
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="font-medium">{product.name}</h3>
-                      <Badge className="bg-blue-600 text-white">
+                      <Badge className="bg-black text-white dark:bg-white dark:text-black">
                         K$ {product.price}
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground mb-2">{product.category}</p>
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Stock: {product.stock}</span>
-                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                      <Button size="sm" className="bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200">
                         <Plus className="w-3 h-3 mr-1" />
                         Add
                       </Button>
