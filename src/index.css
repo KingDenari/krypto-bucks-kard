@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,83 +7,83 @@
 
 @layer base {
   :root {
-    --background: 248 250 252; /* Very light grey */
-    --foreground: 30 41 59; /* Dark grey text */
+    --background: 255 255 255; /* White background */
+    --foreground: 0 0 0; /* Black text */
 
     --card: 255 255 255; /* White cards */
-    --card-foreground: 30 41 59; /* Dark grey text */
+    --card-foreground: 0 0 0; /* Black text */
 
     --popover: 255 255 255;
-    --popover-foreground: 30 41 59;
+    --popover-foreground: 0 0 0;
 
-    --primary: 55 65 81; /* Gray-blackish accent */
+    --primary: 128 128 128; /* Gray accent */
     --primary-foreground: 255 255 255;
 
-    --secondary: 241 245 249; /* Light grey */
-    --secondary-foreground: 30 41 59;
+    --secondary: 245 245 245; /* Light gray */
+    --secondary-foreground: 0 0 0;
 
-    --muted: 241 245 249;
-    --muted-foreground: 100 116 139; /* Medium grey */
+    --muted: 245 245 245;
+    --muted-foreground: 128 128 128; /* Gray text */
 
-    --accent: 55 65 81; /* Gray-blackish accent */
+    --accent: 128 128 128; /* Gray accent */
     --accent-foreground: 255 255 255;
 
     --destructive: 239 68 68;
     --destructive-foreground: 255 255 255;
 
-    --border: 226 232 240; /* Light border */
+    --border: 229 231 235; /* Light gray border */
     --input: 255 255 255;
-    --ring: 55 65 81; /* Gray-blackish focus rings */
+    --ring: 128 128 128; /* Gray focus rings */
 
-    --radius: 0.75rem; /* More rounded corners */
+    --radius: 0.75rem;
 
-    --sidebar-background: 255 255 255;
-    --sidebar-foreground: 30 41 59;
-    --sidebar-primary: 55 65 81;
-    --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 241 245 249;
-    --sidebar-accent-foreground: 30 41 59;
-    --sidebar-border: 226 232 240;
-    --sidebar-ring: 55 65 81;
+    --sidebar-background: 128 128 128; /* Gray sidebar */
+    --sidebar-foreground: 255 255 255; /* White text */
+    --sidebar-primary: 255 255 255;
+    --sidebar-primary-foreground: 128 128 128;
+    --sidebar-accent: 160 160 160;
+    --sidebar-accent-foreground: 255 255 255;
+    --sidebar-border: 96 96 96;
+    --sidebar-ring: 255 255 255;
   }
 
   .dark {
-    --background: 15 23 42; /* Dark slate */
-    --foreground: 248 250 252; /* Light text */
+    --background: 255 255 255; /* White background */
+    --foreground: 0 0 0; /* Black text */
 
-    --card: 30 41 59; /* Dark cards */
-    --card-foreground: 248 250 252;
+    --card: 255 255 255; /* White cards */
+    --card-foreground: 0 0 0;
 
-    --popover: 30 41 59;
-    --popover-foreground: 248 250 252;
+    --popover: 255 255 255;
+    --popover-foreground: 0 0 0;
 
-    --primary: 156 163 175; /* Light gray for dark mode */
-    --primary-foreground: 15 23 42;
+    --primary: 128 128 128; /* Gray for dark mode */
+    --primary-foreground: 255 255 255;
 
-    --secondary: 51 65 85;
-    --secondary-foreground: 248 250 252;
+    --secondary: 245 245 245;
+    --secondary-foreground: 0 0 0;
 
-    --muted: 51 65 85;
-    --muted-foreground: 148 163 184;
+    --muted: 245 245 245;
+    --muted-foreground: 128 128 128;
 
-    --accent: 156 163 175;
-    --accent-foreground: 15 23 42;
+    --accent: 128 128 128;
+    --accent-foreground: 255 255 255;
 
     --destructive: 239 68 68;
-    --destructive-foreground: 248 250 252;
+    --destructive-foreground: 255 255 255;
 
-    --border: 51 65 85;
-    --input: 30 41 59;
-    --ring: 156 163 175;
+    --border: 229 231 235;
+    --input: 255 255 255;
+    --ring: 128 128 128;
 
-    --sidebar-background: 30 41 59;
-    --sidebar-foreground: 248 250 252;
-    --sidebar-primary: 156 163 175;
-    --sidebar-primary-foreground: 15 23 42;
-    --sidebar-accent: 51 65 85;
-    --sidebar-accent-foreground: 248 250 252;
-    --sidebar-border: 51 65 85;
-    --sidebar-ring: 156 163 175;
+    --sidebar-background: 128 128 128;
+    --sidebar-foreground: 255 255 255;
+    --sidebar-primary: 255 255 255;
+    --sidebar-primary-foreground: 128 128 128;
+    --sidebar-accent: 160 160 160;
+    --sidebar-accent-foreground: 255 255 255;
+    --sidebar-border: 96 96 96;
+    --sidebar-ring: 255 255 255;
   }
 }
 
@@ -92,7 +93,7 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-white text-black;
     min-height: 100vh;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   }
@@ -101,7 +102,7 @@
 /* Clean button hover effects */
 button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 4px 12px rgba(128, 128, 128, 0.15);
   transition: all 0.2s ease-in-out;
 }
 
@@ -111,7 +112,7 @@ button:active {
 
 /* Modern card styling */
 .modern-card {
-  @apply bg-card text-card-foreground border border-border rounded-xl shadow-sm hover:shadow-md;
+  @apply bg-white text-black border border-gray-200 rounded-xl shadow-sm hover:shadow-md;
   transition: all 0.2s ease-in-out;
 }
 
@@ -123,7 +124,7 @@ button:active {
 /* Clean focus states */
 *:focus,
 *:focus-visible {
-  outline: 2px solid hsl(var(--primary)) !important;
+  outline: 2px solid #808080 !important;
   outline-offset: 2px !important;
   border-radius: 6px;
 }
@@ -155,16 +156,20 @@ button:active {
 
 /* Professional headings */
 h1, h2, h3, h4, h5, h6 {
-  @apply text-slate-800 dark:text-slate-200;
+  @apply text-black;
   font-weight: 600;
 }
 
 /* Clean input styling */
 input, select, textarea {
-  @apply bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600;
+  @apply bg-white border-gray-300;
   transition: all 0.2s ease-in-out;
 }
 
 input:focus, select:focus, textarea:focus {
-  @apply border-blue-500 ring-2 ring-blue-500/20;
+  @apply border-gray-500 ring-2 ring-gray-500/20;
+}
+
+input::placeholder, select::placeholder, textarea::placeholder {
+  @apply text-gray-500;
 }

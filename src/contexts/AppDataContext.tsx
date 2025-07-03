@@ -29,6 +29,8 @@ interface AppDataContextType {
   updateEmployee: (id: string, updates: Partial<Employee>) => void;
   deleteEmployee: (id: string) => void;
   updateExchangeRate: (rate: number, updatedBy: string) => void;
+  factoryReset: () => void;
+  purchaseProduct: (studentId: string, productId: string, quantity: number, createdBy: string) => boolean;
 }
 
 const AppDataContext = createContext<AppDataContextType | undefined>(undefined);
@@ -63,28 +65,61 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   });
 
+  // Sync data across tabs/devices
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'users' && e.newValue) {
+        setUsers(JSON.parse(e.newValue));
+      }
+      if (e.key === 'products' && e.newValue) {
+        setProducts(JSON.parse(e.newValue));
+      }
+      if (e.key === 'transactions' && e.newValue) {
+        setTransactions(JSON.parse(e.newValue));
+      }
+      if (e.key === 'workers' && e.newValue) {
+        setWorkers(JSON.parse(e.newValue));
+      }
+      if (e.key === 'employees' && e.newValue) {
+        setEmployees(JSON.parse(e.newValue));
+      }
+      if (e.key === 'exchangeRate' && e.newValue) {
+        setExchangeRate(JSON.parse(e.newValue));
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   useEffect(() => {
     localStorage.setItem('users', JSON.stringify(users));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'users', newValue: JSON.stringify(users) }));
   }, [users]);
 
   useEffect(() => {
     localStorage.setItem('products', JSON.stringify(products));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'products', newValue: JSON.stringify(products) }));
   }, [products]);
 
   useEffect(() => {
     localStorage.setItem('transactions', JSON.stringify(transactions));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'transactions', newValue: JSON.stringify(transactions) }));
   }, [transactions]);
 
   useEffect(() => {
     localStorage.setItem('workers', JSON.stringify(workers));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'workers', newValue: JSON.stringify(workers) }));
   }, [workers]);
 
   useEffect(() => {
     localStorage.setItem('employees', JSON.stringify(employees));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'employees', newValue: JSON.stringify(employees) }));
   }, [employees]);
 
   useEffect(() => {
     localStorage.setItem('exchangeRate', JSON.stringify(exchangeRate));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'exchangeRate', newValue: JSON.stringify(exchangeRate) }));
   }, [exchangeRate]);
 
   const getUserBySecretCode = (secretCode: string) => {
@@ -121,6 +156,47 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const addTransaction = (transaction: Transaction) => {
     setTransactions([transaction, ...transactions]);
+  };
+
+  const purchaseProduct = (studentId: string, productId: string, quantity: number, createdBy: string) => {
+    const student = users.find(user => user.id === studentId);
+    const product = products.find(p => p.id === productId);
+
+    if (!student || !product || product.stock < quantity) {
+      return false;
+    }
+
+    const totalAmount = product.price * quantity;
+    if (student.balance < totalAmount) {
+      return false;
+    }
+
+    // Update student balance
+    updateUser(studentId, { balance: student.balance - totalAmount });
+
+    // Update product stock
+    updateProduct(productId, { stock: product.stock - quantity });
+
+    // Add transaction
+    const transaction: Transaction = {
+      id: Date.now().toString(),
+      studentId: studentId,
+      studentName: student.name,
+      type: 'purchase',
+      amount: totalAmount,
+      description: `Purchase of ${quantity} ${product.name}(s)`,
+      products: [{
+        productId: product.id,
+        productName: product.name,
+        quantity: quantity,
+        price: product.price
+      }],
+      createdAt: new Date().toISOString(),
+      createdBy: createdBy
+    };
+
+    addTransaction(transaction);
+    return true;
   };
 
   const transferKryptoBucks = (fromUserId: string, toUserId: string, amount: number, createdBy: string) => {
@@ -211,6 +287,19 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     });
   };
 
+  const factoryReset = () => {
+    setUsers(initialUsers);
+    setProducts(initialProducts);
+    setTransactions([]);
+    setWorkers([]);
+    setEmployees([]);
+    setExchangeRate({
+      kshToKrypto: 0.5,
+      lastUpdated: new Date().toISOString(),
+      updatedBy: 'system'
+    });
+  };
+
   const value = {
     users,
     products,
@@ -237,6 +326,8 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     updateEmployee,
     deleteEmployee,
     updateExchangeRate,
+    factoryReset,
+    purchaseProduct,
   };
 
   return (

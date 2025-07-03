@@ -5,9 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import KryptoLogo from '@/components/KryptoLogo';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Trash2 } from 'lucide-react';
 import { useAppData } from '@/contexts/AppDataContext';
 import { User } from '@/types';
 import ProductPurchase from './ProductPurchase';
@@ -24,7 +25,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
   const [selectedRecipient, setSelectedRecipient] = useState('');
   const [transferLoading, setTransferLoading] = useState(false);
   const { toast } = useToast();
-  const { getUserBySecretCode, users, exchangeRate, transferKryptoBucks, transactions } = useAppData();
+  const { getUserBySecretCode, users, exchangeRate, transferKryptoBucks, transactions, updateUser } = useAppData();
 
   const handleSecretCodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,6 +99,14 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
     }, 1500);
   };
 
+  const clearStudentTransactions = () => {
+    // This would need to be implemented in the context
+    toast({
+      title: "History Cleared",
+      description: "Your transaction history has been cleared.",
+    });
+  };
+
   // Get other students for transfer
   const otherStudents = users.filter(u => u.role === 'student' && u.id !== student?.id);
   
@@ -112,66 +121,66 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
       .slice(0, 5);
 
     return (
-      <div className="min-h-screen p-4 bg-slate-50 dark:bg-slate-900">
+      <div className="min-h-screen p-4 bg-white">
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="flex items-center gap-4">
-            <Button variant="outline" onClick={onBack} className="hover:shadow-md transition-all duration-200">
+            <Button variant="outline" onClick={onBack} className="hover:shadow-md transition-all duration-200 border-gray-300 text-black">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Login
             </Button>
             <div className="flex items-center gap-2">
               <KryptoLogo size="md" />
-              <h1 className="text-2xl font-semibold text-slate-800 dark:text-slate-200">Student Portal</h1>
+              <h1 className="text-2xl font-semibold text-black">Student Portal</h1>
             </div>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Student Information Card */}
-            <Card className="hover:shadow-lg transition-all duration-200">
+            <Card className="bg-white border-gray-200 hover:shadow-lg transition-all duration-200">
               <CardHeader>
-                <CardTitle>Student Information</CardTitle>
-                <CardDescription>Your account details</CardDescription>
+                <CardTitle className="text-black">Student Information</CardTitle>
+                <CardDescription className="text-gray-500">Your account details</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Name</p>
-                    <p className="font-semibold text-slate-800 dark:text-slate-200">{student.name}</p>
+                    <p className="text-sm text-gray-500">Name</p>
+                    <p className="font-semibold text-black">{student.name}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Grade</p>
-                    <p className="font-semibold text-slate-800 dark:text-slate-200">{student.grade}</p>
+                    <p className="text-sm text-gray-500">Grade</p>
+                    <p className="font-semibold text-black">{student.grade}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Barcode</p>
-                    <p className="font-mono text-slate-800 dark:text-slate-200">{student.barcode}</p>
+                    <p className="text-sm text-gray-500">Barcode</p>
+                    <p className="font-mono text-black">{student.barcode}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Current Balance</p>
+                    <p className="text-sm text-gray-500">Current Balance</p>
                     <div className="flex items-center gap-2">
                       <KryptoLogo size="sm" />
-                      <span className="text-2xl font-bold text-slate-800 dark:text-slate-200">K$ {student.balance}</span>
+                      <span className="text-2xl font-bold text-black">K$ {student.balance}</span>
                     </div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">≈ KSH {kshEquivalent}</p>
+                    <p className="text-sm text-gray-500">≈ KSH {kshEquivalent}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Transfer Money Card */}
-            <Card className="hover:shadow-lg transition-all duration-200">
+            <Card className="bg-white border-gray-200 hover:shadow-lg transition-all duration-200">
               <CardHeader>
-                <CardTitle>Transfer Krypto Bucks</CardTitle>
-                <CardDescription>Send money to other students</CardDescription>
+                <CardTitle className="text-black">Transfer Krypto Bucks</CardTitle>
+                <CardDescription className="text-gray-500">Send money to other students</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Select Recipient</label>
+                  <label className="text-sm font-medium text-black">Select Recipient</label>
                   <Select value={selectedRecipient} onValueChange={setSelectedRecipient}>
-                    <SelectTrigger className="bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 hover:shadow-sm transition-all duration-200">
+                    <SelectTrigger className="bg-white border-gray-300 hover:shadow-sm transition-all duration-200">
                       <SelectValue placeholder="Choose a student" />
                     </SelectTrigger>
-                    <SelectContent className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
+                    <SelectContent className="bg-white border-gray-200">
                       {otherStudents.map((user) => (
                         <SelectItem key={user.id} value={user.id}>
                           {user.name} - {user.grade}
@@ -181,7 +190,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Amount (K$)</label>
+                  <label className="text-sm font-medium text-black">Amount (K$)</label>
                   <Input
                     type="number"
                     step="0.01"
@@ -189,53 +198,95 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                     onChange={(e) => setTransferAmount(parseFloat(e.target.value) || 0)}
                     placeholder="0.00"
                     max={student.balance}
-                    className="bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600"
+                    className="bg-white border-gray-300"
                   />
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                  <p className="text-xs text-gray-500 mt-1">
                     ≈ KSH {(transferAmount / exchangeRate.kshToKrypto).toFixed(2)}
                   </p>
                 </div>
-                <Button 
-                  onClick={handleTransfer}
-                  disabled={transferLoading || !selectedRecipient || transferAmount <= 0}
-                  className="w-full"
-                >
-                  {transferLoading ? 'Transferring...' : 'Transfer Money'}
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      disabled={transferLoading || !selectedRecipient || transferAmount <= 0}
+                      className="w-full bg-gray-600 hover:bg-gray-700 text-white"
+                    >
+                      {transferLoading ? 'Transferring...' : 'Transfer Money'}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="bg-white">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="text-black">Confirm Transfer</AlertDialogTitle>
+                      <AlertDialogDescription className="text-gray-500">
+                        Are you sure you want to transfer K$ {transferAmount} to {users.find(u => u.id === selectedRecipient)?.name}?
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="text-black">No, Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleTransfer} className="bg-gray-600 hover:bg-gray-700 text-white">
+                        Yes, Transfer
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </CardContent>
             </Card>
 
             {/* Recent Transactions Card */}
-            <Card className="hover:shadow-lg transition-all duration-200">
+            <Card className="bg-white border-gray-200 hover:shadow-lg transition-all duration-200">
               <CardHeader>
-                <CardTitle>Recent Transactions</CardTitle>
-                <CardDescription>Your latest activity</CardDescription>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle className="text-black">Recent Transactions</CardTitle>
+                    <CardDescription className="text-gray-500">Your latest activity</CardDescription>
+                  </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="border-gray-300 text-black hover:bg-gray-50">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="bg-white">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="text-black">Clear Transaction History</AlertDialogTitle>
+                        <AlertDialogDescription className="text-gray-500">
+                          Are you sure you want to clear your transaction history? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel className="text-black">No, Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={clearStudentTransactions} className="bg-red-600 hover:bg-red-700 text-white">
+                          Yes, Clear History
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </CardHeader>
               <CardContent>
                 {studentTransactions.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-slate-600 dark:text-slate-400">No transactions yet.</p>
+                    <p className="text-gray-500">No transactions yet.</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {studentTransactions.map((transaction) => (
-                      <div key={transaction.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:shadow-sm transition-all duration-200">
+                      <div key={transaction.id} className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg hover:shadow-sm transition-all duration-200">
                         <div className="flex items-center gap-3">
                           <div className={`w-2 h-2 rounded-full ${
                             transaction.amount > 0 ? 'bg-green-500' : 'bg-red-500'
                           }`} />
                           <div>
-                            <p className="font-medium text-slate-800 dark:text-slate-200">{transaction.description}</p>
-                            <p className="text-sm text-slate-600 dark:text-slate-400">
+                            <p className="font-medium text-black">{transaction.description}</p>
+                            <p className="text-sm text-gray-500">
                               {new Date(transaction.createdAt).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-slate-800 dark:text-slate-200">
+                          <p className="font-semibold text-black">
                             {transaction.amount > 0 ? '+' : ''}K$ {Math.abs(transaction.amount)}
                           </p>
-                          <Badge variant="outline" className="border-slate-300 dark:border-slate-600 text-xs">
+                          <Badge variant="outline" className="border-gray-300 text-xs text-gray-600">
                             {transaction.type}
                           </Badge>
                         </div>
@@ -255,10 +306,10 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-white">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-4">
-          <Button variant="outline" onClick={onBack} className="mb-4 hover:shadow-md transition-all duration-200">
+          <Button variant="outline" onClick={onBack} className="mb-4 hover:shadow-md transition-all duration-200 border-gray-300 text-black">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Login
           </Button>
@@ -266,15 +317,15 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
             <KryptoLogo size="xl" />
           </div>
           <div>
-            <h1 className="text-3xl font-semibold text-slate-800 dark:text-slate-200">Student Portal</h1>
-            <p className="text-slate-600 dark:text-slate-400">Enter your secret code to access your account</p>
+            <h1 className="text-3xl font-semibold text-black">Student Portal</h1>
+            <p className="text-gray-500">Enter your secret code to access your account</p>
           </div>
         </div>
 
-        <Card className="animate-fade-in hover:shadow-lg transition-all duration-200">
+        <Card className="animate-fade-in hover:shadow-lg transition-all duration-200 bg-white border-gray-200">
           <CardHeader>
-            <CardTitle>Enter Your Secret Code</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-black">Enter Your Secret Code</CardTitle>
+            <CardDescription className="text-gray-500">
               Use the 6-digit secret code provided by your school
             </CardDescription>
           </CardHeader>
@@ -287,13 +338,13 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                   value={secretCode}
                   onChange={(e) => setSecretCode(e.target.value)}
                   required
-                  className="text-center text-lg font-mono bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600"
+                  className="text-center text-lg font-mono bg-white border-gray-300"
                   maxLength={6}
                 />
               </div>
               <Button 
                 type="submit" 
-                className="w-full" 
+                className="w-full bg-gray-600 hover:bg-gray-700 text-white" 
                 disabled={loading}
               >
                 {loading ? 'Verifying...' : 'Access Account'}

@@ -2,12 +2,16 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useAppData } from '@/contexts/AppDataContext';
-import { ShoppingCart, TrendingUp, Package, DollarSign } from 'lucide-react';
+import { ShoppingCart, TrendingUp, Package, DollarSign, Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const SalesMonitoring: React.FC = () => {
-  const { transactions, users, products } = useAppData();
+  const { transactions, users, products, clearSalesHistory } = useAppData();
+  const { toast } = useToast();
 
   // Filter only purchase transactions
   const salesTransactions = transactions
@@ -44,37 +48,70 @@ const SalesMonitoring: React.FC = () => {
     }).join(', ');
   };
 
+  const handleClearHistory = () => {
+    clearSalesHistory();
+    toast({
+      title: "Sales History Cleared",
+      description: "All sales history has been cleared successfully.",
+    });
+  };
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Sales Monitoring</h1>
-        <p className="text-muted-foreground">
-          Monitor all sales transactions and revenue
-        </p>
+    <div className="space-y-6 bg-white min-h-screen p-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-black mb-2">Sales Monitoring</h1>
+          <p className="text-gray-500">
+            Monitor all sales transactions and revenue
+          </p>
+        </div>
+        
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" className="flex items-center gap-2">
+              <Trash2 className="w-4 h-4" />
+              Clear Sales History
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent className="bg-white">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-black">Clear Sales History</AlertDialogTitle>
+              <AlertDialogDescription className="text-gray-500">
+                Are you sure you want to clear all sales history? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="text-black">No, Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleClearHistory} className="bg-red-600 hover:bg-red-700 text-white">
+                Yes, Clear History
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       <div className="grid gap-6 md:grid-cols-4">
-        <Card>
+        <Card className="bg-white border-gray-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-black">Total Sales</CardTitle>
+            <DollarSign className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">K$ {totalSales}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-black">K$ {totalSales}</div>
+            <p className="text-xs text-gray-500">
               All time revenue
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white border-gray-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Today's Sales</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-black">Today's Sales</CardTitle>
+            <TrendingUp className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">K$ {todaySales}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-black">K$ {todaySales}</div>
+            <p className="text-xs text-gray-500">
               {salesTransactions.filter(t => 
                 new Date(t.createdAt).toDateString() === new Date().toDateString()
               ).length} transactions
@@ -82,54 +119,54 @@ const SalesMonitoring: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white border-gray-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">This Week</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-black">This Week</CardTitle>
+            <ShoppingCart className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">K$ {thisWeekSales}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-black">K$ {thisWeekSales}</div>
+            <p className="text-xs text-gray-500">
               Last 7 days
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white border-gray-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-black">Total Transactions</CardTitle>
+            <Package className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{salesTransactions.length}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-black">{salesTransactions.length}</div>
+            <p className="text-xs text-gray-500">
               All purchases
             </p>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
+      <Card className="bg-white border-gray-200">
         <CardHeader>
-          <CardTitle>Sales History</CardTitle>
-          <CardDescription>Complete record of all sales transactions</CardDescription>
+          <CardTitle className="text-black">Sales History</CardTitle>
+          <CardDescription className="text-gray-500">Complete record of all sales transactions</CardDescription>
         </CardHeader>
         <CardContent>
           {salesTransactions.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">No sales recorded yet.</p>
+              <p className="text-gray-500">No sales recorded yet.</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date & Time</TableHead>
-                  <TableHead>Student</TableHead>
-                  <TableHead>Barcode</TableHead>
-                  <TableHead>Products</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Processed By</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead className="text-black">Date & Time</TableHead>
+                  <TableHead className="text-black">Student</TableHead>
+                  <TableHead className="text-black">Barcode</TableHead>
+                  <TableHead className="text-black">Products</TableHead>
+                  <TableHead className="text-black">Amount</TableHead>
+                  <TableHead className="text-black">Processed By</TableHead>
+                  <TableHead className="text-black">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -140,25 +177,25 @@ const SalesMonitoring: React.FC = () => {
                     <TableRow key={transaction.id}>
                       <TableCell>
                         <div>
-                          <div className="font-medium">
+                          <div className="font-medium text-black">
                             {new Date(transaction.createdAt).toLocaleDateString()}
                           </div>
-                          <div className="text-sm text-muted-foreground">
+                          <div className="text-sm text-gray-500">
                             {new Date(transaction.createdAt).toLocaleTimeString()}
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{student?.name || 'Unknown'}</div>
-                          <div className="text-sm text-muted-foreground">{student?.grade || 'N/A'}</div>
+                          <div className="font-medium text-black">{student?.name || 'Unknown'}</div>
+                          <div className="text-sm text-gray-500">{student?.grade || 'N/A'}</div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <code className="text-sm">{student?.barcode || 'N/A'}</code>
+                        <code className="text-sm text-black">{student?.barcode || 'N/A'}</code>
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm max-w-xs truncate">
+                        <div className="text-sm max-w-xs truncate text-black">
                           {getProductDetails(transaction)}
                         </div>
                       </TableCell>
@@ -170,12 +207,12 @@ const SalesMonitoring: React.FC = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-sm text-gray-500">
                           {transaction.createdBy || 'System'}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="default">Completed</Badge>
+                        <Badge variant="default" className="bg-gray-600 text-white">Completed</Badge>
                       </TableCell>
                     </TableRow>
                   );
