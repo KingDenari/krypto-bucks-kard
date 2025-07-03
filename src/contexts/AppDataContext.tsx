@@ -1,7 +1,8 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { User, Product, Transaction, Worker, Employee, ExchangeRate } from '@/types';
 import { initialUsers, initialProducts } from '@/data/data';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface AppDataContextType {
   users: User[];
@@ -64,6 +65,75 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       updatedBy: 'system'
     };
   });
+
+  // Load data from Supabase on component mount
+  useEffect(() => {
+    loadFromSupabase();
+  }, []);
+
+  const loadFromSupabase = async () => {
+    try {
+      // Load users
+      const { data: usersData } = await supabase.from('users').select('*');
+      if (usersData && usersData.length > 0) {
+        const formattedUsers = usersData.map(user => ({
+          id: user.id,
+          name: user.name,
+          email: '', // Not stored in Supabase table
+          role: user.role,
+          balance: parseFloat(user.balance || 0),
+          barcode: user.barcode,
+          grade: user.grade,
+          secretCode: user.secret_code,
+          createdAt: user.created_at
+        }));
+        setUsers(formattedUsers);
+      }
+
+      // Load products
+      const { data: productsData } = await supabase.from('products').select('*');
+      if (productsData && productsData.length > 0) {
+        const formattedProducts = productsData.map(product => ({
+          id: product.id,
+          name: product.name,
+          price: parseFloat(product.price),
+          stock: product.stock,
+          category: product.category || '',
+          createdAt: product.created_at
+        }));
+        setProducts(formattedProducts);
+      }
+
+      // Load transactions
+      const { data: transactionsData } = await supabase.from('transactions').select('*');
+      if (transactionsData && transactionsData.length > 0) {
+        const formattedTransactions = transactionsData.map(transaction => ({
+          id: transaction.id,
+          studentId: transaction.student_id,
+          studentName: transaction.student_name,
+          type: transaction.type,
+          amount: parseFloat(transaction.amount),
+          description: transaction.description,
+          products: transaction.products || [],
+          createdAt: transaction.created_at,
+          createdBy: 'system'
+        }));
+        setTransactions(formattedTransactions);
+      }
+
+      // Load exchange rate
+      const { data: rateData } = await supabase.from('exchange_rates').select('*').order('updated_at', { ascending: false }).limit(1);
+      if (rateData && rateData.length > 0) {
+        setExchangeRate({
+          kshToKrypto: parseFloat(rateData[0].ksh_to_krypto),
+          lastUpdated: rateData[0].updated_at,
+          updatedBy: 'system'
+        });
+      }
+    } catch (error) {
+      console.error('Error loading data from Supabase:', error);
+    }
+  };
 
   // Sync data across tabs/devices
   useEffect(() => {
@@ -130,35 +200,135 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return users.find(user => user.barcode === barcode);
   };
 
-  const updateUser = (id: string, updates: Partial<User>) => {
+  const updateUser = async (id: string, updates: Partial<User>) => {
     setUsers(users.map(user => user.id === id ? { ...user, ...updates } : user));
+    
+    // Update in Supabase
+    try {
+      await supabase
+        .from('users')
+        .update({
+          name: updates.name,
+          role: updates.role,
+          balance: updates.balance,
+          barcode: updates.barcode,
+          grade: updates.grade,
+          secret_code: updates.secretCode,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
+    } catch (error) {
+      console.error('Error updating user in Supabase:', error);
+    }
   };
 
-  const addUser = (user: User) => {
+  const addUser = async (user: User) => {
     setUsers([...users, user]);
+    
+    // Add to Supabase
+    try {
+      await supabase
+        .from('users')
+        .insert({
+          id: user.id,
+          name: user.name,
+          role: user.role,
+          balance: user.balance,
+          barcode: user.barcode,
+          grade: user.grade,
+          secret_code: user.secretCode,
+          created_at: user.createdAt
+        });
+    } catch (error) {
+      console.error('Error adding user to Supabase:', error);
+    }
   };
 
-  const deleteUser = (id: string) => {
+  const deleteUser = async (id: string) => {
     setUsers(users.filter(user => user.id !== id));
+    
+    // Delete from Supabase
+    try {
+      await supabase.from('users').delete().eq('id', id);
+    } catch (error) {
+      console.error('Error deleting user from Supabase:', error);
+    }
   };
 
-  const addProduct = (product: Product) => {
+  const addProduct = async (product: Product) => {
     setProducts([...products, product]);
+    
+    // Add to Supabase
+    try {
+      await supabase
+        .from('products')
+        .insert({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          stock: product.stock,
+          category: product.category,
+          created_at: product.createdAt
+        });
+    } catch (error) {
+      console.error('Error adding product to Supabase:', error);
+    }
   };
 
-  const updateProduct = (id: string, updates: Partial<Product>) => {
+  const updateProduct = async (id: string, updates: Partial<Product>) => {
     setProducts(products.map(product => product.id === id ? { ...product, ...updates } : product));
+    
+    // Update in Supabase
+    try {
+      await supabase
+        .from('products')
+        .update({
+          name: updates.name,
+          price: updates.price,
+          stock: updates.stock,
+          category: updates.category,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
+    } catch (error) {
+      console.error('Error updating product in Supabase:', error);
+    }
   };
 
-  const deleteProduct = (id: string) => {
+  const deleteProduct = async (id: string) => {
     setProducts(products.filter(product => product.id !== id));
+    
+    // Delete from Supabase
+    try {
+      await supabase.from('products').delete().eq('id', id);
+    } catch (error) {
+      console.error('Error deleting product from Supabase:', error);
+    }
   };
 
-  const addTransaction = (transaction: Transaction) => {
+  const addTransaction = async (transaction: Transaction) => {
     setTransactions([transaction, ...transactions]);
+    
+    // Add to Supabase
+    try {
+      await supabase
+        .from('transactions')
+        .insert({
+          id: transaction.id,
+          student_id: transaction.studentId,
+          student_name: transaction.studentName,
+          type: transaction.type,
+          amount: transaction.amount,
+          description: transaction.description,
+          products: transaction.products,
+          created_at: transaction.createdAt
+        });
+    } catch (error) {
+      console.error('Error adding transaction to Supabase:', error);
+    }
   };
 
-  const purchaseProduct = (studentId: string, productId: string, quantity: number, createdBy: string) => {
+  const purchaseProduct = async (studentId: string, productId: string, quantity: number, createdBy: string) => {
     const student = users.find(user => user.id === studentId);
     const product = products.find(p => p.id === productId);
 
@@ -172,10 +342,10 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
 
     // Update student balance
-    updateUser(studentId, { balance: student.balance - totalAmount });
+    await updateUser(studentId, { balance: student.balance - totalAmount });
 
     // Update product stock
-    updateProduct(productId, { stock: product.stock - quantity });
+    await updateProduct(productId, { stock: product.stock - quantity });
 
     // Add transaction
     const transaction: Transaction = {
@@ -195,7 +365,30 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       createdBy: createdBy
     };
 
-    addTransaction(transaction);
+    await addTransaction(transaction);
+
+    // Create receipt in Supabase
+    try {
+      await supabase
+        .from('receipts')
+        .insert({
+          student_id: studentId,
+          transaction_id: transaction.id,
+          receipt_data: {
+            transactionId: transaction.id,
+            studentId: studentId,
+            studentName: student.name,
+            grade: student.grade,
+            amount: totalAmount,
+            products: transaction.products,
+            date: new Date().toISOString(),
+            exchangeRate: exchangeRate.kshToKrypto
+          }
+        });
+    } catch (error) {
+      console.error('Error creating receipt in Supabase:', error);
+    }
+
     return true;
   };
 
@@ -279,12 +472,26 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setEmployees(employees.filter(employee => employee.id !== id));
   };
 
-  const updateExchangeRate = (rate: number, updatedBy: string) => {
-    setExchangeRate({
+  const updateExchangeRate = async (rate: number, updatedBy: string) => {
+    const newRate = {
       kshToKrypto: rate,
       lastUpdated: new Date().toISOString(),
       updatedBy: updatedBy
-    });
+    };
+    
+    setExchangeRate(newRate);
+    
+    // Update in Supabase
+    try {
+      await supabase
+        .from('exchange_rates')
+        .insert({
+          ksh_to_krypto: rate,
+          updated_at: new Date().toISOString()
+        });
+    } catch (error) {
+      console.error('Error updating exchange rate in Supabase:', error);
+    }
   };
 
   const factoryReset = () => {

@@ -9,7 +9,173 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      exchange_rates: {
+        Row: {
+          id: string
+          ksh_to_krypto: number
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          ksh_to_krypto?: number
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          ksh_to_krypto?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          id: string
+          image_url: string | null
+          name: string
+          price: number
+          stock: number
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          price: number
+          stock?: number
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          price?: number
+          stock?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      receipts: {
+        Row: {
+          created_at: string | null
+          id: string
+          receipt_data: Json
+          student_id: string | null
+          transaction_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          receipt_data: Json
+          student_id?: string | null
+          transaction_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          receipt_data?: Json
+          student_id?: string | null
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipts_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string | null
+          description: string
+          id: string
+          products: Json | null
+          student_id: string | null
+          student_name: string
+          type: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          description: string
+          id?: string
+          products?: Json | null
+          student_id?: string | null
+          student_name: string
+          type: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          description?: string
+          id?: string
+          products?: Json | null
+          student_id?: string | null
+          student_name?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          balance: number | null
+          barcode: string | null
+          created_at: string | null
+          grade: string | null
+          id: string
+          name: string
+          role: string
+          secret_code: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          balance?: number | null
+          barcode?: string | null
+          created_at?: string | null
+          grade?: string | null
+          id?: string
+          name: string
+          role: string
+          secret_code?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          balance?: number | null
+          barcode?: string | null
+          created_at?: string | null
+          grade?: string | null
+          id?: string
+          name?: string
+          role?: string
+          secret_code?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
