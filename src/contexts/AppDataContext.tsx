@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { User, Product, Transaction, Worker, Employee, ExchangeRate } from '@/types';
 import { initialUsers, initialProducts } from '@/data/data';
@@ -31,7 +32,7 @@ interface AppDataContextType {
   deleteEmployee: (id: string) => void;
   updateExchangeRate: (rate: number, updatedBy: string) => void;
   factoryReset: () => void;
-  purchaseProduct: (studentId: string, productId: string, quantity: number, createdBy: string) => boolean;
+  purchaseProduct: (studentId: string, productId: string, quantity: number, createdBy: string) => Promise<boolean>;
 }
 
 const AppDataContext = createContext<AppDataContextType | undefined>(undefined);
@@ -76,16 +77,16 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       // Load users
       const { data: usersData } = await supabase.from('users').select('*');
       if (usersData && usersData.length > 0) {
-        const formattedUsers = usersData.map(user => ({
+        const formattedUsers: User[] = usersData.map(user => ({
           id: user.id,
           name: user.name,
           email: '', // Not stored in Supabase table
-          role: user.role,
-          balance: parseFloat(user.balance || 0),
-          barcode: user.barcode,
-          grade: user.grade,
-          secretCode: user.secret_code,
-          createdAt: user.created_at
+          role: user.role as 'admin' | 'worker' | 'student',
+          balance: parseFloat(user.balance?.toString() || '0'),
+          barcode: user.barcode || '',
+          grade: user.grade || '',
+          secretCode: user.secret_code || '',
+          createdAt: user.created_at || new Date().toISOString()
         }));
         setUsers(formattedUsers);
       }
@@ -93,13 +94,13 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       // Load products
       const { data: productsData } = await supabase.from('products').select('*');
       if (productsData && productsData.length > 0) {
-        const formattedProducts = productsData.map(product => ({
+        const formattedProducts: Product[] = productsData.map(product => ({
           id: product.id,
           name: product.name,
-          price: parseFloat(product.price),
-          stock: product.stock,
+          price: parseFloat(product.price?.toString() || '0'),
+          stock: product.stock || 0,
           category: product.category || '',
-          createdAt: product.created_at
+          createdAt: product.created_at || new Date().toISOString()
         }));
         setProducts(formattedProducts);
       }
@@ -107,15 +108,15 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       // Load transactions
       const { data: transactionsData } = await supabase.from('transactions').select('*');
       if (transactionsData && transactionsData.length > 0) {
-        const formattedTransactions = transactionsData.map(transaction => ({
+        const formattedTransactions: Transaction[] = transactionsData.map(transaction => ({
           id: transaction.id,
-          studentId: transaction.student_id,
+          studentId: transaction.student_id || '',
           studentName: transaction.student_name,
-          type: transaction.type,
-          amount: parseFloat(transaction.amount),
+          type: transaction.type as 'purchase' | 'deposit' | 'deduction' | 'transfer',
+          amount: parseFloat(transaction.amount?.toString() || '0'),
           description: transaction.description,
-          products: transaction.products || [],
-          createdAt: transaction.created_at,
+          products: Array.isArray(transaction.products) ? transaction.products as { productId: string; productName: string; quantity: number; price: number }[] : [],
+          createdAt: transaction.created_at || new Date().toISOString(),
           createdBy: 'system'
         }));
         setTransactions(formattedTransactions);
@@ -125,8 +126,8 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const { data: rateData } = await supabase.from('exchange_rates').select('*').order('updated_at', { ascending: false }).limit(1);
       if (rateData && rateData.length > 0) {
         setExchangeRate({
-          kshToKrypto: parseFloat(rateData[0].ksh_to_krypto),
-          lastUpdated: rateData[0].updated_at,
+          kshToKrypto: parseFloat(rateData[0].ksh_to_krypto?.toString() || '0.5'),
+          lastUpdated: rateData[0].updated_at || new Date().toISOString(),
           updatedBy: 'system'
         });
       }
@@ -328,7 +329,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const purchaseProduct = async (studentId: string, productId: string, quantity: number, createdBy: string) => {
+  const purchaseProduct = async (studentId: string, productId: string, quantity: number, createdBy: string): Promise<boolean> => {
     const student = users.find(user => user.id === studentId);
     const product = products.find(p => p.id === productId);
 
