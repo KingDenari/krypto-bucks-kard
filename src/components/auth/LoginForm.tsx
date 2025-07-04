@@ -18,7 +18,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const { employees } = useAppData();
+  const { employees, setCurrentAccount } = useAppData();
 
   // Admin accounts configuration
   const adminAccounts = [
@@ -28,7 +28,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
     'john@admin.com',
     'mary@admin.com',
     'peterson@admin.com',
-    'kbuck@admin.com'
+    'kbucks@admin.com'
   ];
 
   const adminPasswords = ['admin123', 'admin321', 'admin101'];
@@ -41,6 +41,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
     setTimeout(() => {
       // Check admin credentials
       if (adminAccounts.includes(email) && adminPasswords.includes(password)) {
+        // Set current account for data persistence
+        setCurrentAccount(email);
+        
         onLogin(email, 'admin');
         toast({
           title: "Login successful!",
@@ -50,6 +53,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
         // Check employee credentials
         const employee = employees.find(emp => emp.email === email && emp.password === password);
         if (employee) {
+          setCurrentAccount(email);
           onLogin(email, 'worker');
           toast({
             title: "Login successful!",
@@ -68,24 +72,24 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FFFFFF' }}>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-white">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-4">
           <div className="flex justify-center">
             <KryptoLogo size="xl" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-black" style={{ color: '#000000' }}>
+            <h1 className="text-3xl font-bold text-black">
               Krypto Bucks
             </h1>
-            <p className="text-gray-500" style={{ color: '#808080' }}>Admin & Employee Portal</p>
+            <p className="text-gray-500">Admin & Employee Portal</p>
           </div>
         </div>
 
-        <Card className="animate-fade-in" style={{ backgroundColor: '#FFFFFF', borderColor: '#000000', color: '#000000' }}>
+        <Card className="animate-fade-in bg-white border-2 border-black text-black">
           <CardHeader>
-            <CardTitle style={{ color: '#000000' }}>Sign In</CardTitle>
-            <CardDescription style={{ color: '#808080' }}>
+            <CardTitle className="text-black">Sign In</CardTitle>
+            <CardDescription className="text-gray-500">
               Enter your credentials to access the system
             </CardDescription>
           </CardHeader>
@@ -93,37 +97,34 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" style={{ color: '#808080' }} />
+                  <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                   <Input
                     type="email"
                     placeholder="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="pl-10"
-                    style={{ backgroundColor: '#FFFFFF', borderColor: '#000000', color: '#000000' }}
+                    className="pl-10 bg-white border-2 border-black text-black"
                   />
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" style={{ color: '#808080' }} />
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                   <Input
                     type="password"
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="pl-10"
-                    style={{ backgroundColor: '#FFFFFF', borderColor: '#000000', color: '#000000' }}
+                    className="pl-10 bg-white border-2 border-black text-black"
                   />
                 </div>
               </div>
               <Button 
                 type="submit" 
-                className="w-full border-2 border-black text-black hover:bg-gray-100" 
+                className="w-full border-2 border-black text-black hover:bg-gray-100 bg-white" 
                 disabled={loading}
-                style={{ backgroundColor: '#FFFFFF', borderColor: '#000000', color: '#000000' }}
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </Button>
@@ -132,16 +133,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
         </Card>
 
         <div className="text-center">
-          <p className="text-gray-500 mb-4" style={{ color: '#808080' }}>or</p>
+          <p className="text-gray-500 mb-4">or</p>
           <Button 
             variant="outline" 
             onClick={onStudentView}
             className="w-full animate-pulse border-2 border-black text-black bg-white hover:bg-gray-100"
             style={{ 
               animationDuration: '3s',
-              backgroundColor: '#FFFFFF',
-              borderColor: '#000000',
-              color: '#000000'
             }}
           >
             I'm a Student - Transfer Krypto Bucks

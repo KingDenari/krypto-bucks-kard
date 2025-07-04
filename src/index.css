@@ -87,17 +87,33 @@
   }
 }
 
-/* Clean button hover effects */
+/* Ensure ALL buttons are visible with black borders and text */
+button {
+  border: 2px solid #000000 !important;
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  border-radius: 0.75rem;
+  font-weight: 500;
+}
+
 button:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.2s ease-in-out;
   background-color: #F5F5F5 !important;
   color: #000000 !important;
+  border-color: #000000 !important;
 }
 
 button:active {
   transform: translateY(0);
+}
+
+button:disabled {
+  opacity: 0.5;
+  background-color: #F5F5F5 !important;
+  color: #808080 !important;
+  border-color: #808080 !important;
 }
 
 /* Modern card styling with black borders */
@@ -262,19 +278,6 @@ div, section, article, main, aside, header, footer, nav {
   color: #000000 !important;
 }
 
-/* Ensure all buttons are visible with proper borders */
-button {
-  border: 2px solid #000000 !important;
-  background-color: #FFFFFF !important;
-  color: #000000 !important;
-}
-
-button:hover {
-  background-color: #F5F5F5 !important;
-  color: #000000 !important;
-  border-color: #000000 !important;
-}
-
 /* Remove any remaining yellow anywhere */
 * {
   background-color: inherit;
@@ -289,4 +292,27 @@ button:hover {
 /* Ensure page background is always white */
 body, html, #root {
   background-color: #FFFFFF !important;
+}
+
+/* Ensure all text is visible on white background */
+p, span, label, div, h1, h2, h3, h4, h5, h6 {
+  color: #000000 !important;
+}
+
+/* Special styling for muted text */
+.text-muted, .text-muted-foreground, [class*="text-gray"] {
+  color: #808080 !important;
+}
+
+/* Ensure destructive buttons remain red but visible */
+button[class*="destructive"], .destructive {
+  background-color: #DC2626 !important;
+  color: #FFFFFF !important;
+  border-color: #DC2626 !important;
+}
+
+button[class*="destructive"]:hover, .destructive:hover {
+  background-color: #B91C1C !important;
+  color: #FFFFFF !important;
+  border-color: #B91C1C !important;
 }
