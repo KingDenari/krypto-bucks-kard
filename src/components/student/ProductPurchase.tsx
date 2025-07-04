@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,12 +24,17 @@ interface CartItem {
 }
 
 const ProductPurchase: React.FC<ProductPurchaseProps> = ({ student, setStudent }) => {
-  const { products, exchangeRate, addTransaction, updateUser } = useAppData();
+  const { products, exchangeRate, purchaseProduct, refreshData } = useAppData();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [showReceipt, setShowReceipt] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
   const { toast } = useToast();
+
+  // Refresh data when component mounts
+  useEffect(() => {
+    refreshData();
+  }, [refreshData]);
 
   const addToCart = (product: Product) => {
     if (product.stock <= 0) {
@@ -88,7 +93,7 @@ const ProductPurchase: React.FC<ProductPurchaseProps> = ({ student, setStudent }
     return cart.reduce((total, item) => total + (item.product.price * item.quantity), 0);
   };
 
-  const processPurchase = () => {
+  const processPurchase = async () => {
     const totalAmount = getTotalAmount();
 
     if (totalAmount <= 0) {
@@ -109,39 +114,60 @@ const ProductPurchase: React.FC<ProductPurchaseProps> = ({ student, setStudent }
       return;
     }
 
-    const transaction: Transaction = {
-      id: Date.now().toString(),
-      studentId: student.id,
-      studentName: student.name,
-      type: 'purchase',
-      amount: totalAmount,
-      description: `Purchase of ${cart.length} item(s)`,
-      products: cart.map(item => ({
-        productId: item.product.id,
-        productName: item.product.name,
-        quantity: item.quantity,
-        price: item.product.price
-      })),
-      createdAt: new Date().toISOString(),
-      createdBy: student.name
-    };
+    try {
+      // Process each item in the cart
+      for (const item of cart) {
+        const success = await purchaseProduct(student.id, item.product.id, item.quantity, student.name);
+        if (!success) {
+          toast({
+            title: "Purchase Failed",
+            description: `Failed to purchase ${item.product.name}`,
+            variant: "destructive",
+          });
+          return;
+        }
+      }
 
-    addTransaction(transaction);
-    setLastTransaction(transaction);
+      // Create a summary transaction for the receipt
+      const summaryTransaction: Transaction = {
+        id: Date.now().toString(),
+        studentId: student.id,
+        studentName: student.name,
+        type: 'purchase',
+        amount: totalAmount,
+        description: `Purchase of ${cart.length} item(s)`,
+        products: cart.map(item => ({
+          productId: item.product.id,
+          productName: item.product.name,
+          quantity: item.quantity,
+          price: item.product.price
+        })),
+        createdAt: new Date().toISOString(),
+        createdBy: student.name
+      };
 
-    // Update student balance
-    const updatedStudent = { ...student, balance: student.balance - totalAmount };
-    setStudent(updatedStudent);
-    updateUser(student.id, { balance: updatedStudent.balance });
+      setLastTransaction(summaryTransaction);
 
-    // Clear cart
-    setCart([]);
-    setShowReceipt(true);
+      // Update student balance locally
+      const updatedStudent = { ...student, balance: student.balance - totalAmount };
+      setStudent(updatedStudent);
 
-    toast({
-      title: "Purchase Successful!",
-      description: `Spent K$ ${totalAmount}. New balance: K$ ${updatedStudent.balance}`,
-    });
+      // Clear cart and refresh data
+      setCart([]);
+      await refreshData();
+      setShowReceipt(true);
+
+      toast({
+        title: "Purchase Successful!",
+        description: `Spent K$ ${totalAmount}. New balance: K$ ${updatedStudent.balance}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Purchase Failed",
+        description: "An error occurred while processing your purchase",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

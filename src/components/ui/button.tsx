@@ -6,24 +6,24 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:transform hover:-translate-y-0.5 hover:shadow-lg border-2 border-black bg-white text-black",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300 border-2 border-black transform hover:scale-[1.02] active:scale-[0.99] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
   {
     variants: {
       variant: {
-        default: "bg-white text-black border-black hover:bg-gray-100 shadow-sm",
+        default: "bg-white text-black hover:bg-gray-50 active:bg-gray-100",
         destructive:
-          "bg-red-600 text-white border-red-600 hover:bg-red-700 shadow-sm",
+          "bg-red-500 text-white hover:bg-red-600 active:bg-red-700 border-red-600",
         outline:
-          "border-black bg-white hover:bg-gray-100 text-black",
+          "border-2 border-black bg-white text-black hover:bg-gray-50 active:bg-gray-100",
         secondary:
-          "bg-gray-100 text-black border-black hover:bg-gray-200",
-        ghost: "border-black hover:bg-gray-100 text-black bg-white",
-        link: "text-black underline-offset-4 hover:underline border-black bg-white",
+          "bg-gray-100 text-black hover:bg-gray-200 active:bg-gray-300 border-gray-400",
+        ghost: "border-transparent shadow-none hover:shadow-none bg-transparent text-black hover:bg-gray-100 active:bg-gray-200",
+        link: "border-transparent shadow-none hover:shadow-none text-black underline-offset-4 hover:underline",
       },
       size: {
         default: "h-10 px-4 py-2",
         sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-lg px-8",
+        lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
       },
     },
@@ -47,13 +47,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
-        style={{
-          backgroundColor: variant === 'destructive' ? '#DC2626' : '#FFFFFF',
-          color: variant === 'destructive' ? '#FFFFFF' : '#000000',
-          borderColor: variant === 'destructive' ? '#DC2626' : '#000000',
-          borderWidth: '2px',
-          borderStyle: 'solid'
-        }}
         {...props}
       />
     )

@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import KryptoLogo from '@/components/KryptoLogo';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Trash2, Receipt } from 'lucide-react';
+import { ArrowLeft, Trash2, Receipt, RefreshCw } from 'lucide-react';
 import { useAppData } from '@/contexts/AppDataContext';
 import { User } from '@/types';
 import ProductPurchase from './ProductPurchase';
@@ -27,7 +26,33 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
   const [transferLoading, setTransferLoading] = useState(false);
   const [showReceiptHistory, setShowReceiptHistory] = useState(false);
   const { toast } = useToast();
-  const { getUserBySecretCode, users, exchangeRate, transferKryptoBucks, transactions, clearStudentTransactions } = useAppData();
+  const { getUserBySecretCode, users, exchangeRate, transferKryptoBucks, transactions, clearStudentTransactions, refreshData } = useAppData();
+
+  // Auto-refresh data every 5 seconds when student is logged in
+  useEffect(() => {
+    if (student) {
+      const interval = setInterval(() => {
+        refreshData();
+        // Update student data from the latest users array
+        const updatedStudent = users.find(u => u.id === student.id);
+        if (updatedStudent) {
+          setStudent(updatedStudent);
+        }
+      }, 5000);
+
+      return () => clearInterval(interval);
+    }
+  }, [student, refreshData, users]);
+
+  // Update student when users array changes
+  useEffect(() => {
+    if (student) {
+      const updatedStudent = users.find(u => u.id === student.id);
+      if (updatedStudent) {
+        setStudent(updatedStudent);
+      }
+    }
+  }, [users, student]);
 
   const handleSecretCodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +76,14 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
       }
       setLoading(false);
     }, 1000);
+  };
+
+  const handleRefreshData = () => {
+    refreshData();
+    toast({
+      title: "Data Refreshed",
+      description: "Your transaction history has been updated",
+    });
   };
 
   const handleTransfer = () => {
@@ -128,17 +161,17 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
   }
 
   if (student) {
-    // Get student's transactions
+    // Get student's transactions - always get fresh data
     const studentTransactions = transactions
       .filter(t => t.studentId === student.id)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .slice(0, 5);
+      .slice(0, 10); // Show more transactions
 
     return (
       <div className="min-h-screen p-4 bg-white">
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="flex items-center gap-4">
-            <Button variant="outline" onClick={onBack} className="hover:shadow-md transition-all duration-200 border-2 border-black text-black bg-white hover:bg-gray-100">
+            <Button variant="outline" onClick={onBack} className="hover:shadow-md transition-all duration-200">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Login
             </Button>
@@ -146,6 +179,10 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
               <KryptoLogo size="md" />
               <h1 className="text-2xl font-semibold text-black">Student Portal</h1>
             </div>
+            <Button variant="outline" onClick={handleRefreshData} className="ml-auto">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
+            </Button>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3">
@@ -179,7 +216,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                   </div>
                   <Button 
                     onClick={() => setShowReceiptHistory(true)}
-                    className="w-full bg-black hover:bg-gray-800 text-white border-2 border-black"
+                    className="w-full"
                   >
                     <Receipt className="w-4 h-4 mr-2" />
                     View Receipt History
@@ -229,7 +266,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                   <AlertDialogTrigger asChild>
                     <Button 
                       disabled={transferLoading || !selectedRecipient || transferAmount <= 0}
-                      className="w-full bg-black hover:bg-gray-800 text-white"
+                      className="w-full"
                     >
                       {transferLoading ? 'Transferring...' : 'Transfer Money'}
                     </Button>
@@ -242,8 +279,8 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel className="text-black border-2 border-black bg-white hover:bg-gray-100">No, Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleTransfer} className="bg-black hover:bg-gray-800 text-white">
+                      <AlertDialogCancel>No, Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleTransfer}>
                         Yes, Transfer
                       </AlertDialogAction>
                     </AlertDialogFooter>
@@ -262,7 +299,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                   </div>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="border-2 border-black text-black hover:bg-gray-100 bg-white">
+                      <Button variant="outline" size="sm">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </AlertDialogTrigger>
@@ -274,7 +311,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel className="text-black border-2 border-black bg-white hover:bg-gray-100">No, Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>No, Cancel</AlertDialogCancel>
                         <AlertDialogAction onClick={handleClearStudentTransactions} className="bg-red-600 hover:bg-red-700 text-white">
                           Yes, Clear History
                         </AlertDialogAction>
@@ -289,7 +326,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                     <p className="text-gray-500">No transactions yet.</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-3 max-h-80 overflow-y-auto">
                     {studentTransactions.map((transaction) => (
                       <div key={transaction.id} className="flex items-center justify-between p-3 bg-gray-50 border-2 border-gray-200 rounded-lg hover:shadow-sm transition-all duration-200">
                         <div className="flex items-center gap-3">
@@ -297,14 +334,14 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                             transaction.amount > 0 ? 'bg-green-500' : 'bg-red-500'
                           }`} />
                           <div>
-                            <p className="font-medium text-black">{transaction.description}</p>
-                            <p className="text-sm text-gray-500">
-                              {new Date(transaction.createdAt).toLocaleDateString()}
+                            <p className="font-medium text-black text-sm">{transaction.description}</p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(transaction.createdAt).toLocaleDateString()} {new Date(transaction.createdAt).toLocaleTimeString()}
                             </p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-black">
+                          <p className="font-semibold text-black text-sm">
                             {transaction.amount > 0 ? '+' : ''}K$ {Math.abs(transaction.amount)}
                           </p>
                           <Badge variant="outline" className="border-2 border-black text-xs text-gray-600 bg-white">
@@ -330,7 +367,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
     <div className="min-h-screen flex items-center justify-center p-4 bg-white">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-4">
-          <Button variant="outline" onClick={onBack} className="mb-4 hover:shadow-md transition-all duration-200 border-2 border-black text-black bg-white hover:bg-gray-100">
+          <Button variant="outline" onClick={onBack} className="mb-4 hover:shadow-md transition-all duration-200">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Login
           </Button>
@@ -365,7 +402,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
               </div>
               <Button 
                 type="submit" 
-                className="w-full bg-black hover:bg-gray-800 text-white" 
+                className="w-full" 
                 disabled={loading}
               >
                 {loading ? 'Verifying...' : 'Access Account'}
