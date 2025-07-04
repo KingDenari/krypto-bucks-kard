@@ -16,8 +16,8 @@
     --popover: 255 255 255;
     --popover-foreground: 0 0 0;
 
-    --primary: 128 128 128; /* Gray accent */
-    --primary-foreground: 255 255 255;
+    --primary: 0 0 0; /* Black primary */
+    --primary-foreground: 255 255 255; /* White on black */
 
     --secondary: 245 245 245; /* Light gray */
     --secondary-foreground: 0 0 0;
@@ -25,7 +25,7 @@
     --muted: 245 245 245;
     --muted-foreground: 128 128 128; /* Gray text */
 
-    --accent: 128 128 128; /* Gray accent */
+    --accent: 0 0 0; /* Black accent */
     --accent-foreground: 255 255 255;
 
     --destructive: 239 68 68;
@@ -48,7 +48,7 @@
     --popover: 255 255 255;
     --popover-foreground: 0 0 0;
 
-    --primary: 128 128 128;
+    --primary: 0 0 0;
     --primary-foreground: 255 255 255;
 
     --secondary: 245 245 245;
@@ -57,7 +57,7 @@
     --muted: 245 245 245;
     --muted-foreground: 128 128 128;
 
-    --accent: 128 128 128;
+    --accent: 0 0 0;
     --accent-foreground: 255 255 255;
 
     --destructive: 239 68 68;
@@ -92,6 +92,8 @@ button:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.2s ease-in-out;
+  background-color: #F5F5F5 !important;
+  color: #000000 !important;
 }
 
 button:active {
@@ -100,7 +102,7 @@ button:active {
 
 /* Modern card styling with black borders */
 .modern-card {
-  @apply bg-white text-black border border-black rounded-xl shadow-sm hover:shadow-md;
+  @apply bg-white text-black border-2 border-black rounded-xl shadow-sm hover:shadow-md;
   transition: all 0.2s ease-in-out;
   background-color: #FFFFFF !important;
   color: #000000 !important;
@@ -154,7 +156,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Clean input styling with black borders and white background */
 input, select, textarea {
-  @apply bg-white border-black text-black;
+  @apply bg-white border-2 border-black text-black;
   transition: all 0.2s ease-in-out;
   background-color: #FFFFFF !important;
   color: #000000 !important;
@@ -175,7 +177,8 @@ input::placeholder, select::placeholder, textarea::placeholder {
 
 /* Force white background and black text everywhere */
 .bg-slate-50, .bg-slate-100, .bg-slate-200, .bg-gray-50, .bg-gray-100,
-.bg-yellow-50, .bg-yellow-100, .bg-yellow-200, .bg-yellow-300, .bg-yellow-400 {
+.bg-yellow-50, .bg-yellow-100, .bg-yellow-200, .bg-yellow-300, .bg-yellow-400,
+.bg-yellow-500, .bg-yellow-600, .bg-yellow-700, .bg-yellow-800, .bg-yellow-900 {
   background-color: #FFFFFF !important;
 }
 
@@ -205,7 +208,7 @@ input::placeholder, select::placeholder, textarea::placeholder {
 .card, [class*="Card"] {
   background-color: #FFFFFF !important;
   color: #000000 !important;
-  border: 1px solid #000000 !important;
+  border: 2px solid #000000 !important;
 }
 
 /* Override any component-specific styling */
@@ -225,4 +228,34 @@ div, section, article, main, aside, header, footer, nav {
   background-color: #F3F4F6 !important;
   color: #000000 !important;
   border-color: #000000 !important;
+}
+
+/* Toast styling */
+[data-sonner-toast] {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+}
+
+[data-sonner-toast] [data-title] {
+  color: #000000 !important;
+}
+
+[data-sonner-toast] [data-description] {
+  color: #808080 !important;
+}
+
+/* Sidebar hover effects */
+[data-sidebar] button:hover,
+[data-sidebar] a:hover {
+  background-color: #F5F5F5 !important;
+  color: #000000 !important;
+}
+
+/* All hover effects */
+.hover\:bg-muted:hover,
+.hover\:bg-accent:hover,
+.hover\:bg-secondary:hover {
+  background-color: #F5F5F5 !important;
+  color: #000000 !important;
 }

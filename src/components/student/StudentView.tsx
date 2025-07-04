@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,7 +27,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
   const [transferLoading, setTransferLoading] = useState(false);
   const [showReceiptHistory, setShowReceiptHistory] = useState(false);
   const { toast } = useToast();
-  const { getUserBySecretCode, users, exchangeRate, transferKryptoBucks, transactions, updateUser } = useAppData();
+  const { getUserBySecretCode, users, exchangeRate, transferKryptoBucks, transactions, clearStudentTransactions } = useAppData();
 
   const handleSecretCodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,12 +101,14 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
     }, 1500);
   };
 
-  const clearStudentTransactions = () => {
-    // This would need to be implemented in the context
-    toast({
-      title: "History Cleared",
-      description: "Your transaction history has been cleared.",
-    });
+  const handleClearStudentTransactions = () => {
+    if (student) {
+      clearStudentTransactions(student.id);
+      toast({
+        title: "History Cleared",
+        description: "Your transaction history has been cleared.",
+      });
+    }
   };
 
   // Get other students for transfer
@@ -135,7 +138,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
       <div className="min-h-screen p-4 bg-white">
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="flex items-center gap-4">
-            <Button variant="outline" onClick={onBack} className="hover:shadow-md transition-all duration-200 border-black text-black bg-white">
+            <Button variant="outline" onClick={onBack} className="hover:shadow-md transition-all duration-200 border-2 border-black text-black bg-white hover:bg-gray-100">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Login
             </Button>
@@ -147,7 +150,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
 
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Student Information Card */}
-            <Card className="bg-white border-black hover:shadow-lg transition-all duration-200">
+            <Card className="bg-white border-2 border-black hover:shadow-lg transition-all duration-200">
               <CardHeader>
                 <CardTitle className="text-black">Student Information</CardTitle>
                 <CardDescription className="text-gray-500">Your account details</CardDescription>
@@ -176,7 +179,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                   </div>
                   <Button 
                     onClick={() => setShowReceiptHistory(true)}
-                    className="w-full bg-black hover:bg-gray-800 text-white border border-black"
+                    className="w-full bg-black hover:bg-gray-800 text-white border-2 border-black"
                   >
                     <Receipt className="w-4 h-4 mr-2" />
                     View Receipt History
@@ -186,7 +189,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
             </Card>
 
             {/* Transfer Money Card */}
-            <Card className="bg-white border-black hover:shadow-lg transition-all duration-200">
+            <Card className="bg-white border-2 border-black hover:shadow-lg transition-all duration-200">
               <CardHeader>
                 <CardTitle className="text-black">Transfer Krypto Bucks</CardTitle>
                 <CardDescription className="text-gray-500">Send money to other students</CardDescription>
@@ -195,10 +198,10 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                 <div>
                   <label className="text-sm font-medium text-black">Select Recipient</label>
                   <Select value={selectedRecipient} onValueChange={setSelectedRecipient}>
-                    <SelectTrigger className="bg-white border-black hover:shadow-sm transition-all duration-200">
+                    <SelectTrigger className="bg-white border-2 border-black hover:shadow-sm transition-all duration-200">
                       <SelectValue placeholder="Choose a student" />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-black">
+                    <SelectContent className="bg-white border-2 border-black">
                       {otherStudents.map((user) => (
                         <SelectItem key={user.id} value={user.id}>
                           {user.name} - {user.grade}
@@ -216,7 +219,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                     onChange={(e) => setTransferAmount(parseFloat(e.target.value) || 0)}
                     placeholder="0.00"
                     max={student.balance}
-                    className="bg-white border-black"
+                    className="bg-white border-2 border-black"
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     ≈ KSH {(transferAmount / exchangeRate.kshToKrypto).toFixed(2)}
@@ -231,7 +234,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                       {transferLoading ? 'Transferring...' : 'Transfer Money'}
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent className="bg-white border-black">
+                  <AlertDialogContent className="bg-white border-2 border-black">
                     <AlertDialogHeader>
                       <AlertDialogTitle className="text-black">Confirm Transfer</AlertDialogTitle>
                       <AlertDialogDescription className="text-gray-500">
@@ -239,7 +242,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel className="text-black border-black bg-white">No, Cancel</AlertDialogCancel>
+                      <AlertDialogCancel className="text-black border-2 border-black bg-white hover:bg-gray-100">No, Cancel</AlertDialogCancel>
                       <AlertDialogAction onClick={handleTransfer} className="bg-black hover:bg-gray-800 text-white">
                         Yes, Transfer
                       </AlertDialogAction>
@@ -250,7 +253,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
             </Card>
 
             {/* Recent Transactions Card */}
-            <Card className="bg-white border-black hover:shadow-lg transition-all duration-200">
+            <Card className="bg-white border-2 border-black hover:shadow-lg transition-all duration-200">
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <div>
@@ -259,11 +262,11 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                   </div>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="border-black text-black hover:bg-gray-50 bg-white">
+                      <Button variant="outline" size="sm" className="border-2 border-black text-black hover:bg-gray-100 bg-white">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent className="bg-white border-black">
+                    <AlertDialogContent className="bg-white border-2 border-black">
                       <AlertDialogHeader>
                         <AlertDialogTitle className="text-black">Clear Transaction History</AlertDialogTitle>
                         <AlertDialogDescription className="text-gray-500">
@@ -271,8 +274,8 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel className="text-black border-black bg-white">No, Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={clearStudentTransactions} className="bg-red-600 hover:bg-red-700 text-white">
+                        <AlertDialogCancel className="text-black border-2 border-black bg-white hover:bg-gray-100">No, Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleClearStudentTransactions} className="bg-red-600 hover:bg-red-700 text-white">
                           Yes, Clear History
                         </AlertDialogAction>
                       </AlertDialogFooter>
@@ -288,7 +291,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                 ) : (
                   <div className="space-y-3">
                     {studentTransactions.map((transaction) => (
-                      <div key={transaction.id} className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg hover:shadow-sm transition-all duration-200">
+                      <div key={transaction.id} className="flex items-center justify-between p-3 bg-gray-50 border-2 border-gray-200 rounded-lg hover:shadow-sm transition-all duration-200">
                         <div className="flex items-center gap-3">
                           <div className={`w-2 h-2 rounded-full ${
                             transaction.amount > 0 ? 'bg-green-500' : 'bg-red-500'
@@ -304,7 +307,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                           <p className="font-semibold text-black">
                             {transaction.amount > 0 ? '+' : ''}K$ {Math.abs(transaction.amount)}
                           </p>
-                          <Badge variant="outline" className="border-black text-xs text-gray-600 bg-white">
+                          <Badge variant="outline" className="border-2 border-black text-xs text-gray-600 bg-white">
                             {transaction.type}
                           </Badge>
                         </div>
@@ -327,7 +330,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
     <div className="min-h-screen flex items-center justify-center p-4 bg-white">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-4">
-          <Button variant="outline" onClick={onBack} className="mb-4 hover:shadow-md transition-all duration-200 border-black text-black bg-white">
+          <Button variant="outline" onClick={onBack} className="mb-4 hover:shadow-md transition-all duration-200 border-2 border-black text-black bg-white hover:bg-gray-100">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Login
           </Button>
@@ -340,7 +343,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
           </div>
         </div>
 
-        <Card className="animate-fade-in hover:shadow-lg transition-all duration-200 bg-white border-black">
+        <Card className="animate-fade-in hover:shadow-lg transition-all duration-200 bg-white border-2 border-black">
           <CardHeader>
             <CardTitle className="text-black">Enter Your Secret Code</CardTitle>
             <CardDescription className="text-gray-500">
@@ -356,7 +359,7 @@ const StudentView: React.FC<StudentViewProps> = ({ onBack }) => {
                   value={secretCode}
                   onChange={(e) => setSecretCode(e.target.value)}
                   required
-                  className="text-center text-lg font-mono bg-white border-black"
+                  className="text-center text-lg font-mono bg-white border-2 border-black"
                   maxLength={6}
                 />
               </div>

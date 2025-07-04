@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { User, Product, Transaction, Worker, Employee, ExchangeRate } from '@/types';
 import { initialUsers, initialProducts } from '@/data/data';
@@ -33,6 +32,7 @@ interface AppDataContextType {
   updateExchangeRate: (rate: number, updatedBy: string) => void;
   factoryReset: () => void;
   purchaseProduct: (studentId: string, productId: string, quantity: number, createdBy: string) => Promise<boolean>;
+  clearStudentTransactions: (studentId: string) => void;
 }
 
 const AppDataContext = createContext<AppDataContextType | undefined>(undefined);
@@ -345,7 +345,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     // Update student balance
     await updateUser(studentId, { balance: student.balance - totalAmount });
 
-    // Update product stock
+    // Update product stock - this ensures stock reduction works everywhere
     await updateProduct(productId, { stock: product.stock - quantity });
 
     // Add transaction
@@ -449,6 +449,10 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setTransactions(prev => prev.filter(t => t.type !== 'purchase'));
   };
 
+  const clearStudentTransactions = (studentId: string) => {
+    setTransactions(prev => prev.filter(t => t.studentId !== studentId));
+  };
+
   const addWorker = (worker: Worker) => {
     setWorkers([...workers, worker]);
   };
@@ -496,8 +500,8 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const factoryReset = () => {
-    setUsers(initialUsers);
-    setProducts(initialProducts);
+    setUsers([]);
+    setProducts([]);
     setTransactions([]);
     setWorkers([]);
     setEmployees([]);
@@ -506,7 +510,40 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       lastUpdated: new Date().toISOString(),
       updatedBy: 'system'
     });
+    
+    // Clear localStorage
+    localStorage.clear();
   };
+
+  useEffect(() => {
+    localStorage.setItem('users', JSON.stringify(users));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'users', newValue: JSON.stringify(users) }));
+  }, [users]);
+
+  useEffect(() => {
+    localStorage.setItem('products', JSON.stringify(products));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'products', newValue: JSON.stringify(products) }));
+  }, [products]);
+
+  useEffect(() => {
+    localStorage.setItem('transactions', JSON.stringify(transactions));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'transactions', newValue: JSON.stringify(transactions) }));
+  }, [transactions]);
+
+  useEffect(() => {
+    localStorage.setItem('workers', JSON.stringify(workers));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'workers', newValue: JSON.stringify(workers) }));
+  }, [workers]);
+
+  useEffect(() => {
+    localStorage.setItem('employees', JSON.stringify(employees));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'employees', newValue: JSON.stringify(employees) }));
+  }, [employees]);
+
+  useEffect(() => {
+    localStorage.setItem('exchangeRate', JSON.stringify(exchangeRate));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'exchangeRate', newValue: JSON.stringify(exchangeRate) }));
+  }, [exchangeRate]);
 
   const value = {
     users,
@@ -527,12 +564,13 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     transferKryptoBucks,
     clearTransferHistory,
     clearSalesHistory,
-    addWorker,
-    updateWorker,
-    deleteWorker,
-    addEmployee,
-    updateEmployee,
-    deleteEmployee,
+    clearStudentTransactions,
+    addWorker: (worker: Worker) => setWorkers([...workers, worker]),
+    updateWorker: (id: string, updates: Partial<Worker>) => setWorkers(workers.map(worker => worker.id === id ? { ...worker, ...updates } : worker)),
+    deleteWorker: (id: string) => setWorkers(workers.filter(worker => worker.id !== id)),
+    addEmployee: (employee: Employee) => setEmployees([...employees, employee]),
+    updateEmployee: (id: string, updates: Partial<Employee>) => setEmployees(employees.map(employee => employee.id === id ? { ...employee, ...updates } : employee)),
+    deleteEmployee: (id: string) => setEmployees(employees.filter(employee => employee.id !== id)),
     updateExchangeRate,
     factoryReset,
     purchaseProduct,

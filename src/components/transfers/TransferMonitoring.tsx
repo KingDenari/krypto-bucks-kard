@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -41,32 +42,32 @@ const TransferMonitoring: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-white min-h-screen p-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Transfer Monitoring</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold mb-2 text-black">Transfer Monitoring</h1>
+          <p className="text-gray-500">
             Monitor all Krypto Bucks transfers between students
           </p>
         </div>
         
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" className="flex items-center gap-2">
+            <Button variant="destructive" className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white">
               <Trash2 className="w-4 h-4" />
               Clear History
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent>
+          <AlertDialogContent className="bg-white border-2 border-black">
             <AlertDialogHeader>
-              <AlertDialogTitle>Clear Transfer History</AlertDialogTitle>
-              <AlertDialogDescription>
+              <AlertDialogTitle className="text-black">Clear Transfer History</AlertDialogTitle>
+              <AlertDialogDescription className="text-gray-500">
                 Are you sure you want to clear all transfer history? This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>No, Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleClearHistory} className="bg-red-600 hover:bg-red-700">
+              <AlertDialogCancel className="text-black border-2 border-black bg-white hover:bg-gray-100">No, Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleClearHistory} className="bg-red-600 hover:bg-red-700 text-white">
                 Yes, Clear History
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -75,73 +76,73 @@ const TransferMonitoring: React.FC = () => {
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
-        <Card>
+        <Card className="bg-white border-2 border-black">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Transfers</CardTitle>
-            <ArrowLeftRight className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-black">Total Transfers</CardTitle>
+            <ArrowLeftRight className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{uniqueTransfers.length}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-black">{uniqueTransfers.length}</div>
+            <p className="text-xs text-gray-500">
               All time transfers
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white border-2 border-black">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Amount Transferred</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-black">Total Amount Transferred</CardTitle>
+            <TrendingUp className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-black">
               K$ {uniqueTransfers.reduce((sum, t) => sum + Math.abs(t.amount), 0)}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-500">
               Total value moved
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white border-2 border-black">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Today's Transfers</CardTitle>
-            <TrendingDown className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-black">Today's Transfers</CardTitle>
+            <TrendingDown className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-black">
               {uniqueTransfers.filter(t => 
                 new Date(t.createdAt).toDateString() === new Date().toDateString()
               ).length}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-500">
               Transfers today
             </p>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
+      <Card className="bg-white border-2 border-black">
         <CardHeader>
-          <CardTitle>Transfer History</CardTitle>
-          <CardDescription>Complete record of all student transfers</CardDescription>
+          <CardTitle className="text-black">Transfer History</CardTitle>
+          <CardDescription className="text-gray-500">Complete record of all student transfers</CardDescription>
         </CardHeader>
         <CardContent>
           {uniqueTransfers.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">No transfers recorded yet.</p>
+              <p className="text-gray-500">No transfers recorded yet.</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date & Time</TableHead>
-                  <TableHead>From Student</TableHead>
-                  <TableHead>From Barcode</TableHead>
-                  <TableHead>To Student</TableHead>
-                  <TableHead>To Barcode</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead className="text-black">Date & Time</TableHead>
+                  <TableHead className="text-black">From Student</TableHead>
+                  <TableHead className="text-black">From Barcode</TableHead>
+                  <TableHead className="text-black">To Student</TableHead>
+                  <TableHead className="text-black">To Barcode</TableHead>
+                  <TableHead className="text-black">Amount</TableHead>
+                  <TableHead className="text-black">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -154,31 +155,31 @@ const TransferMonitoring: React.FC = () => {
                     <TableRow key={transfer.id}>
                       <TableCell>
                         <div>
-                          <div className="font-medium">
+                          <div className="font-medium text-black">
                             {new Date(transfer.createdAt).toLocaleDateString()}
                           </div>
-                          <div className="text-sm text-muted-foreground">
+                          <div className="text-sm text-gray-500">
                             {new Date(transfer.createdAt).toLocaleTimeString()}
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{fromUser?.name || 'Unknown'}</div>
-                          <div className="text-sm text-muted-foreground">{fromUser?.grade || 'N/A'}</div>
+                          <div className="font-medium text-black">{fromUser?.name || 'Unknown'}</div>
+                          <div className="text-sm text-gray-500">{fromUser?.grade || 'N/A'}</div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <code className="text-sm">{fromUser?.barcode || 'N/A'}</code>
+                        <code className="text-sm text-black">{fromUser?.barcode || 'N/A'}</code>
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{toUser?.name || 'Unknown'}</div>
-                          <div className="text-sm text-muted-foreground">{toUser?.grade || 'N/A'}</div>
+                          <div className="font-medium text-black">{toUser?.name || 'Unknown'}</div>
+                          <div className="text-sm text-gray-500">{toUser?.grade || 'N/A'}</div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <code className="text-sm">{toUser?.barcode || 'N/A'}</code>
+                        <code className="text-sm text-black">{toUser?.barcode || 'N/A'}</code>
                       </TableCell>
                       <TableCell>
                         <div className="text-right">
@@ -188,7 +189,7 @@ const TransferMonitoring: React.FC = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="default">Completed</Badge>
+                        <Badge variant="default" className="bg-black text-white">Completed</Badge>
                       </TableCell>
                     </TableRow>
                   );

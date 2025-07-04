@@ -68,12 +68,12 @@ const SalesMonitoring: React.FC = () => {
         
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" className="flex items-center gap-2">
+            <Button variant="destructive" className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white">
               <Trash2 className="w-4 h-4" />
               Clear Sales History
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent className="bg-white">
+          <AlertDialogContent className="bg-white border-2 border-black">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-black">Clear Sales History</AlertDialogTitle>
               <AlertDialogDescription className="text-gray-500">
@@ -81,7 +81,7 @@ const SalesMonitoring: React.FC = () => {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel className="text-black">No, Cancel</AlertDialogCancel>
+              <AlertDialogCancel className="text-black border-2 border-black bg-white hover:bg-gray-100">No, Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={handleClearHistory} className="bg-red-600 hover:bg-red-700 text-white">
                 Yes, Clear History
               </AlertDialogAction>
@@ -91,7 +91,7 @@ const SalesMonitoring: React.FC = () => {
       </div>
 
       <div className="grid gap-6 md:grid-cols-4">
-        <Card className="bg-white border-gray-200">
+        <Card className="bg-white border-2 border-black">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-black">Total Sales</CardTitle>
             <DollarSign className="h-4 w-4 text-gray-500" />
@@ -104,7 +104,7 @@ const SalesMonitoring: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-gray-200">
+        <Card className="bg-white border-2 border-black">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-black">Today's Sales</CardTitle>
             <TrendingUp className="h-4 w-4 text-gray-500" />
@@ -119,7 +119,7 @@ const SalesMonitoring: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-gray-200">
+        <Card className="bg-white border-2 border-black">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-black">This Week</CardTitle>
             <ShoppingCart className="h-4 w-4 text-gray-500" />
@@ -132,7 +132,7 @@ const SalesMonitoring: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-gray-200">
+        <Card className="bg-white border-2 border-black">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-black">Total Transactions</CardTitle>
             <Package className="h-4 w-4 text-gray-500" />
@@ -146,7 +146,7 @@ const SalesMonitoring: React.FC = () => {
         </Card>
       </div>
 
-      <Card className="bg-white border-gray-200">
+      <Card className="bg-white border-2 border-black">
         <CardHeader>
           <CardTitle className="text-black">Sales History</CardTitle>
           <CardDescription className="text-gray-500">Complete record of all sales transactions</CardDescription>
@@ -212,7 +212,7 @@ const SalesMonitoring: React.FC = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="default" className="bg-gray-600 text-white">Completed</Badge>
+                        <Badge variant="default" className="bg-black text-white">Completed</Badge>
                       </TableCell>
                     </TableRow>
                   );

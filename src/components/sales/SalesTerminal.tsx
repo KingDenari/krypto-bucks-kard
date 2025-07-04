@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +21,7 @@ interface SalesTerminalProps {
 }
 
 const SalesTerminal: React.FC<SalesTerminalProps> = ({ userEmail = 'employee@example.com' }) => {
-  const { users, products, addTransaction, getUserByBarcode, exchangeRate, clearSalesHistory } = useAppData();
+  const { users, products, addTransaction, getUserByBarcode, exchangeRate, clearSalesHistory, updateUser, updateProduct } = useAppData();
   const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
   const [barcodeInput, setBarcodeInput] = useState('');
   const [cart, setCart] = useState<{ product: Product; quantity: number }[]>([]);
@@ -125,7 +126,7 @@ const SalesTerminal: React.FC<SalesTerminalProps> = ({ userEmail = 'employee@exa
     return cart.reduce((total, item) => total + (item.product.price * item.quantity), 0);
   };
 
-  const processTransaction = () => {
+  const processTransaction = async () => {
     if (!selectedStudent) {
       toast({
         title: "Error",
@@ -153,6 +154,14 @@ const SalesTerminal: React.FC<SalesTerminalProps> = ({ userEmail = 'employee@exa
         variant: "destructive",
       });
       return;
+    }
+
+    // Update student balance
+    await updateUser(selectedStudent.id, { balance: selectedStudent.balance - totalAmount });
+
+    // Update product stock for each item in cart
+    for (const item of cart) {
+      await updateProduct(item.product.id, { stock: item.product.stock - item.quantity });
     }
 
     const transaction: Transaction = {
@@ -194,30 +203,30 @@ const SalesTerminal: React.FC<SalesTerminalProps> = ({ userEmail = 'employee@exa
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-white min-h-screen p-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Sales Terminal</h1>
-          <p className="text-muted-foreground">Process student purchases and manage transactions</p>
+          <h1 className="text-3xl font-bold text-black">Sales Terminal</h1>
+          <p className="text-gray-500">Process student purchases and manage transactions</p>
         </div>
         
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" className="flex items-center gap-2">
+            <Button variant="destructive" className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white border-red-600">
               <Trash2 className="w-4 h-4" />
               Clear Sales History
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent>
+          <AlertDialogContent className="bg-white border-2 border-black">
             <AlertDialogHeader>
-              <AlertDialogTitle>Clear Sales History</AlertDialogTitle>
-              <AlertDialogDescription>
+              <AlertDialogTitle className="text-black">Clear Sales History</AlertDialogTitle>
+              <AlertDialogDescription className="text-gray-500">
                 Are you sure you want to clear all sales history? This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>No, Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleClearSalesHistory} className="bg-red-600 hover:bg-red-700">
+              <AlertDialogCancel className="bg-white text-black border-2 border-black hover:bg-gray-100">No, Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleClearSalesHistory} className="bg-red-600 hover:bg-red-700 text-white">
                 Yes, Clear History
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -384,38 +393,38 @@ const SalesTerminal: React.FC<SalesTerminalProps> = ({ userEmail = 'employee@exa
       </div>
 
       {/* Products Section */}
-      <Card>
+      <Card className="bg-white border-2 border-black">
         <CardHeader>
-          <CardTitle>Available Products</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-black">Available Products</CardTitle>
+          <CardDescription className="text-gray-500">
             Click to add products to the cart
           </CardDescription>
         </CardHeader>
         <CardContent>
           {products.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">No products available.</p>
-              <p className="text-sm text-muted-foreground">Add products in the Product Management section.</p>
+              <p className="text-gray-500">No products available.</p>
+              <p className="text-sm text-gray-500">Add products in the Product Management section.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {products.map((product) => (
                 <Card 
                   key={product.id} 
-                  className="cursor-pointer hover:shadow-md transition-shadow border-2 border-black dark:border-white"
+                  className="cursor-pointer hover:shadow-md transition-shadow bg-white border-2 border-black"
                   onClick={() => addToCart(product)}
                 >
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-medium">{product.name}</h3>
-                      <Badge className="bg-black text-white dark:bg-white dark:text-black">
+                      <h3 className="font-medium text-black">{product.name}</h3>
+                      <Badge className="bg-black text-white">
                         K$ {product.price}
                       </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-2">{product.category}</p>
+                    <p className="text-sm text-gray-500 mb-2">{product.category}</p>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm">Stock: {product.stock}</span>
-                      <Button size="sm" className="bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200">
+                      <span className="text-sm text-black">Stock: {product.stock}</span>
+                      <Button size="sm" className="bg-black text-white hover:bg-gray-800">
                         <Plus className="w-3 h-3 mr-1" />
                         Add
                       </Button>
