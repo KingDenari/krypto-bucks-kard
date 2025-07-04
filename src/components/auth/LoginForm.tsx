@@ -27,7 +27,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
     'taher@admin.com',
     'john@admin.com',
     'mary@admin.com',
-    'peterson@admin.com'
+    'peterson@admin.com',
+    'kbuck@admin.com'
   ];
 
   const adminPasswords = ['admin123', 'admin321', 'admin101'];
@@ -67,24 +68,24 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FFFFFF' }}>
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-4">
           <div className="flex justify-center">
             <KryptoLogo size="xl" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold">
+            <h1 className="text-3xl font-bold text-black" style={{ color: '#000000' }}>
               Krypto Bucks
             </h1>
-            <p className="text-muted-foreground">Admin & Employee Portal</p>
+            <p className="text-gray-500" style={{ color: '#808080' }}>Admin & Employee Portal</p>
           </div>
         </div>
 
-        <Card className="animate-fade-in">
+        <Card className="animate-fade-in" style={{ backgroundColor: '#FFFFFF', borderColor: '#000000', color: '#000000' }}>
           <CardHeader>
-            <CardTitle>Sign In</CardTitle>
-            <CardDescription>
+            <CardTitle style={{ color: '#000000' }}>Sign In</CardTitle>
+            <CardDescription style={{ color: '#808080' }}>
               Enter your credentials to access the system
             </CardDescription>
           </CardHeader>
@@ -92,7 +93,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" style={{ color: '#808080' }} />
                   <Input
                     type="email"
                     placeholder="Email"
@@ -100,12 +101,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     className="pl-10"
+                    style={{ backgroundColor: '#FFFFFF', borderColor: '#000000', color: '#000000' }}
                   />
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" style={{ color: '#808080' }} />
                   <Input
                     type="password"
                     placeholder="Password"
@@ -113,10 +115,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     className="pl-10"
+                    style={{ backgroundColor: '#FFFFFF', borderColor: '#000000', color: '#000000' }}
                   />
                 </div>
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button 
+                type="submit" 
+                className="w-full border-2 border-black text-black hover:bg-gray-100" 
+                disabled={loading}
+                style={{ backgroundColor: '#FFFFFF', borderColor: '#000000', color: '#000000' }}
+              >
                 {loading ? 'Signing in...' : 'Sign In'}
               </Button>
             </form>
@@ -124,12 +132,17 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onStudentView }) => {
         </Card>
 
         <div className="text-center">
-          <p className="text-muted-foreground mb-4">or</p>
+          <p className="text-gray-500 mb-4" style={{ color: '#808080' }}>or</p>
           <Button 
             variant="outline" 
             onClick={onStudentView}
-            className="w-full animate-pulse"
-            style={{ animationDuration: '3s' }}
+            className="w-full animate-pulse border-2 border-black text-black bg-white hover:bg-gray-100"
+            style={{ 
+              animationDuration: '3s',
+              backgroundColor: '#FFFFFF',
+              borderColor: '#000000',
+              color: '#000000'
+            }}
           >
             I'm a Student - Transfer Krypto Bucks
           </Button>

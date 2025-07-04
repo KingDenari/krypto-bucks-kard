@@ -175,10 +175,11 @@ input::placeholder, select::placeholder, textarea::placeholder {
   color: #808080 !important;
 }
 
-/* Force white background and black text everywhere */
+/* Force white background and black text everywhere - Remove ALL yellow */
 .bg-slate-50, .bg-slate-100, .bg-slate-200, .bg-gray-50, .bg-gray-100,
 .bg-yellow-50, .bg-yellow-100, .bg-yellow-200, .bg-yellow-300, .bg-yellow-400,
-.bg-yellow-500, .bg-yellow-600, .bg-yellow-700, .bg-yellow-800, .bg-yellow-900 {
+.bg-yellow-500, .bg-yellow-600, .bg-yellow-700, .bg-yellow-800, .bg-yellow-900,
+[class*="bg-yellow"] {
   background-color: #FFFFFF !important;
 }
 
@@ -190,10 +191,11 @@ input::placeholder, select::placeholder, textarea::placeholder {
   color: #808080 !important;
 }
 
-/* Remove any yellow colors */
+/* Remove any yellow colors completely */
 .text-yellow-500, .text-yellow-600, .text-yellow-700, .text-yellow-800, .text-yellow-900,
 .bg-yellow-500, .bg-yellow-600, .bg-yellow-700, .bg-yellow-800, .bg-yellow-900,
-.border-yellow-500, .border-yellow-600, .border-yellow-700, .border-yellow-800, .border-yellow-900 {
+.border-yellow-500, .border-yellow-600, .border-yellow-700, .border-yellow-800, .border-yellow-900,
+[class*="text-yellow"], [class*="border-yellow"] {
   color: #000000 !important;
   background-color: #FFFFFF !important;
   border-color: #000000 !important;
@@ -230,7 +232,7 @@ div, section, article, main, aside, header, footer, nav {
   border-color: #000000 !important;
 }
 
-/* Toast styling */
+/* Toast styling - white background, black text */
 [data-sonner-toast] {
   background-color: #FFFFFF !important;
   color: #000000 !important;
@@ -245,17 +247,46 @@ div, section, article, main, aside, header, footer, nav {
   color: #808080 !important;
 }
 
-/* Sidebar hover effects */
+/* Sidebar hover effects - pure white on hover */
 [data-sidebar] button:hover,
 [data-sidebar] a:hover {
-  background-color: #F5F5F5 !important;
+  background-color: #FFFFFF !important;
   color: #000000 !important;
 }
 
-/* All hover effects */
+/* All hover effects - pure white background */
 .hover\:bg-muted:hover,
 .hover\:bg-accent:hover,
 .hover\:bg-secondary:hover {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+}
+
+/* Ensure all buttons are visible with proper borders */
+button {
+  border: 2px solid #000000 !important;
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+}
+
+button:hover {
   background-color: #F5F5F5 !important;
   color: #000000 !important;
+  border-color: #000000 !important;
+}
+
+/* Remove any remaining yellow anywhere */
+* {
+  background-color: inherit;
+}
+
+*[style*="yellow"], *[class*="yellow"] {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
+}
+
+/* Ensure page background is always white */
+body, html, #root {
+  background-color: #FFFFFF !important;
 }
