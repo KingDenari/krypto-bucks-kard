@@ -118,18 +118,77 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     });
   };
 
-  // Load data from Supabase on component mount
-  useEffect(() => {
-    if (currentAccount) {
-      loadFromSupabase();
-    }
-  }, [currentAccount]);
-
-  const loadFromSupabase = async () => {
+  // Simplified Supabase sync functions
+  const syncToSupabase = async () => {
     if (!currentAccount) return;
     
     try {
-      // Load users with account filter
+      // Only sync for kbucks@admin.com account
+      if (currentAccount === 'kbucks@admin.com') {
+        console.log('Syncing data to Supabase for kbucks@admin.com');
+        
+        // Sync users
+        for (const user of users) {
+          await supabase.from('users').upsert({
+            id: user.id,
+            name: user.name,
+            role: user.role,
+            balance: user.balance,
+            barcode: user.barcode,
+            grade: user.grade,
+            secret_code: user.secretCode,
+            account_email: currentAccount,
+            created_at: user.createdAt
+          });
+        }
+
+        // Sync products
+        for (const product of products) {
+          await supabase.from('products').upsert({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            stock: product.stock,
+            category: product.category,
+            account_email: currentAccount,
+            created_at: product.createdAt
+          });
+        }
+
+        // Sync transactions
+        for (const transaction of transactions) {
+          await supabase.from('transactions').upsert({
+            id: transaction.id,
+            student_id: transaction.studentId,
+            student_name: transaction.studentName,
+            type: transaction.type,
+            amount: transaction.amount,
+            description: transaction.description,
+            products: transaction.products,
+            account_email: currentAccount,
+            created_at: transaction.createdAt
+          });
+        }
+
+        // Sync exchange rate
+        await supabase.from('exchange_rates').upsert({
+          ksh_to_krypto: exchangeRate.kshToKrypto,
+          account_email: currentAccount,
+          updated_at: exchangeRate.lastUpdated
+        });
+      }
+    } catch (error) {
+      console.error('Error syncing to Supabase:', error);
+    }
+  };
+
+  const loadFromSupabase = async () => {
+    if (!currentAccount || currentAccount !== 'kbucks@admin.com') return;
+    
+    try {
+      console.log('Loading data from Supabase for kbucks@admin.com');
+      
+      // Load users
       const { data: usersData } = await supabase
         .from('users')
         .select('*')
@@ -139,7 +198,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         const formattedUsers: User[] = usersData.map(user => ({
           id: user.id,
           name: user.name,
-          email: '', // Not stored in Supabase table
+          email: '',
           role: user.role as 'admin' | 'worker' | 'student',
           balance: parseFloat(user.balance?.toString() || '0'),
           barcode: user.barcode || '',
@@ -150,7 +209,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setUsers(formattedUsers);
       }
 
-      // Load products with account filter
+      // Load products
       const { data: productsData } = await supabase
         .from('products')
         .select('*')
@@ -168,7 +227,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setProducts(formattedProducts);
       }
 
-      // Load transactions with account filter
+      // Load transactions
       const { data: transactionsData } = await supabase
         .from('transactions')
         .select('*')
@@ -189,7 +248,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setTransactions(formattedTransactions);
       }
 
-      // Load exchange rate with account filter
+      // Load exchange rate
       const { data: rateData } = await supabase
         .from('exchange_rates')
         .select('*')
@@ -209,7 +268,24 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  // Sync data across tabs/devices
+  // Load data from Supabase on component mount
+  useEffect(() => {
+    if (currentAccount === 'kbucks@admin.com') {
+      loadFromSupabase();
+    }
+  }, [currentAccount]);
+
+  // Auto-sync data changes to Supabase for kbucks@admin.com
+  useEffect(() => {
+    if (currentAccount === 'kbucks@admin.com') {
+      const timeoutId = setTimeout(() => {
+        syncToSupabase();
+      }, 1000); // Debounce sync calls
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [users, products, transactions, exchangeRate, currentAccount]);
+
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === getStorageKey('users') && e.newValue) {
@@ -623,36 +699,6 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       });
     }
   };
-
-  useEffect(() => {
-    localStorage.setItem('users', JSON.stringify(users));
-    window.dispatchEvent(new StorageEvent('storage', { key: 'users', newValue: JSON.stringify(users) }));
-  }, [users]);
-
-  useEffect(() => {
-    localStorage.setItem('products', JSON.stringify(products));
-    window.dispatchEvent(new StorageEvent('storage', { key: 'products', newValue: JSON.stringify(products) }));
-  }, [products]);
-
-  useEffect(() => {
-    localStorage.setItem('transactions', JSON.stringify(transactions));
-    window.dispatchEvent(new StorageEvent('storage', { key: 'transactions', newValue: JSON.stringify(transactions) }));
-  }, [transactions]);
-
-  useEffect(() => {
-    localStorage.setItem('workers', JSON.stringify(workers));
-    window.dispatchEvent(new StorageEvent('storage', { key: 'workers', newValue: JSON.stringify(workers) }));
-  }, [workers]);
-
-  useEffect(() => {
-    localStorage.setItem('employees', JSON.stringify(employees));
-    window.dispatchEvent(new StorageEvent('storage', { key: 'employees', newValue: JSON.stringify(employees) }));
-  }, [employees]);
-
-  useEffect(() => {
-    localStorage.setItem('exchangeRate', JSON.stringify(exchangeRate));
-    window.dispatchEvent(new StorageEvent('storage', { key: 'exchangeRate', newValue: JSON.stringify(exchangeRate) }));
-  }, [exchangeRate]);
 
   const value = {
     users,

@@ -11,16 +11,19 @@ export type Database = {
     Tables: {
       exchange_rates: {
         Row: {
+          account_email: string | null
           id: string
           ksh_to_krypto: number
           updated_at: string | null
         }
         Insert: {
+          account_email?: string | null
           id?: string
           ksh_to_krypto?: number
           updated_at?: string | null
         }
         Update: {
+          account_email?: string | null
           id?: string
           ksh_to_krypto?: number
           updated_at?: string | null
@@ -29,6 +32,7 @@ export type Database = {
       }
       products: {
         Row: {
+          account_email: string | null
           category: string | null
           created_at: string | null
           id: string
@@ -39,6 +43,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          account_email?: string | null
           category?: string | null
           created_at?: string | null
           id?: string
@@ -49,6 +54,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          account_email?: string | null
           category?: string | null
           created_at?: string | null
           id?: string
@@ -62,6 +68,7 @@ export type Database = {
       }
       receipts: {
         Row: {
+          account_email: string | null
           created_at: string | null
           id: string
           receipt_data: Json
@@ -69,6 +76,7 @@ export type Database = {
           transaction_id: string | null
         }
         Insert: {
+          account_email?: string | null
           created_at?: string | null
           id?: string
           receipt_data: Json
@@ -76,6 +84,7 @@ export type Database = {
           transaction_id?: string | null
         }
         Update: {
+          account_email?: string | null
           created_at?: string | null
           id?: string
           receipt_data?: Json
@@ -101,6 +110,7 @@ export type Database = {
       }
       transactions: {
         Row: {
+          account_email: string | null
           amount: number
           created_at: string | null
           description: string
@@ -111,6 +121,7 @@ export type Database = {
           type: string
         }
         Insert: {
+          account_email?: string | null
           amount: number
           created_at?: string | null
           description: string
@@ -121,6 +132,7 @@ export type Database = {
           type: string
         }
         Update: {
+          account_email?: string | null
           amount?: number
           created_at?: string | null
           description?: string
@@ -142,6 +154,7 @@ export type Database = {
       }
       users: {
         Row: {
+          account_email: string | null
           balance: number | null
           barcode: string | null
           created_at: string | null
@@ -153,6 +166,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          account_email?: string | null
           balance?: number | null
           barcode?: string | null
           created_at?: string | null
@@ -164,6 +178,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          account_email?: string | null
           balance?: number | null
           barcode?: string | null
           created_at?: string | null
