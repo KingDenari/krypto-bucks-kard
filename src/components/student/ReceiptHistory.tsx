@@ -38,7 +38,6 @@ const ReceiptHistory: React.FC<ReceiptHistoryProps> = ({ studentId, onBack }) =>
       if (!currentAccount) {
         console.log('No current account, no receipts to load');
         setReceipts([]);
-        setLoading(false);
         return;
       }
 
