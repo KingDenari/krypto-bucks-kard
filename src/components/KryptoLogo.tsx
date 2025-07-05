@@ -15,8 +15,10 @@ const KryptoLogo: React.FC<KryptoLogoProps> = ({ size = 'md', className = '' }) 
   };
 
   return (
-    <div className={`${sizeClasses[size]} ${className} flex items-center justify-center font-bold bg-gradient-to-br from-blue-500 to-purple-600 bg-clip-text text-transparent`}>
-      K<span className="text-sm relative -top-1">b</span>
+    <div className={`${sizeClasses[size]} ${className} flex items-center justify-center font-bold`}>
+      <span className="bg-gradient-to-br from-blue-500 to-purple-600 bg-clip-text text-transparent">
+        K<span className="text-sm relative -top-1">b</span>
+      </span>
     </div>
   );
 };

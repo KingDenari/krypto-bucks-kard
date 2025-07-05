@@ -49,44 +49,15 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return currentAccount ? `${currentAccount}_${key}` : key;
   };
 
-  const [users, setUsers] = useState<User[]>(() => {
-    const storageKey = getStorageKey('users');
-    const storedUsers = localStorage.getItem(storageKey);
-    return storedUsers ? JSON.parse(storedUsers) : initialUsers;
-  });
-  
-  const [products, setProducts] = useState<Product[]>(() => {
-    const storageKey = getStorageKey('products');
-    const storedProducts = localStorage.getItem(storageKey);
-    return storedProducts ? JSON.parse(storedProducts) : initialProducts;
-  });
-  
-  const [transactions, setTransactions] = useState<Transaction[]>(() => {
-    const storageKey = getStorageKey('transactions');
-    const storedTransactions = localStorage.getItem(storageKey);
-    return storedTransactions ? JSON.parse(storedTransactions) : [];
-  });
-  
-  const [workers, setWorkers] = useState<Worker[]>(() => {
-    const storageKey = getStorageKey('workers');
-    const storedWorkers = localStorage.getItem(storageKey);
-    return storedWorkers ? JSON.parse(storedWorkers) : [];
-  });
-  
-  const [employees, setEmployees] = useState<Employee[]>(() => {
-    const storageKey = getStorageKey('employees');
-    const storedEmployees = localStorage.getItem(storageKey);
-    return storedEmployees ? JSON.parse(storedEmployees) : [];
-  });
-  
-  const [exchangeRate, setExchangeRate] = useState<ExchangeRate>(() => {
-    const storageKey = getStorageKey('exchangeRate');
-    const storedRate = localStorage.getItem(storageKey);
-    return storedRate ? JSON.parse(storedRate) : {
-      kshToKrypto: 0.5,
-      lastUpdated: new Date().toISOString(),
-      updatedBy: 'system'
-    };
+  const [users, setUsers] = useState<User[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [workers, setWorkers] = useState<Worker[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [exchangeRate, setExchangeRate] = useState<ExchangeRate>({
+    kshToKrypto: 0.5,
+    lastUpdated: new Date().toISOString(),
+    updatedBy: 'system'
   });
 
   const refreshData = async () => {
@@ -96,14 +67,13 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const setCurrentAccount = (email: string) => {
+    console.log('Setting current account to:', email);
     setCurrentAccountState(email);
     localStorage.setItem('currentAccount', email);
     
     // Load data from Supabase immediately after setting account
     if (email) {
-      setTimeout(() => {
-        loadFromSupabase();
-      }, 100);
+      loadFromSupabase();
     }
   };
 
@@ -171,18 +141,28 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const loadFromSupabase = async () => {
-    if (!currentAccount) return;
+    if (!currentAccount) {
+      console.log('No current account, loading default data');
+      setUsers(initialUsers);
+      setProducts(initialProducts);
+      setTransactions([]);
+      setWorkers([]);
+      setEmployees([]);
+      return;
+    }
     
     try {
       console.log('Loading data from Supabase for account:', currentAccount);
       
       // Load users
-      const { data: usersData } = await supabase
+      const { data: usersData, error: usersError } = await supabase
         .from('users')
         .select('*')
         .eq('account_email', currentAccount);
         
-      if (usersData && usersData.length > 0) {
+      if (usersError) {
+        console.error('Error loading users:', usersError);
+      } else if (usersData && usersData.length > 0) {
         const formattedUsers: User[] = usersData.map(user => ({
           id: user.id,
           name: user.name,
@@ -194,18 +174,24 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           secretCode: user.secret_code || '',
           createdAt: user.created_at || new Date().toISOString()
         }));
+        console.log('Setting users from Supabase:', formattedUsers);
         setUsers(formattedUsers);
         localStorage.setItem(getStorageKey('users'), JSON.stringify(formattedUsers));
-        console.log('Loaded users from Supabase:', formattedUsers);
+      } else {
+        console.log('No users found in Supabase, using initial users');
+        setUsers(initialUsers);
+        localStorage.setItem(getStorageKey('users'), JSON.stringify(initialUsers));
       }
 
       // Load products
-      const { data: productsData } = await supabase
+      const { data: productsData, error: productsError } = await supabase
         .from('products')
         .select('*')
         .eq('account_email', currentAccount);
         
-      if (productsData && productsData.length > 0) {
+      if (productsError) {
+        console.error('Error loading products:', productsError);
+      } else if (productsData && productsData.length > 0) {
         const formattedProducts: Product[] = productsData.map(product => ({
           id: product.id,
           name: product.name,
@@ -214,19 +200,25 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           category: product.category || '',
           createdAt: product.created_at || new Date().toISOString()
         }));
+        console.log('Setting products from Supabase:', formattedProducts);
         setProducts(formattedProducts);
         localStorage.setItem(getStorageKey('products'), JSON.stringify(formattedProducts));
-        console.log('Loaded products from Supabase:', formattedProducts);
+      } else {
+        console.log('No products found in Supabase, using initial products');
+        setProducts(initialProducts);
+        localStorage.setItem(getStorageKey('products'), JSON.stringify(initialProducts));
       }
 
       // Load transactions
-      const { data: transactionsData } = await supabase
+      const { data: transactionsData, error: transactionsError } = await supabase
         .from('transactions')
         .select('*')
         .eq('account_email', currentAccount)
         .order('created_at', { ascending: false });
         
-      if (transactionsData && transactionsData.length > 0) {
+      if (transactionsError) {
+        console.error('Error loading transactions:', transactionsError);
+      } else if (transactionsData && transactionsData.length > 0) {
         const formattedTransactions: Transaction[] = transactionsData.map(transaction => ({
           id: transaction.id,
           studentId: transaction.student_id || '',
@@ -238,41 +230,60 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           createdAt: transaction.created_at || new Date().toISOString(),
           createdBy: 'system'
         }));
+        console.log('Setting transactions from Supabase:', formattedTransactions);
         setTransactions(formattedTransactions);
         localStorage.setItem(getStorageKey('transactions'), JSON.stringify(formattedTransactions));
-        console.log('Loaded transactions from Supabase:', formattedTransactions);
+      } else {
+        console.log('No transactions found in Supabase');
+        setTransactions([]);
+        localStorage.setItem(getStorageKey('transactions'), JSON.stringify([]));
       }
 
       // Load exchange rate
-      const { data: rateData } = await supabase
+      const { data: rateData, error: rateError } = await supabase
         .from('exchange_rates')
         .select('*')
         .eq('account_email', currentAccount)
         .order('updated_at', { ascending: false })
         .limit(1);
         
-      if (rateData && rateData.length > 0) {
+      if (rateError) {
+        console.error('Error loading exchange rate:', rateError);
+      } else if (rateData && rateData.length > 0) {
         const newRate = {
           kshToKrypto: parseFloat(rateData[0].ksh_to_krypto?.toString() || '0.5'),
           lastUpdated: rateData[0].updated_at || new Date().toISOString(),
           updatedBy: 'system'
         };
+        console.log('Setting exchange rate from Supabase:', newRate);
         setExchangeRate(newRate);
         localStorage.setItem(getStorageKey('exchangeRate'), JSON.stringify(newRate));
-        console.log('Loaded exchange rate from Supabase:', newRate);
       }
 
       console.log('Successfully loaded all data from Supabase');
     } catch (error) {
       console.error('Error loading data from Supabase:', error);
+      // Fallback to local storage or initial data
+      const storedUsers = localStorage.getItem(getStorageKey('users'));
+      if (storedUsers) {
+        setUsers(JSON.parse(storedUsers));
+      } else {
+        setUsers(initialUsers);
+      }
+      
+      const storedProducts = localStorage.getItem(getStorageKey('products'));
+      if (storedProducts) {
+        setProducts(JSON.parse(storedProducts));
+      } else {
+        setProducts(initialProducts);
+      }
     }
   };
 
   // Load data from Supabase on component mount and account change
   useEffect(() => {
-    if (currentAccount) {
-      loadFromSupabase();
-    }
+    console.log('Account changed:', currentAccount);
+    loadFromSupabase();
   }, [currentAccount]);
 
   // Auto-sync data changes to Supabase with debounce
