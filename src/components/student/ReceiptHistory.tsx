@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { ArrowLeft, Download, Copy, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAppData } from '@/contexts/AppDataContext';
 import KryptoLogo from '@/components/KryptoLogo';
 
 interface Receipt {
@@ -26,17 +26,27 @@ const ReceiptHistory: React.FC<ReceiptHistoryProps> = ({ studentId, onBack }) =>
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { currentAccount } = useAppData();
 
   useEffect(() => {
     fetchReceipts();
-  }, [studentId]);
+  }, [studentId, currentAccount]);
 
   const fetchReceipts = async () => {
+    setLoading(true);
     try {
+      if (!currentAccount) {
+        console.log('No current account, no receipts to load');
+        setReceipts([]);
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('receipts')
         .select('*')
         .eq('student_id', studentId)
+        .eq('account_email', currentAccount)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -46,11 +56,14 @@ const ReceiptHistory: React.FC<ReceiptHistoryProps> = ({ studentId, onBack }) =>
           description: "Failed to load receipt history",
           variant: "destructive",
         });
+        setReceipts([]);
       } else {
+        console.log('Loaded receipts:', data);
         setReceipts(data || []);
       }
     } catch (error) {
       console.error('Error:', error);
+      setReceipts([]);
     } finally {
       setLoading(false);
     }
@@ -61,7 +74,8 @@ const ReceiptHistory: React.FC<ReceiptHistoryProps> = ({ studentId, onBack }) =>
       const { error } = await supabase
         .from('receipts')
         .delete()
-        .eq('id', receiptId);
+        .eq('id', receiptId)
+        .eq('account_email', currentAccount);
 
       if (error) {
         console.error('Error deleting receipt:', error);

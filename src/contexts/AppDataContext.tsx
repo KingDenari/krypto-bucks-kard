@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { User, Product, Transaction, Worker, Employee, ExchangeRate } from '@/types';
 import { initialUsers, initialProducts } from '@/data/data';
@@ -46,18 +47,42 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   });
   
   const getStorageKey = (key: string) => {
-    return currentAccount ? `${currentAccount}_${key}` : key;
+    return currentAccount ? `${currentAccount}_${key}` : `global_${key}`;
   };
 
-  const [users, setUsers] = useState<User[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [workers, setWorkers] = useState<Worker[]>([]);
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [exchangeRate, setExchangeRate] = useState<ExchangeRate>({
-    kshToKrypto: 0.5,
-    lastUpdated: new Date().toISOString(),
-    updatedBy: 'system'
+  // Initialize with localStorage data first, then sync with Supabase
+  const [users, setUsers] = useState<User[]>(() => {
+    const stored = localStorage.getItem(getStorageKey('users'));
+    return stored ? JSON.parse(stored) : initialUsers;
+  });
+  
+  const [products, setProducts] = useState<Product[]>(() => {
+    const stored = localStorage.getItem(getStorageKey('products'));
+    return stored ? JSON.parse(stored) : initialProducts;
+  });
+  
+  const [transactions, setTransactions] = useState<Transaction[]>(() => {
+    const stored = localStorage.getItem(getStorageKey('transactions'));
+    return stored ? JSON.parse(stored) : [];
+  });
+  
+  const [workers, setWorkers] = useState<Worker[]>(() => {
+    const stored = localStorage.getItem(getStorageKey('workers'));
+    return stored ? JSON.parse(stored) : [];
+  });
+  
+  const [employees, setEmployees] = useState<Employee[]>(() => {
+    const stored = localStorage.getItem(getStorageKey('employees'));
+    return stored ? JSON.parse(stored) : [];
+  });
+  
+  const [exchangeRate, setExchangeRate] = useState<ExchangeRate>(() => {
+    const stored = localStorage.getItem(getStorageKey('exchangeRate'));
+    return stored ? JSON.parse(stored) : {
+      kshToKrypto: 0.5,
+      lastUpdated: new Date().toISOString(),
+      updatedBy: 'system'
+    };
   });
 
   const refreshData = async () => {
@@ -71,22 +96,44 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setCurrentAccountState(email);
     localStorage.setItem('currentAccount', email);
     
-    // Load data from Supabase immediately after setting account
+    // Load data for this account
     if (email) {
-      loadFromSupabase();
+      loadDataForAccount(email);
     }
   };
 
-  // Enhanced Supabase sync functions with better error handling
+  const loadDataForAccount = async (accountEmail: string) => {
+    const accountStorageKey = (key: string) => `${accountEmail}_${key}`;
+    
+    // Load from localStorage first
+    const storedUsers = localStorage.getItem(accountStorageKey('users'));
+    const storedProducts = localStorage.getItem(accountStorageKey('products'));
+    const storedTransactions = localStorage.getItem(accountStorageKey('transactions'));
+    const storedExchangeRate = localStorage.getItem(accountStorageKey('exchangeRate'));
+    
+    if (storedUsers) setUsers(JSON.parse(storedUsers));
+    if (storedProducts) setProducts(JSON.parse(storedProducts));
+    if (storedTransactions) setTransactions(JSON.parse(storedTransactions));
+    if (storedExchangeRate) setExchangeRate(JSON.parse(storedExchangeRate));
+    
+    // Then sync with Supabase
+    await loadFromSupabase();
+  };
+
   const syncToSupabase = async () => {
     if (!currentAccount) return;
     
     try {
       console.log('Syncing data to Supabase for account:', currentAccount);
       
-      // Sync users with proper type handling
-      for (const user of users) {
-        await supabase.from('users').upsert({
+      // Clear existing data for this account
+      await supabase.from('users').delete().eq('account_email', currentAccount);
+      await supabase.from('products').delete().eq('account_email', currentAccount);
+      await supabase.from('transactions').delete().eq('account_email', currentAccount);
+      
+      // Sync users
+      if (users.length > 0) {
+        const userInserts = users.map(user => ({
           id: user.id,
           name: user.name,
           role: user.role,
@@ -96,12 +143,13 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           secret_code: user.secretCode,
           account_email: currentAccount,
           created_at: user.createdAt
-        });
+        }));
+        await supabase.from('users').insert(userInserts);
       }
 
       // Sync products
-      for (const product of products) {
-        await supabase.from('products').upsert({
+      if (products.length > 0) {
+        const productInserts = products.map(product => ({
           id: product.id,
           name: product.name,
           price: product.price,
@@ -109,12 +157,13 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           category: product.category,
           account_email: currentAccount,
           created_at: product.createdAt
-        });
+        }));
+        await supabase.from('products').insert(productInserts);
       }
 
       // Sync transactions
-      for (const transaction of transactions) {
-        await supabase.from('transactions').upsert({
+      if (transactions.length > 0) {
+        const transactionInserts = transactions.map(transaction => ({
           id: transaction.id,
           student_id: transaction.studentId,
           student_name: transaction.studentName,
@@ -124,11 +173,13 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           products: transaction.products,
           account_email: currentAccount,
           created_at: transaction.createdAt
-        });
+        }));
+        await supabase.from('transactions').insert(transactionInserts);
       }
 
       // Sync exchange rate
-      await supabase.from('exchange_rates').upsert({
+      await supabase.from('exchange_rates').delete().eq('account_email', currentAccount);
+      await supabase.from('exchange_rates').insert({
         ksh_to_krypto: exchangeRate.kshToKrypto,
         account_email: currentAccount,
         updated_at: exchangeRate.lastUpdated
@@ -141,15 +192,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const loadFromSupabase = async () => {
-    if (!currentAccount) {
-      console.log('No current account, loading default data');
-      setUsers(initialUsers);
-      setProducts(initialProducts);
-      setTransactions([]);
-      setWorkers([]);
-      setEmployees([]);
-      return;
-    }
+    if (!currentAccount) return;
     
     try {
       console.log('Loading data from Supabase for account:', currentAccount);
@@ -160,9 +203,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         .select('*')
         .eq('account_email', currentAccount);
         
-      if (usersError) {
-        console.error('Error loading users:', usersError);
-      } else if (usersData && usersData.length > 0) {
+      if (!usersError && usersData && usersData.length > 0) {
         const formattedUsers: User[] = usersData.map(user => ({
           id: user.id,
           name: user.name,
@@ -174,13 +215,8 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           secretCode: user.secret_code || '',
           createdAt: user.created_at || new Date().toISOString()
         }));
-        console.log('Setting users from Supabase:', formattedUsers);
         setUsers(formattedUsers);
         localStorage.setItem(getStorageKey('users'), JSON.stringify(formattedUsers));
-      } else {
-        console.log('No users found in Supabase, using initial users');
-        setUsers(initialUsers);
-        localStorage.setItem(getStorageKey('users'), JSON.stringify(initialUsers));
       }
 
       // Load products
@@ -189,9 +225,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         .select('*')
         .eq('account_email', currentAccount);
         
-      if (productsError) {
-        console.error('Error loading products:', productsError);
-      } else if (productsData && productsData.length > 0) {
+      if (!productsError && productsData && productsData.length > 0) {
         const formattedProducts: Product[] = productsData.map(product => ({
           id: product.id,
           name: product.name,
@@ -200,13 +234,8 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           category: product.category || '',
           createdAt: product.created_at || new Date().toISOString()
         }));
-        console.log('Setting products from Supabase:', formattedProducts);
         setProducts(formattedProducts);
         localStorage.setItem(getStorageKey('products'), JSON.stringify(formattedProducts));
-      } else {
-        console.log('No products found in Supabase, using initial products');
-        setProducts(initialProducts);
-        localStorage.setItem(getStorageKey('products'), JSON.stringify(initialProducts));
       }
 
       // Load transactions
@@ -216,9 +245,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         .eq('account_email', currentAccount)
         .order('created_at', { ascending: false });
         
-      if (transactionsError) {
-        console.error('Error loading transactions:', transactionsError);
-      } else if (transactionsData && transactionsData.length > 0) {
+      if (!transactionsError && transactionsData && transactionsData.length > 0) {
         const formattedTransactions: Transaction[] = transactionsData.map(transaction => ({
           id: transaction.id,
           studentId: transaction.student_id || '',
@@ -230,13 +257,8 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           createdAt: transaction.created_at || new Date().toISOString(),
           createdBy: 'system'
         }));
-        console.log('Setting transactions from Supabase:', formattedTransactions);
         setTransactions(formattedTransactions);
         localStorage.setItem(getStorageKey('transactions'), JSON.stringify(formattedTransactions));
-      } else {
-        console.log('No transactions found in Supabase');
-        setTransactions([]);
-        localStorage.setItem(getStorageKey('transactions'), JSON.stringify([]));
       }
 
       // Load exchange rate
@@ -247,46 +269,29 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         .order('updated_at', { ascending: false })
         .limit(1);
         
-      if (rateError) {
-        console.error('Error loading exchange rate:', rateError);
-      } else if (rateData && rateData.length > 0) {
+      if (!rateError && rateData && rateData.length > 0) {
         const newRate = {
           kshToKrypto: parseFloat(rateData[0].ksh_to_krypto?.toString() || '0.5'),
           lastUpdated: rateData[0].updated_at || new Date().toISOString(),
           updatedBy: 'system'
         };
-        console.log('Setting exchange rate from Supabase:', newRate);
         setExchangeRate(newRate);
         localStorage.setItem(getStorageKey('exchangeRate'), JSON.stringify(newRate));
       }
 
-      console.log('Successfully loaded all data from Supabase');
     } catch (error) {
       console.error('Error loading data from Supabase:', error);
-      // Fallback to local storage or initial data
-      const storedUsers = localStorage.getItem(getStorageKey('users'));
-      if (storedUsers) {
-        setUsers(JSON.parse(storedUsers));
-      } else {
-        setUsers(initialUsers);
-      }
-      
-      const storedProducts = localStorage.getItem(getStorageKey('products'));
-      if (storedProducts) {
-        setProducts(JSON.parse(storedProducts));
-      } else {
-        setProducts(initialProducts);
-      }
     }
   };
 
-  // Load data from Supabase on component mount and account change
+  // Load data on mount and account change
   useEffect(() => {
-    console.log('Account changed:', currentAccount);
-    loadFromSupabase();
+    if (currentAccount) {
+      loadDataForAccount(currentAccount);
+    }
   }, [currentAccount]);
 
-  // Auto-sync data changes to Supabase with debounce
+  // Auto-sync to Supabase when data changes
   useEffect(() => {
     if (currentAccount) {
       const timeoutId = setTimeout(() => {
@@ -297,66 +302,21 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [users, products, transactions, exchangeRate, currentAccount]);
 
+  // Save to localStorage when data changes
   useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === getStorageKey('users') && e.newValue) {
-        setUsers(JSON.parse(e.newValue));
-      }
-      if (e.key === getStorageKey('products') && e.newValue) {
-        setProducts(JSON.parse(e.newValue));
-      }
-      if (e.key === getStorageKey('transactions') && e.newValue) {
-        setTransactions(JSON.parse(e.newValue));
-      }
-      if (e.key === getStorageKey('workers') && e.newValue) {
-        setWorkers(JSON.parse(e.newValue));
-      }
-      if (e.key === getStorageKey('employees') && e.newValue) {
-        setEmployees(JSON.parse(e.newValue));
-      }
-      if (e.key === getStorageKey('exchangeRate') && e.newValue) {
-        setExchangeRate(JSON.parse(e.newValue));
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, [currentAccount]);
-
-  useEffect(() => {
-    const storageKey = getStorageKey('users');
-    localStorage.setItem(storageKey, JSON.stringify(users));
-    window.dispatchEvent(new StorageEvent('storage', { key: storageKey, newValue: JSON.stringify(users) }));
+    localStorage.setItem(getStorageKey('users'), JSON.stringify(users));
   }, [users, currentAccount]);
 
   useEffect(() => {
-    const storageKey = getStorageKey('products');
-    localStorage.setItem(storageKey, JSON.stringify(products));
-    window.dispatchEvent(new StorageEvent('storage', { key: storageKey, newValue: JSON.stringify(products) }));
+    localStorage.setItem(getStorageKey('products'), JSON.stringify(products));
   }, [products, currentAccount]);
 
   useEffect(() => {
-    const storageKey = getStorageKey('transactions');
-    localStorage.setItem(storageKey, JSON.stringify(transactions));
-    window.dispatchEvent(new StorageEvent('storage', { key: storageKey, newValue: JSON.stringify(transactions) }));
+    localStorage.setItem(getStorageKey('transactions'), JSON.stringify(transactions));
   }, [transactions, currentAccount]);
 
   useEffect(() => {
-    const storageKey = getStorageKey('workers');
-    localStorage.setItem(storageKey, JSON.stringify(workers));
-    window.dispatchEvent(new StorageEvent('storage', { key: storageKey, newValue: JSON.stringify(workers) }));
-  }, [workers, currentAccount]);
-
-  useEffect(() => {
-    const storageKey = getStorageKey('employees');
-    localStorage.setItem(storageKey, JSON.stringify(employees));
-    window.dispatchEvent(new StorageEvent('storage', { key: storageKey, newValue: JSON.stringify(employees) }));
-  }, [employees, currentAccount]);
-
-  useEffect(() => {
-    const storageKey = getStorageKey('exchangeRate');
-    localStorage.setItem(storageKey, JSON.stringify(exchangeRate));
-    window.dispatchEvent(new StorageEvent('storage', { key: storageKey, newValue: JSON.stringify(exchangeRate) }));
+    localStorage.setItem(getStorageKey('exchangeRate'), JSON.stringify(exchangeRate));
   }, [exchangeRate, currentAccount]);
 
   const getUserBySecretCode = (secretCode: string) => {
@@ -367,160 +327,32 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return users.find(user => user.barcode === barcode);
   };
 
-  const updateUser = async (id: string, updates: Partial<User>) => {
-    const updatedUsers = users.map(user => user.id === id ? { ...user, ...updates } : user);
-    setUsers(updatedUsers);
-    
-    // Sync to Supabase immediately for user updates
-    if (currentAccount) {
-      try {
-        const userToUpdate = updatedUsers.find(u => u.id === id);
-        if (userToUpdate) {
-          await supabase
-            .from('users')
-            .upsert({
-              id: userToUpdate.id,
-              name: userToUpdate.name,
-              role: userToUpdate.role,
-              balance: userToUpdate.balance,
-              barcode: userToUpdate.barcode,
-              grade: userToUpdate.grade,
-              secret_code: userToUpdate.secretCode,
-              account_email: currentAccount,
-              updated_at: new Date().toISOString()
-            });
-        }
-      } catch (error) {
-        console.error('Error updating user in Supabase:', error);
-      }
-    }
+  const updateUser = (id: string, updates: Partial<User>) => {
+    setUsers(users.map(user => user.id === id ? { ...user, ...updates } : user));
   };
 
-  const addUser = async (user: User) => {
+  const addUser = (user: User) => {
     setUsers([...users, user]);
-    
-    // Add to Supabase immediately
-    if (currentAccount) {
-      try {
-        await supabase
-          .from('users')
-          .insert({
-            id: user.id,
-            name: user.name,
-            role: user.role,
-            balance: user.balance,
-            barcode: user.barcode,
-            grade: user.grade,
-            secret_code: user.secretCode,
-            account_email: currentAccount,
-            created_at: user.createdAt
-          });
-      } catch (error) {
-        console.error('Error adding user to Supabase:', error);
-      }
-    }
   };
 
-  const deleteUser = async (id: string) => {
+  const deleteUser = (id: string) => {
     setUsers(users.filter(user => user.id !== id));
-    
-    // Delete from Supabase immediately
-    if (currentAccount) {
-      try {
-        await supabase.from('users').delete().eq('id', id).eq('account_email', currentAccount);
-      } catch (error) {
-        console.error('Error deleting user from Supabase:', error);
-      }
-    }
   };
 
-  const addProduct = async (product: Product) => {
+  const addProduct = (product: Product) => {
     setProducts([...products, product]);
-    
-    // Add to Supabase immediately
-    if (currentAccount) {
-      try {
-        await supabase
-          .from('products')
-          .insert({
-            id: product.id,
-            name: product.name,
-            price: product.price,
-            stock: product.stock,
-            category: product.category,
-            account_email: currentAccount,
-            created_at: product.createdAt
-          });
-      } catch (error) {
-        console.error('Error adding product to Supabase:', error);
-      }
-    }
   };
 
-  const updateProduct = async (id: string, updates: Partial<Product>) => {
-    const updatedProducts = products.map(product => product.id === id ? { ...product, ...updates } : product);
-    setProducts(updatedProducts);
-    
-    // Sync to Supabase immediately for product updates
-    if (currentAccount) {
-      try {
-        const productToUpdate = updatedProducts.find(p => p.id === id);
-        if (productToUpdate) {
-          await supabase
-            .from('products')
-            .upsert({
-              id: productToUpdate.id,
-              name: productToUpdate.name,
-              price: productToUpdate.price,
-              stock: productToUpdate.stock,
-              category: productToUpdate.category,
-              account_email: currentAccount,
-              updated_at: new Date().toISOString()
-            });
-        }
-      } catch (error) {
-        console.error('Error updating product in Supabase:', error);
-      }
-    }
+  const updateProduct = (id: string, updates: Partial<Product>) => {
+    setProducts(products.map(product => product.id === id ? { ...product, ...updates } : product));
   };
 
-  const deleteProduct = async (id: string) => {
+  const deleteProduct = (id: string) => {
     setProducts(products.filter(product => product.id !== id));
-    
-    // Delete from Supabase immediately
-    if (currentAccount) {
-      try {
-        await supabase.from('products').delete().eq('id', id).eq('account_email', currentAccount);
-      } catch (error) {
-        console.error('Error deleting product from Supabase:', error);
-      }
-    }
   };
 
-  const addTransaction = async (transaction: Transaction) => {
-    const newTransactions = [transaction, ...transactions];
-    setTransactions(newTransactions);
-    
-    // Add to Supabase immediately
-    if (currentAccount) {
-      try {
-        await supabase
-          .from('transactions')
-          .insert({
-            id: transaction.id,
-            student_id: transaction.studentId,
-            student_name: transaction.studentName,
-            type: transaction.type,
-            amount: transaction.amount,
-            description: transaction.description,
-            products: transaction.products,
-            account_email: currentAccount,
-            created_at: transaction.createdAt
-          });
-      } catch (error) {
-        console.error('Error adding transaction to Supabase:', error);
-      }
-    }
+  const addTransaction = (transaction: Transaction) => {
+    setTransactions([transaction, ...transactions]);
   };
 
   const transferKryptoBucks = (fromUserId: string, toUserId: string, amount: number, createdBy: string) => {
@@ -607,29 +439,13 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setEmployees(employees.filter(employee => employee.id !== id));
   };
 
-  const updateExchangeRate = async (rate: number, updatedBy: string) => {
+  const updateExchangeRate = (rate: number, updatedBy: string) => {
     const newRate = {
       kshToKrypto: rate,
       lastUpdated: new Date().toISOString(),
       updatedBy: updatedBy
     };
-    
     setExchangeRate(newRate);
-    
-    // Update in Supabase immediately
-    if (currentAccount) {
-      try {
-        await supabase
-          .from('exchange_rates')
-          .insert({
-            ksh_to_krypto: rate,
-            account_email: currentAccount,
-            updated_at: new Date().toISOString()
-          });
-      } catch (error) {
-        console.error('Error updating exchange rate in Supabase:', error);
-      }
-    }
   };
 
   const purchaseProduct = async (studentId: string, productId: string, quantity: number, createdBy: string): Promise<boolean> => {
@@ -646,10 +462,10 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
 
     // Update student balance
-    await updateUser(studentId, { balance: student.balance - totalAmount });
+    updateUser(studentId, { balance: student.balance - totalAmount });
 
     // Update product stock
-    await updateProduct(productId, { stock: product.stock - quantity });
+    updateProduct(productId, { stock: product.stock - quantity });
 
     // Add transaction
     const transaction: Transaction = {
@@ -669,7 +485,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       createdBy: createdBy
     };
 
-    await addTransaction(transaction);
+    addTransaction(transaction);
 
     // Create receipt in Supabase
     if (currentAccount) {
@@ -700,8 +516,8 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const factoryReset = () => {
-    setUsers([]);
-    setProducts([]);
+    setUsers(initialUsers);
+    setProducts(initialProducts);
     setTransactions([]);
     setWorkers([]);
     setEmployees([]);
@@ -711,7 +527,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       updatedBy: 'system'
     });
     
-    // Clear account-specific localStorage
+    // Clear localStorage
     if (currentAccount) {
       const keys = ['users', 'products', 'transactions', 'workers', 'employees', 'exchangeRate'];
       keys.forEach(key => {
@@ -741,12 +557,12 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     clearTransferHistory,
     clearSalesHistory,
     clearStudentTransactions,
-    addWorker: (worker: Worker) => setWorkers([...workers, worker]),
-    updateWorker: (id: string, updates: Partial<Worker>) => setWorkers(workers.map(worker => worker.id === id ? { ...worker, ...updates } : worker)),
-    deleteWorker: (id: string) => setWorkers(workers.filter(worker => worker.id !== id)),
-    addEmployee: (employee: Employee) => setEmployees([...employees, employee]),
-    updateEmployee: (id: string, updates: Partial<Employee>) => setEmployees(employees.map(employee => employee.id === id ? { ...employee, ...updates } : employee)),
-    deleteEmployee: (id: string) => setEmployees(employees.filter(employee => employee.id !== id)),
+    addWorker,
+    updateWorker,
+    deleteWorker,
+    addEmployee,
+    updateEmployee,
+    deleteEmployee,
     updateExchangeRate,
     factoryReset,
     purchaseProduct,
