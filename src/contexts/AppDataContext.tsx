@@ -99,32 +99,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setCurrentAccountState(email);
     localStorage.setItem('currentAccount', email);
     
-    // Reload data for the new account
-    const storageKey = (key: string) => `${email}_${key}`;
-    
-    const storedUsers = localStorage.getItem(storageKey('users'));
-    setUsers(storedUsers ? JSON.parse(storedUsers) : initialUsers);
-    
-    const storedProducts = localStorage.getItem(storageKey('products'));
-    setProducts(storedProducts ? JSON.parse(storedProducts) : initialProducts);
-    
-    const storedTransactions = localStorage.getItem(storageKey('transactions'));
-    setTransactions(storedTransactions ? JSON.parse(storedTransactions) : []);
-    
-    const storedWorkers = localStorage.getItem(storageKey('workers'));
-    setWorkers(storedWorkers ? JSON.parse(storedWorkers) : []);
-    
-    const storedEmployees = localStorage.getItem(storageKey('employees'));
-    setEmployees(storedEmployees ? JSON.parse(storedEmployees) : []);
-    
-    const storedRate = localStorage.getItem(storageKey('exchangeRate'));
-    setExchangeRate(storedRate ? JSON.parse(storedRate) : {
-      kshToKrypto: 0.5,
-      lastUpdated: new Date().toISOString(),
-      updatedBy: 'system'
-    });
-
-    // Load from Supabase immediately after setting account
+    // Load data from Supabase immediately after setting account
     if (email) {
       setTimeout(() => {
         loadFromSupabase();
@@ -221,6 +196,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }));
         setUsers(formattedUsers);
         localStorage.setItem(getStorageKey('users'), JSON.stringify(formattedUsers));
+        console.log('Loaded users from Supabase:', formattedUsers);
       }
 
       // Load products
@@ -240,6 +216,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }));
         setProducts(formattedProducts);
         localStorage.setItem(getStorageKey('products'), JSON.stringify(formattedProducts));
+        console.log('Loaded products from Supabase:', formattedProducts);
       }
 
       // Load transactions
@@ -263,6 +240,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }));
         setTransactions(formattedTransactions);
         localStorage.setItem(getStorageKey('transactions'), JSON.stringify(formattedTransactions));
+        console.log('Loaded transactions from Supabase:', formattedTransactions);
       }
 
       // Load exchange rate
@@ -281,9 +259,10 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         };
         setExchangeRate(newRate);
         localStorage.setItem(getStorageKey('exchangeRate'), JSON.stringify(newRate));
+        console.log('Loaded exchange rate from Supabase:', newRate);
       }
 
-      console.log('Successfully loaded data from Supabase');
+      console.log('Successfully loaded all data from Supabase');
     } catch (error) {
       console.error('Error loading data from Supabase:', error);
     }
@@ -301,7 +280,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (currentAccount) {
       const timeoutId = setTimeout(() => {
         syncToSupabase();
-      }, 2000); // Increased debounce time
+      }, 2000);
       
       return () => clearTimeout(timeoutId);
     }
