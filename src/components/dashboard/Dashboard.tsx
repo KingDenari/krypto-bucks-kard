@@ -1,231 +1,296 @@
-
 import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import KryptoLogo from '@/components/KryptoLogo';
-import { TrendingUp, Users, Package, ShoppingCart } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Users, 
+  Package, 
+  TrendingUp, 
+  CreditCard, 
+  ShoppingCart, 
+  BarChart3,
+  Settings,
+  LogOut,
+  UserCheck,
+  Briefcase,
+  Building
+} from 'lucide-react';
+import { User, Product, Transaction } from '@/types';
+import { useToast } from '@/hooks/use-toast';
 import { useAppData } from '@/contexts/AppDataContext';
+import UserManagement from '@/components/users/UserManagement';
+import ProductManagement from '@/components/products/ProductManagement';
+import SalesMonitoring from '@/components/sales/SalesMonitoring';
+import TransferMonitoring from '@/components/transfers/TransferMonitoring';
+import SalesTerminal from '@/components/sales/SalesTerminal';
+import ExchangeRate from '@/components/exchange/ExchangeRate';
+import WorkerManagement from '@/components/workers/WorkerManagement';
+import EmployeeManagement from '@/components/workers/EmployeeManagement';
+import Settings from '@/components/settings/Settings';
+import KryptoLogo from '@/components/KryptoLogo';
+import SaveStatusIndicator from '@/components/SaveStatusIndicator';
 
 interface DashboardProps {
-  userRole: 'admin' | 'worker';
+  user: User;
+  onLogout: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ userRole }) => {
-  const { users, products, transactions } = useAppData();
-  const [lastRefresh, setLastRefresh] = useState<string>(() => {
-    return localStorage.getItem('dashboard-last-refresh') || new Date().toISOString();
-  });
-  
-  // Filter students only
-  const students = users.filter(user => user.role === 'student');
+const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
+  const { users, products, transactions, exchangeRate } = useAppData();
+  const [activeTab, setActiveTab] = useState('overview');
+  const { toast } = useToast();
 
-  // Check if 24 hours have passed and refresh data
   useEffect(() => {
-    const checkRefresh = () => {
-      const now = new Date();
-      const lastRefreshDate = new Date(lastRefresh);
-      const hoursDiff = (now.getTime() - lastRefreshDate.getTime()) / (1000 * 60 * 60);
-      
-      if (hoursDiff >= 24) {
-        setLastRefresh(now.toISOString());
-        localStorage.setItem('dashboard-last-refresh', now.toISOString());
-      }
-    };
+    toast({
+      title: "Welcome!",
+      description: `Hello ${user.name}, you're logged in as ${user.role}`,
+    });
+  }, [user.name, user.role, toast]);
 
-    checkRefresh();
-    // Check every hour
-    const interval = setInterval(checkRefresh, 60 * 60 * 1000);
-    
-    return () => clearInterval(interval);
-  }, [lastRefresh]);
+  // Calculate stats
+  const totalStudents = users.filter(u => u.role === 'student').length;
+  const totalProducts = products.length;
+  const totalTransactions = transactions.length;
+  const totalRevenue = transactions
+    .filter(t => t.type === 'purchase')
+    .reduce((sum, t) => sum + t.amount, 0);
 
-  // Filter transactions for today's sales (reset at midnight)
-  const today = new Date().toDateString();
-  const todayTransactions = transactions.filter(t => 
-    new Date(t.createdAt).toDateString() === today
-  );
+  const lowStockProducts = products.filter(p => p.stock < 10 && p.stock > 0);
+  const outOfStockProducts = products.filter(p => p.stock === 0);
 
-  // Calculate dynamic stats from real data
-  const stats = {
-    totalStudents: students.length,
-    totalBalance: students.reduce((sum, student) => sum + student.balance, 0),
-    totalProducts: products.length,
-    todaySales: todayTransactions
-      .filter(t => t.type === 'purchase')
-      .reduce((sum, t) => sum + t.amount, 0),
-    recentTransactions: transactions
-      .slice(-5)
-      .reverse() // Show most recent first
-  };
+  const recentTransactions = transactions.slice(0, 5);
 
-  const getTransactionIcon = (type: string) => {
-    switch (type) {
-      case 'purchase':
-        return '🛒';
-      case 'deposit':
-        return '💰';
-      case 'deduction':
-        return '❌';
-      case 'transfer':
-        return '↔️';
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'users':
+        return <UserManagement />;
+      case 'products':
+        return <ProductManagement />;
+      case 'sales-monitoring':
+        return <SalesMonitoring />;
+      case 'transfers':
+        return <TransferMonitoring />;
+      case 'sales-terminal':
+        return <SalesTerminal userEmail={user.email} />;
+      case 'exchange':
+        return <ExchangeRate />;
+      case 'workers':
+        return <WorkerManagement />;
+      case 'employees':
+        return <EmployeeManagement />;
+      case 'settings':
+        return <Settings />;
       default:
-        return '📝';
-    }
-  };
+        return (
+          <div className="space-y-6">
+            {/* Overview content */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <Users className="h-8 w-8 text-blue-600" />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-muted-foreground">Total Students</p>
+                      <p className="text-2xl font-bold">{totalStudents}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-  const getTransactionColor = (type: string) => {
-    switch (type) {
-      case 'purchase':
-        return 'text-red-600 dark:text-red-400';
-      case 'deposit':
-        return 'text-green-600 dark:text-green-400';
-      case 'deduction':
-        return 'text-orange-600 dark:text-orange-400';
-      case 'transfer':
-        return 'text-blue-600 dark:text-blue-400';
-      default:
-        return 'text-slate-600 dark:text-slate-400';
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <Package className="h-8 w-8 text-green-600" />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-muted-foreground">Products</p>
+                      <p className="text-2xl font-bold">{totalProducts}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <TrendingUp className="h-8 w-8 text-purple-600" />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-muted-foreground">Transactions</p>
+                      <p className="text-2xl font-bold">{totalTransactions}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <CreditCard className="h-8 w-8 text-orange-600" />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-muted-foreground">Revenue</p>
+                      <div className="flex items-center gap-1">
+                        <KryptoLogo size="sm" />
+                        <p className="text-2xl font-bold">K$ {totalRevenue}</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Quick Actions and Recent Activity */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Inventory Alerts</CardTitle>
+                  <CardDescription>Products that need attention</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {outOfStockProducts.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-red-600 mb-2">Out of Stock</h4>
+                      {outOfStockProducts.map(product => (
+                        <div key={product.id} className="flex justify-between items-center p-2 bg-red-50 rounded">
+                          <span>{product.name}</span>
+                          <Badge variant="destructive">0 left</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {lowStockProducts.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-yellow-600 mb-2">Low Stock</h4>
+                      {lowStockProducts.map(product => (
+                        <div key={product.id} className="flex justify-between items-center p-2 bg-yellow-50 rounded">
+                          <span>{product.name}</span>
+                          <Badge variant="secondary">{product.stock} left</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {outOfStockProducts.length === 0 && lowStockProducts.length === 0 && (
+                    <p className="text-muted-foreground">All products are well stocked! 🎉</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Transactions</CardTitle>
+                  <CardDescription>Latest 5 transactions</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {recentTransactions.length > 0 ? (
+                    <div className="space-y-2">
+                      {recentTransactions.map(transaction => (
+                        <div key={transaction.id} className="flex justify-between items-center p-2 border rounded">
+                          <div>
+                            <p className="font-medium">{transaction.studentName}</p>
+                            <p className="text-sm text-muted-foreground">{transaction.description}</p>
+                          </div>
+                          <div className="text-right">
+                            <div className="flex items-center gap-1">
+                              <KryptoLogo size="sm" />
+                              <span className={transaction.type === 'purchase' ? 'text-red-600' : 'text-green-600'}>
+                                {transaction.type === 'purchase' ? '-' : '+'}K$ {Math.abs(transaction.amount)}
+                              </span>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(transaction.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No transactions yet</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        );
     }
   };
 
   return (
-    <div className="space-y-6 p-6 bg-slate-50 dark:bg-slate-900 min-h-screen">
-      <div>
-        <h1 className="text-3xl font-semibold text-slate-800 dark:text-slate-200 mb-2">Dashboard</h1>
-        <p className="text-slate-600 dark:text-slate-400">
-          Welcome back! Here's what's happening with Krypto Bucks today.
-        </p>
-        <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
-          Last refreshed: {new Date(lastRefresh).toLocaleString()} • Auto-refresh: Every 24 hours
-        </p>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="animate-fade-in hover:shadow-lg transition-all duration-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">Total Students</CardTitle>
-            <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-slate-800 dark:text-slate-200">{stats.totalStudents}</div>
-            <p className="text-xs text-slate-600 dark:text-slate-400">
-              Active registered students
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="animate-fade-in hover:shadow-lg transition-all duration-200" style={{ animationDelay: '0.1s' }}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">Total K$ in System</CardTitle>
-            <KryptoLogo size="sm" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-slate-800 dark:text-slate-200">K$ {stats.totalBalance.toLocaleString()}</div>
-            <p className="text-xs text-slate-600 dark:text-slate-400">
-              KES {(stats.totalBalance / 51).toFixed(2)}
-            </p>
-          </CardContent>
-        </Card>
-
-        {userRole === 'admin' && (
-          <Card className="animate-fade-in hover:shadow-lg transition-all duration-200" style={{ animationDelay: '0.2s' }}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">Products</CardTitle>
-              <Package className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200">{stats.totalProducts}</div>
-              <p className="text-xs text-slate-600 dark:text-slate-400">
-                Available in store
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="container mx-auto p-6">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center space-x-4">
+            <KryptoLogo size="lg" />
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Krypto Bucks Dashboard
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300">
+                Welcome back, {user.name}!
               </p>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          </div>
+          
+          <Button 
+            onClick={onLogout} 
+            variant="outline"
+            className="hover:shadow-md transition-all duration-200"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Logout
+          </Button>
+        </div>
 
-        <Card className="animate-fade-in hover:shadow-lg transition-all duration-200" style={{ animationDelay: '0.3s' }}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">Today's Sales</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-slate-800 dark:text-slate-200">K$ {stats.todaySales}</div>
-            <p className="text-xs text-slate-600 dark:text-slate-400">
-              From {todayTransactions.filter(t => t.type === 'purchase').length} transactions
-            </p>
-          </CardContent>
-        </Card>
+        {/* Navigation Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 lg:grid-cols-9">
+            <TabsTrigger value="overview" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              <span className="hidden sm:inline">Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              <span className="hidden sm:inline">Users</span>
+            </TabsTrigger>
+            <TabsTrigger value="products" className="flex items-center gap-2">
+              <Package className="w-4 h-4" />
+              <span className="hidden sm:inline">Products</span>
+            </TabsTrigger>
+            <TabsTrigger value="sales-terminal" className="flex items-center gap-2">
+              <ShoppingCart className="w-4 h-4" />
+              <span className="hidden sm:inline">Sales</span>
+            </TabsTrigger>
+            <TabsTrigger value="sales-monitoring" className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" />
+              <span className="hidden sm:inline">Monitor</span>
+            </TabsTrigger>
+            <TabsTrigger value="transfers" className="flex items-center gap-2">
+              <CreditCard className="w-4 h-4" />
+              <span className="hidden sm:inline">Transfers</span>
+            </TabsTrigger>
+            <TabsTrigger value="exchange" className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" />
+              <span className="hidden sm:inline">Exchange</span>
+            </TabsTrigger>
+            <TabsTrigger value="workers" className="flex items-center gap-2">
+              <UserCheck className="w-4 h-4" />
+              <span className="hidden sm:inline">Workers</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              <span className="hidden sm:inline">Settings</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value={activeTab} className="space-y-6">
+            {renderTabContent()}
+          </TabsContent>
+        </Tabs>
       </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card className="animate-fade-in hover:shadow-lg transition-all duration-200" style={{ animationDelay: '0.4s' }}>
-          <CardHeader>
-            <CardTitle className="text-slate-800 dark:text-slate-200">Recent Activity</CardTitle>
-            <CardDescription>Latest transactions in the system (refreshes daily)</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {stats.recentTransactions.length === 0 ? (
-                <p className="text-slate-600 dark:text-slate-400 text-center py-4">No recent transactions</p>
-              ) : (
-                stats.recentTransactions.map((transaction) => (
-                  <div key={transaction.id} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600 hover:shadow-sm transition-all duration-200">
-                    <div className="flex items-center space-x-3">
-                      <span className="text-lg">{getTransactionIcon(transaction.type)}</span>
-                      <div>
-                        <p className="font-medium text-sm text-slate-800 dark:text-slate-200">{transaction.studentName}</p>
-                        <p className="text-xs text-slate-600 dark:text-slate-400">{transaction.description}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className={`font-medium text-sm ${getTransactionColor(transaction.type)}`}>
-                        {transaction.type === 'purchase' || transaction.type === 'deduction' || (transaction.type === 'transfer' && transaction.amount < 0) ? '' : '+'}K$ {Math.abs(transaction.amount)}
-                      </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-500">
-                        {new Date(transaction.createdAt).toLocaleTimeString()}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="animate-fade-in hover:shadow-lg transition-all duration-200" style={{ animationDelay: '0.5s' }}>
-          <CardHeader>
-            <CardTitle className="text-slate-800 dark:text-slate-200">System Overview</CardTitle>
-            <CardDescription>Quick system health check</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-700 dark:text-slate-300">Active Students</span>
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                {students.filter(s => s.balance > 0).length}
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-700 dark:text-slate-300">Scanner Status</span>
-              <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Ready</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-700 dark:text-slate-300">Low Stock Items</span>
-              <Badge variant="secondary" className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
-                {products.filter(p => p.stock < 10 && p.stock > 0).length}
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-700 dark:text-slate-300">Out of Stock</span>
-              <Badge variant={products.filter(p => p.stock === 0).length > 0 ? "destructive" : "secondary"}>
-                {products.filter(p => p.stock === 0).length}
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-700 dark:text-slate-300">System Health</span>
-              <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Excellent</Badge>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      
+      {/* Save Status Indicator - Only show on overview tab */}
+      {activeTab === 'overview' && <SaveStatusIndicator />}
     </div>
   );
 };

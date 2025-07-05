@@ -12,6 +12,7 @@ import { useAppData } from '@/contexts/AppDataContext';
 import { User, Product, Transaction } from '@/types';
 import KryptoLogo from '@/components/KryptoLogo';
 import DigitalReceipt from './DigitalReceipt';
+import ReceiptHistory from './ReceiptHistory';
 
 interface ProductPurchaseProps {
   student: User;
@@ -31,10 +32,27 @@ const ProductPurchase: React.FC<ProductPurchaseProps> = ({ student, setStudent }
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
   const { toast } = useToast();
 
-  // Refresh data when component mounts
+  // Refresh data when component mounts and periodically
   useEffect(() => {
     refreshData();
+    const interval = setInterval(refreshData, 30000); // Refresh every 30 seconds
+    return () => clearInterval(interval);
   }, [refreshData]);
+
+  // Update cart when products change (stock updates)
+  useEffect(() => {
+    setCart(prev => prev.map(cartItem => {
+      const updatedProduct = products.find(p => p.id === cartItem.product.id);
+      if (updatedProduct) {
+        return {
+          ...cartItem,
+          product: updatedProduct,
+          quantity: Math.min(cartItem.quantity, updatedProduct.stock)
+        };
+      }
+      return cartItem;
+    }).filter(item => item.quantity > 0));
+  }, [products]);
 
   const addToCart = (product: Product) => {
     if (product.stock <= 0) {
@@ -169,6 +187,16 @@ const ProductPurchase: React.FC<ProductPurchaseProps> = ({ student, setStudent }
       });
     }
   };
+
+  // Show receipt history
+  if (showHistory) {
+    return (
+      <ReceiptHistory 
+        studentId={student.id} 
+        onBack={() => setShowHistory(false)}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
