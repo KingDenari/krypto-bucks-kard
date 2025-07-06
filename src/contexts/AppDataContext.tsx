@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { User, Product, Transaction, Worker, Employee, ExchangeRate } from '@/types';
 import { initialUsers, initialProducts } from '@/data/data';
@@ -72,12 +73,42 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
+  const saveToCSVFile = (type: 'users' | 'products', data: User[] | Product[]) => {
+    if (currentAccount === 'kbucks@admin.com') {
+      try {
+        localStorage.setItem(`csv_${type}`, JSON.stringify(data));
+        console.log(`Saved ${type} data to CSV storage`);
+      } catch (error) {
+        console.error(`Error saving ${type} to CSV:`, error);
+      }
+    }
+  };
+
+  const loadFromCSVFile = (type: 'users' | 'products') => {
+    if (currentAccount === 'kbucks@admin.com') {
+      try {
+        const stored = localStorage.getItem(`csv_${type}`);
+        return stored ? JSON.parse(stored) : null;
+      } catch (error) {
+        console.error(`Error loading ${type} from CSV:`, error);
+        return null;
+      }
+    }
+    return null;
+  };
+
   const saveData = async () => {
     if (!currentAccount || !isInitialized) return;
     
     console.log('Saving data for account:', currentAccount);
     
     try {
+      // Save to CSV if admin account
+      if (currentAccount === 'kbucks@admin.com') {
+        saveToCSVFile('users', users);
+        saveToCSVFile('products', products);
+      }
+
       // Try to save to Supabase first
       await Promise.all([
         syncUsersToSupabase(users, currentAccount),
@@ -164,7 +195,29 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setIsInitialized(false);
     
     try {
-      // Try to load from Supabase first with better error handling
+      // Try to load from CSV first if admin account
+      if (accountEmail === 'kbucks@admin.com') {
+        const csvUsers = loadFromCSVFile('users');
+        const csvProducts = loadFromCSVFile('products');
+        
+        if (csvUsers && csvUsers.length > 0) {
+          setUsers(csvUsers);
+          console.log('Loaded users from CSV:', csvUsers.length);
+        }
+        
+        if (csvProducts && csvProducts.length > 0) {
+          setProducts(csvProducts);
+          console.log('Loaded products from CSV:', csvProducts.length);
+        }
+        
+        if (csvUsers || csvProducts) {
+          setTransactions([]);
+          setIsInitialized(true);
+          return;
+        }
+      }
+
+      // Try to load from Supabase with better error handling
       const [usersResult, productsResult, transactionsResult, rateResult] = await Promise.allSettled([
         supabase.from('users').select('*').eq('account_email', accountEmail),
         supabase.from('products').select('*').eq('account_email', accountEmail),
@@ -365,27 +418,59 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const addUser = (user: User) => {
-    setUsers(prev => [...prev, user]);
-    // Auto-export to CSV when adding a student
+    const newUsers = [...users, user];
+    setUsers(newUsers);
+    
+    // Save to CSV if admin account
+    if (currentAccount === 'kbucks@admin.com') {
+      saveToCSVFile('users', newUsers);
+    }
+    
+    // Auto-export to download CSV
     setTimeout(() => exportToCSV('users'), 100);
   };
 
   const deleteUser = (id: string) => {
-    setUsers(prev => prev.filter(user => user.id !== id));
+    const newUsers = users.filter(user => user.id !== id);
+    setUsers(newUsers);
+    
+    // Save to CSV if admin account
+    if (currentAccount === 'kbucks@admin.com') {
+      saveToCSVFile('users', newUsers);
+    }
   };
 
   const addProduct = (product: Product) => {
-    setProducts(prev => [...prev, product]);
-    // Auto-export to CSV when adding a product
+    const newProducts = [...products, product];
+    setProducts(newProducts);
+    
+    // Save to CSV if admin account
+    if (currentAccount === 'kbucks@admin.com') {
+      saveToCSVFile('products', newProducts);
+    }
+    
+    // Auto-export to download CSV
     setTimeout(() => exportToCSV('products'), 100);
   };
 
   const updateProduct = async (id: string, updates: Partial<Product>) => {
-    setProducts(prev => prev.map(product => product.id === id ? { ...product, ...updates } : product));
+    const newProducts = products.map(product => product.id === id ? { ...product, ...updates } : product);
+    setProducts(newProducts);
+    
+    // Save to CSV if admin account
+    if (currentAccount === 'kbucks@admin.com') {
+      saveToCSVFile('products', newProducts);
+    }
   };
 
   const deleteProduct = (id: string) => {
-    setProducts(prev => prev.filter(product => product.id !== id));
+    const newProducts = products.filter(product => product.id !== id);
+    setProducts(newProducts);
+    
+    // Save to CSV if admin account
+    if (currentAccount === 'kbucks@admin.com') {
+      saveToCSVFile('products', newProducts);
+    }
   };
 
   const addTransaction = (transaction: Transaction) => {
