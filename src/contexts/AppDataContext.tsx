@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { User, Product, Transaction, Worker, Employee, ExchangeRate } from '@/types';
 import { initialUsers, initialProducts } from '@/data/data';
@@ -257,8 +256,6 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           setExchangeRate(localRate);
         }
       }
-
-      setSaveStatus('saved');
 
     } catch (error) {
       console.error('Error loading data from Supabase, trying localStorage:', error);
