@@ -29,6 +29,7 @@ import EmployeeManagement from '@/components/workers/EmployeeManagement';
 import Settings from '@/components/settings/Settings';
 import KryptoLogo from '@/components/KryptoLogo';
 import SaveStatusIndicator from '@/components/SaveStatusIndicator';
+import { Settings as SettingsIcon } from 'lucide-react';
 
 interface DashboardProps {
   user: User;
@@ -277,7 +278,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               <span className="hidden sm:inline">Workers</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
-              <Settings className="w-4 h-4" />
+              <SettingsIcon className="w-4 h-4" />
               <span className="hidden sm:inline">Settings</span>
             </TabsTrigger>
           </TabsList>
