@@ -1,8 +1,8 @@
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { User, Product, Transaction, Worker, Employee, ExchangeRate } from '@/types';
 import { initialUsers, initialProducts } from '@/data/data';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 interface AppDataContextType {
   users: User[];
@@ -12,7 +12,6 @@ interface AppDataContextType {
   employees: Employee[];
   exchangeRate: ExchangeRate;
   currentAccount: string | null;
-  saveStatus: 'saving' | 'saved' | 'error' | 'local';
   getUserBySecretCode: (secretCode: string) => User | undefined;
   getUserByBarcode: (barcode: string) => User | undefined;
   updateUser: (id: string, updates: Partial<User>) => Promise<void>;
@@ -37,6 +36,7 @@ interface AppDataContextType {
   clearStudentTransactions: (studentId: string) => void;
   setCurrentAccount: (email: string) => void;
   refreshData: () => void;
+  exportToCSV: (type: 'users' | 'products') => void;
 }
 
 const AppDataContext = createContext<AppDataContextType | undefined>(undefined);
@@ -48,15 +48,12 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [saveStatus, setSaveStatus] = useState<'saving' | 'saved' | 'error' | 'local'>('saved');
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate>({
     kshToKrypto: 0.5,
     lastUpdated: new Date().toISOString(),
     updatedBy: 'system'
   });
   const [isInitialized, setIsInitialized] = useState(false);
-
-  const { toast } = useToast();
 
   const saveToLocalStorage = (key: string, data: any) => {
     try {
@@ -79,7 +76,6 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const saveData = async () => {
     if (!currentAccount || !isInitialized) return;
     
-    setSaveStatus('saving');
     console.log('Saving data for account:', currentAccount);
     
     try {
@@ -98,7 +94,6 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       saveToLocalStorage('exchangeRate', exchangeRate);
       
       console.log('Data saved successfully to Supabase');
-      setSaveStatus('saved');
       
     } catch (error) {
       console.error('Error saving to Supabase, falling back to localStorage:', error);
@@ -108,15 +103,37 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       saveToLocalStorage('products', products);
       saveToLocalStorage('transactions', transactions);
       saveToLocalStorage('exchangeRate', exchangeRate);
-      
-      setSaveStatus('local');
-      
-      toast({
-        title: "Save Warning",
-        description: "Data saved locally only. Check internet connection.",
-        variant: "destructive",
-      });
     }
+  };
+
+  const exportToCSV = (type: 'users' | 'products') => {
+    let csvContent = '';
+    let filename = '';
+    
+    if (type === 'users') {
+      const students = users.filter(u => u.role === 'student');
+      csvContent = 'Name,Email,Grade,Balance,Barcode,Secret Code,Created At\n';
+      students.forEach(user => {
+        csvContent += `"${user.name}","${user.email}","${user.grade || ''}",${user.balance},"${user.barcode}","${user.secretCode}","${user.createdAt}"\n`;
+      });
+      filename = 'students.csv';
+    } else if (type === 'products') {
+      csvContent = 'Name,Price,Stock,Category,Created At\n';
+      products.forEach(product => {
+        csvContent += `"${product.name}",${product.price},${product.stock},"${product.category}","${product.createdAt}"\n`;
+      });
+      filename = 'products.csv';
+    }
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const refreshData = async () => {
@@ -129,7 +146,6 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const setCurrentAccount = (email: string) => {
     console.log('Setting current account to:', email);
     setCurrentAccountState(email);
-    // Store current account in localStorage so it persists
     localStorage.setItem('kbucks_current_account', email);
     loadDataForAccount(email);
   };
@@ -147,7 +163,6 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const loadDataForAccount = async (accountEmail: string) => {
     console.log('Loading data for account:', accountEmail);
     setIsInitialized(false);
-    setSaveStatus('saving');
     
     try {
       // Try to load from Supabase first with better error handling
@@ -259,8 +274,6 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setTransactions(localTransactions || []);
       if (localRate) setExchangeRate(localRate);
       
-      setSaveStatus('local');
-      
     } finally {
       setIsInitialized(true);
     }
@@ -356,6 +369,8 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const addUser = (user: User) => {
     setUsers(prev => [...prev, user]);
+    // Auto-export to CSV when adding a student
+    setTimeout(() => exportToCSV('users'), 100);
   };
 
   const deleteUser = (id: string) => {
@@ -364,6 +379,8 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const addProduct = (product: Product) => {
     setProducts(prev => [...prev, product]);
+    // Auto-export to CSV when adding a product
+    setTimeout(() => exportToCSV('products'), 100);
   };
 
   const updateProduct = async (id: string, updates: Partial<Product>) => {
@@ -557,7 +574,6 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     employees,
     exchangeRate,
     currentAccount,
-    saveStatus,
     getUserBySecretCode,
     getUserByBarcode,
     updateUser,
@@ -582,6 +598,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     purchaseProduct,
     setCurrentAccount,
     refreshData,
+    exportToCSV,
   };
 
   return (

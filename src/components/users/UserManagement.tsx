@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,13 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Download } from 'lucide-react';
+import { Plus, Edit, Trash2, Download, FileDown } from 'lucide-react';
 import { User } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { useAppData } from '@/contexts/AppDataContext';
 
 const UserManagement: React.FC = () => {
-  const { users, addUser, updateUser, deleteUser } = useAppData();
+  const { users, addUser, updateUser, deleteUser, exportToCSV } = useAppData();
   const [students, setStudents] = useState<User[]>([]);
   
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -78,7 +77,7 @@ const UserManagement: React.FC = () => {
     };
 
     try {
-      await addUser(user);
+      addUser(user);
       setNewUser({ name: '', email: '', balance: 0, grade: '', barcode: '', secretCode: '' });
       setIsAddDialogOpen(false);
       
@@ -114,12 +113,12 @@ const UserManagement: React.FC = () => {
     }
   };
 
-  const handleDeleteUser = async (userId: string) => {
+  const handleDeleteUser = async (userId: string, userName: string) => {
     try {
-      await deleteUser(userId);
+      deleteUser(userId);
       toast({
         title: "Success",
-        description: "Student deleted successfully",
+        description: `${userName} deleted successfully`,
       });
     } catch (error) {
       toast({
@@ -166,84 +165,95 @@ const UserManagement: React.FC = () => {
           <p className="text-muted-foreground">Manage student accounts and balances</p>
         </div>
         
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Student
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Student</DialogTitle>
-              <DialogDescription>
-                Create a new student account with initial balance
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="name">Name *</Label>
-                <Input
-                  id="name"
-                  value={newUser.name}
-                  onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                  placeholder="Enter student name"
-                />
-              </div>
-              <div>
-                <Label htmlFor="email">Email *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={newUser.email}
-                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                  placeholder="Enter student email"
-                />
-              </div>
-              <div>
-                <Label htmlFor="grade">Grade *</Label>
-                <Input
-                  id="grade"
-                  value={newUser.grade}
-                  onChange={(e) => setNewUser({ ...newUser, grade: e.target.value })}
-                  placeholder="Enter student grade (e.g., Grade 5, 10th Grade)"
-                />
-              </div>
-              <div>
-                <Label htmlFor="barcode">Barcode (optional)</Label>
-                <Input
-                  id="barcode"
-                  value={newUser.barcode}
-                  onChange={(e) => setNewUser({ ...newUser, barcode: e.target.value })}
-                  placeholder="Enter custom barcode or leave empty for auto-generated"
-                />
-              </div>
-              <div>
-                <Label htmlFor="secretCode">Secret Code (optional)</Label>
-                <Input
-                  id="secretCode"
-                  value={newUser.secretCode}
-                  onChange={(e) => setNewUser({ ...newUser, secretCode: e.target.value })}
-                  placeholder="Enter custom secret code or leave empty for auto-generated"
-                />
-              </div>
-              <div>
-                <Label htmlFor="balance">Initial Balance (K$)</Label>
-                <Input
-                  id="balance"
-                  type="number"
-                  step="0.01"
-                  value={newUser.balance}
-                  onChange={(e) => setNewUser({ ...newUser, balance: parseFloat(e.target.value) || 0 })}
-                  placeholder="0.00"
-                />
-              </div>
-              <Button onClick={handleAddUser} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                Create Student Account
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => exportToCSV('users')} 
+            variant="outline"
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            <FileDown className="w-4 h-4 mr-2" />
+            Export CSV
+          </Button>
+          
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Student
               </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Student</DialogTitle>
+                <DialogDescription>
+                  Create a new student account with initial balance
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Name *</Label>
+                  <Input
+                    id="name"
+                    value={newUser.name}
+                    onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                    placeholder="Enter student name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={newUser.email}
+                    onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                    placeholder="Enter student email"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="grade">Grade *</Label>
+                  <Input
+                    id="grade"
+                    value={newUser.grade}
+                    onChange={(e) => setNewUser({ ...newUser, grade: e.target.value })}
+                    placeholder="Enter student grade (e.g., Grade 5, 10th Grade)"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="barcode">Barcode (optional)</Label>
+                  <Input
+                    id="barcode"
+                    value={newUser.barcode}
+                    onChange={(e) => setNewUser({ ...newUser, barcode: e.target.value })}
+                    placeholder="Enter custom barcode or leave empty for auto-generated"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="secretCode">Secret Code (optional)</Label>
+                  <Input
+                    id="secretCode"
+                    value={newUser.secretCode}
+                    onChange={(e) => setNewUser({ ...newUser, secretCode: e.target.value })}
+                    placeholder="Enter custom secret code or leave empty for auto-generated"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="balance">Initial Balance (K$)</Label>
+                  <Input
+                    id="balance"
+                    type="number"
+                    step="0.01"
+                    value={newUser.balance}
+                    onChange={(e) => setNewUser({ ...newUser, balance: parseFloat(e.target.value) || 0 })}
+                    placeholder="0.00"
+                  />
+                </div>
+                <Button onClick={handleAddUser} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                  Create Student Account
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <Card>
@@ -307,7 +317,7 @@ const UserManagement: React.FC = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleDeleteUser(user.id)}
+                          onClick={() => handleDeleteUser(user.id, user.name)}
                         >
                           <Trash2 className="w-3 h-3" />
                         </Button>
