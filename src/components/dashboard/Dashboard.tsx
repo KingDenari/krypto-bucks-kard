@@ -37,9 +37,16 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
-  const { users, products, transactions, exchangeRate } = useAppData();
+  const { users, products, transactions, exchangeRate, setCurrentAccount } = useAppData();
   const [activeTab, setActiveTab] = useState('overview');
   const { toast } = useToast();
+
+  // Set current account when dashboard loads
+  useEffect(() => {
+    if (user.email) {
+      setCurrentAccount(user.email);
+    }
+  }, [user.email, setCurrentAccount]);
 
   useEffect(() => {
     toast({

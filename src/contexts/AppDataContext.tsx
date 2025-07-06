@@ -80,6 +80,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (!currentAccount || !isInitialized) return;
     
     setSaveStatus('saving');
+    console.log('Saving data for account:', currentAccount);
     
     try {
       // Try to save to Supabase first
@@ -96,6 +97,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       saveToLocalStorage('transactions', transactions);
       saveToLocalStorage('exchangeRate', exchangeRate);
       
+      console.log('Data saved successfully to Supabase');
       setSaveStatus('saved');
       
     } catch (error) {
@@ -108,11 +110,18 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       saveToLocalStorage('exchangeRate', exchangeRate);
       
       setSaveStatus('local');
+      
+      toast({
+        title: "Save Warning",
+        description: "Data saved locally only. Check internet connection.",
+        variant: "destructive",
+      });
     }
   };
 
   const refreshData = async () => {
     if (currentAccount) {
+      console.log('Refreshing data for account:', currentAccount);
       await loadDataForAccount(currentAccount);
     }
   };
@@ -120,41 +129,38 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const setCurrentAccount = (email: string) => {
     console.log('Setting current account to:', email);
     setCurrentAccountState(email);
+    // Store current account in localStorage so it persists
+    localStorage.setItem('kbucks_current_account', email);
     loadDataForAccount(email);
   };
+
+  // Load current account from localStorage on app start
+  useEffect(() => {
+    const savedAccount = localStorage.getItem('kbucks_current_account');
+    if (savedAccount && !currentAccount) {
+      console.log('Loading saved account:', savedAccount);
+      setCurrentAccountState(savedAccount);
+      loadDataForAccount(savedAccount);
+    }
+  }, []);
 
   const loadDataForAccount = async (accountEmail: string) => {
     console.log('Loading data for account:', accountEmail);
     setIsInitialized(false);
+    setSaveStatus('saving');
     
     try {
-      // Try to load from Supabase first
-      const { data: usersData, error: usersError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('account_email', accountEmail);
-
-      const { data: productsData, error: productsError } = await supabase
-        .from('products')
-        .select('*')
-        .eq('account_email', accountEmail);
-
-      const { data: transactionsData, error: transactionsError } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('account_email', accountEmail)
-        .order('created_at', { ascending: false });
-
-      const { data: rateData, error: rateError } = await supabase
-        .from('exchange_rates')
-        .select('*')
-        .eq('account_email', accountEmail)
-        .order('updated_at', { ascending: false })
-        .limit(1);
+      // Try to load from Supabase first with better error handling
+      const [usersResult, productsResult, transactionsResult, rateResult] = await Promise.allSettled([
+        supabase.from('users').select('*').eq('account_email', accountEmail),
+        supabase.from('products').select('*').eq('account_email', accountEmail),
+        supabase.from('transactions').select('*').eq('account_email', accountEmail).order('created_at', { ascending: false }),
+        supabase.from('exchange_rates').select('*').eq('account_email', accountEmail).order('updated_at', { ascending: false }).limit(1)
+      ]);
 
       // Load users
-      if (!usersError && usersData && usersData.length > 0) {
-        const formattedUsers: User[] = usersData.map(user => ({
+      if (usersResult.status === 'fulfilled' && !usersResult.value.error && usersResult.value.data && usersResult.value.data.length > 0) {
+        const formattedUsers: User[] = usersResult.value.data.map(user => ({
           id: user.id,
           name: user.name,
           email: '',
@@ -180,8 +186,8 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
 
       // Load products
-      if (!productsError && productsData && productsData.length > 0) {
-        const formattedProducts: Product[] = productsData.map(product => ({
+      if (productsResult.status === 'fulfilled' && !productsResult.value.error && productsResult.value.data && productsResult.value.data.length > 0) {
+        const formattedProducts: Product[] = productsResult.value.data.map(product => ({
           id: product.id,
           name: product.name,
           price: parseFloat(product.price?.toString() || '0'),
@@ -192,7 +198,6 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setProducts(formattedProducts);
         console.log('Loaded products from Supabase:', formattedProducts.length);
       } else {
-        // Try localStorage fallback
         const localProducts = loadFromLocalStorage('products');
         if (localProducts && localProducts.length > 0) {
           setProducts(localProducts);
@@ -204,8 +209,8 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
 
       // Load transactions
-      if (!transactionsError && transactionsData) {
-        const formattedTransactions: Transaction[] = transactionsData.map(transaction => ({
+      if (transactionsResult.status === 'fulfilled' && !transactionsResult.value.error && transactionsResult.value.data) {
+        const formattedTransactions: Transaction[] = transactionsResult.value.data.map(transaction => ({
           id: transaction.id,
           studentId: transaction.student_id || '',
           studentName: transaction.student_name,
@@ -224,10 +229,10 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
 
       // Load exchange rate
-      if (!rateError && rateData && rateData.length > 0) {
+      if (rateResult.status === 'fulfilled' && !rateResult.value.error && rateResult.value.data && rateResult.value.data.length > 0) {
         const newRate = {
-          kshToKrypto: parseFloat(rateData[0].ksh_to_krypto?.toString() || '0.5'),
-          lastUpdated: rateData[0].updated_at || new Date().toISOString(),
+          kshToKrypto: parseFloat(rateResult.value.data[0].ksh_to_krypto?.toString() || '0.5'),
+          lastUpdated: rateResult.value.data[0].updated_at || new Date().toISOString(),
           updatedBy: 'system'
         };
         setExchangeRate(newRate);
@@ -237,6 +242,8 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           setExchangeRate(localRate);
         }
       }
+
+      setSaveStatus('saved');
 
     } catch (error) {
       console.error('Error loading data from Supabase, trying localStorage:', error);
@@ -251,6 +258,8 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setProducts(localProducts || initialProducts);
       setTransactions(localTransactions || []);
       if (localRate) setExchangeRate(localRate);
+      
+      setSaveStatus('local');
       
     } finally {
       setIsInitialized(true);
@@ -325,7 +334,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (error) throw error;
   };
 
-  // Auto-save when data changes
+  // Auto-save when data changes with debouncing
   useEffect(() => {
     if (currentAccount && isInitialized) {
       const timeoutId = setTimeout(saveData, 1000);

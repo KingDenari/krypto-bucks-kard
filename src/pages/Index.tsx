@@ -13,17 +13,20 @@ import Settings from '@/components/settings/Settings';
 import ExchangeRate from '@/components/exchange/ExchangeRate';
 import TransferMonitoring from '@/components/transfers/TransferMonitoring';
 import SalesMonitoring from '@/components/sales/SalesMonitoring';
-import { AppDataProvider } from '@/contexts/AppDataContext';
+import { AppDataProvider, useAppData } from '@/contexts/AppDataContext';
 import { AuthUser } from '@/types';
 import Scanner from '@/components/scanner/Scanner';
 
-const Index = () => {
+const IndexContent = () => {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [showStudentView, setShowStudentView] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const { setCurrentAccount } = useAppData();
 
   const handleLogin = (email: string, role: 'admin' | 'worker') => {
+    console.log('Login with email:', email, 'role:', role);
     setAuthUser({ email, role });
+    setCurrentAccount(email); // Set the current account immediately
     setShowStudentView(false);
   };
 
@@ -44,57 +47,55 @@ const Index = () => {
 
   // Show student view
   if (showStudentView) {
-    return (
-      <AppDataProvider>
-        <StudentView onBack={handleBackFromStudent} />
-      </AppDataProvider>
-    );
+    return <StudentView onBack={handleBackFromStudent} />;
   }
 
   // Show login if not authenticated
   if (!authUser) {
-    return (
-      <AppDataProvider>
-        <LoginForm onLogin={handleLogin} onStudentView={handleStudentView} />
-      </AppDataProvider>
-    );
+    return <LoginForm onLogin={handleLogin} onStudentView={handleStudentView} />;
   }
 
   // Show main application
   return (
+    <div className="flex min-h-screen bg-background">
+      <Sidebar 
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onLogout={handleLogout}
+        userRole={authUser.role}
+      />
+      <main className="flex-1 overflow-auto bg-background">
+        {activeTab === 'dashboard' && (
+          <Dashboard 
+            user={{ 
+              id: 'admin-user', 
+              email: authUser.email, 
+              role: authUser.role, 
+              name: 'Admin',
+              balance: 0,
+              createdAt: new Date().toISOString()
+            }}
+            onLogout={handleLogout}
+          />
+        )}
+        {activeTab === 'scan' && <Scanner />}
+        {activeTab === 'sales' && <SalesTerminal userEmail={authUser.email} />}
+        {activeTab === 'exchange' && <ExchangeRate userRole={authUser.role} />}
+        {activeTab === 'settings' && <Settings userEmail={authUser.email} userRole={authUser.role} />}
+        {activeTab === 'users' && authUser.role === 'admin' && <UserManagement />}
+        {activeTab === 'products' && authUser.role === 'admin' && <ProductManagement />}
+        {activeTab === 'workers' && authUser.role === 'admin' && <EmployeeManagement />}
+        {activeTab === 'transfers' && authUser.role === 'admin' && <TransferMonitoring />}
+        {activeTab === 'sales-monitor' && authUser.role === 'admin' && <SalesMonitoring />}
+      </main>
+    </div>
+  );
+};
+
+const Index = () => {
+  return (
     <AppDataProvider>
-      <div className="flex min-h-screen bg-background">
-        <Sidebar 
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          onLogout={handleLogout}
-          userRole={authUser.role}
-        />
-        <main className="flex-1 overflow-auto bg-background">
-          {activeTab === 'dashboard' && (
-            <Dashboard 
-              user={{ 
-                id: 'admin-user', 
-                email: authUser.email, 
-                role: authUser.role, 
-                name: 'Admin',
-                balance: 0,
-                createdAt: new Date().toISOString()
-              }}
-              onLogout={handleLogout}
-            />
-          )}
-          {activeTab === 'scan' && <Scanner />}
-          {activeTab === 'sales' && <SalesTerminal userEmail={authUser.email} />}
-          {activeTab === 'exchange' && <ExchangeRate userRole={authUser.role} />}
-          {activeTab === 'settings' && <Settings userEmail={authUser.email} userRole={authUser.role} />}
-          {activeTab === 'users' && authUser.role === 'admin' && <UserManagement />}
-          {activeTab === 'products' && authUser.role === 'admin' && <ProductManagement />}
-          {activeTab === 'workers' && authUser.role === 'admin' && <EmployeeManagement />}
-          {activeTab === 'transfers' && authUser.role === 'admin' && <TransferMonitoring />}
-          {activeTab === 'sales-monitor' && authUser.role === 'admin' && <SalesMonitoring />}
-        </main>
-      </div>
+      <IndexContent />
     </AppDataProvider>
   );
 };
