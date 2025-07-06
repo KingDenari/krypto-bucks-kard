@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,13 +14,18 @@ import { useAppData } from '@/contexts/AppDataContext';
 
 const UserManagement: React.FC = () => {
   const { users, addUser, updateUser, deleteUser } = useAppData();
-  const students = users.filter(user => user.role === 'student');
+  const [students, setStudents] = useState<User[]>([]);
   
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [newUser, setNewUser] = useState({ name: '', email: '', balance: 0, grade: '', barcode: '', secretCode: '' });
   const { toast } = useToast();
+
+  // Update students list when users change
+  useEffect(() => {
+    setStudents(users.filter(user => user.role === 'student'));
+  }, [users]);
 
   const generateBarcode = () => {
     return Date.now().toString() + Math.random().toString(36).substr(2, 5);
@@ -30,7 +35,7 @@ const UserManagement: React.FC = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
   };
 
-  const handleAddUser = () => {
+  const handleAddUser = async () => {
     if (!newUser.name || !newUser.email || !newUser.grade) {
       toast({
         title: "Error",
@@ -72,33 +77,57 @@ const UserManagement: React.FC = () => {
       createdAt: new Date().toISOString(),
     };
 
-    addUser(user);
-    setNewUser({ name: '', email: '', balance: 0, grade: '', barcode: '', secretCode: '' });
-    setIsAddDialogOpen(false);
-    
-    toast({
-      title: "Success",
-      description: `Student ${user.name} added successfully`,
-    });
+    try {
+      await addUser(user);
+      setNewUser({ name: '', email: '', balance: 0, grade: '', barcode: '', secretCode: '' });
+      setIsAddDialogOpen(false);
+      
+      toast({
+        title: "Success",
+        description: `Student ${user.name} added successfully`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add student",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleEditBalance = (userId: string, newBalance: number) => {
-    updateUser(userId, { balance: newBalance });
-    setIsEditDialogOpen(false);
-    setEditingUser(null);
-    
-    toast({
-      title: "Success",
-      description: "Balance updated successfully",
-    });
+  const handleEditBalance = async (userId: string, newBalance: number) => {
+    try {
+      await updateUser(userId, { balance: newBalance });
+      setIsEditDialogOpen(false);
+      setEditingUser(null);
+      
+      toast({
+        title: "Success",
+        description: "Balance updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error", 
+        description: "Failed to update balance",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDeleteUser = (userId: string) => {
-    deleteUser(userId);
-    toast({
-      title: "Success",
-      description: "Student deleted successfully",
-    });
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      await deleteUser(userId);
+      toast({
+        title: "Success",
+        description: "Student deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete student", 
+        variant: "destructive",
+      });
+    }
   };
 
   const downloadBarcode = (user: User) => {

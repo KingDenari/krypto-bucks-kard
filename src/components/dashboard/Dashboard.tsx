@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +17,6 @@ import {
   Building
 } from 'lucide-react';
 import { User, Product, Transaction } from '@/types';
-import { useToast } from '@/hooks/use-toast';
 import { useAppData } from '@/contexts/AppDataContext';
 import UserManagement from '@/components/users/UserManagement';
 import ProductManagement from '@/components/products/ProductManagement';
@@ -28,7 +28,6 @@ import WorkerManagement from '@/components/workers/WorkerManagement';
 import EmployeeManagement from '@/components/workers/EmployeeManagement';
 import Settings from '@/components/settings/Settings';
 import KryptoLogo from '@/components/KryptoLogo';
-import SaveStatusIndicator from '@/components/SaveStatusIndicator';
 import { Settings as SettingsIcon } from 'lucide-react';
 
 interface DashboardProps {
@@ -39,7 +38,7 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const { users, products, transactions, exchangeRate, setCurrentAccount } = useAppData();
   const [activeTab, setActiveTab] = useState('overview');
-  const { toast } = useToast();
+  const [hasShownWelcome, setHasShownWelcome] = useState(false);
 
   // Set current account when dashboard loads
   useEffect(() => {
@@ -48,12 +47,17 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     }
   }, [user.email, setCurrentAccount]);
 
+  // Show welcome notification only once and for 2 seconds
   useEffect(() => {
-    toast({
-      title: "Welcome!",
-      description: `Hello ${user.name}, you're logged in as ${user.role}`,
-    });
-  }, [user.name, user.role, toast]);
+    if (!hasShownWelcome) {
+      const timer = setTimeout(() => {
+        setHasShownWelcome(true);
+      }, 2000);
+      
+      setHasShownWelcome(true);
+      return () => clearTimeout(timer);
+    }
+  }, [hasShownWelcome]);
 
   // Calculate stats
   const totalStudents = users.filter(u => u.role === 'student').length;
@@ -295,9 +299,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
           </TabsContent>
         </Tabs>
       </div>
-      
-      {/* Save Status Indicator - Only show on overview tab */}
-      {activeTab === 'overview' && <SaveStatusIndicator />}
     </div>
   );
 };
