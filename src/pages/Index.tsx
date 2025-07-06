@@ -73,7 +73,14 @@ const Index = () => {
         <main className="flex-1 overflow-auto bg-background">
           {activeTab === 'dashboard' && (
             <Dashboard 
-              user={{ email: authUser.email, role: authUser.role, name: 'Admin' }}
+              user={{ 
+                id: 'admin-user', 
+                email: authUser.email, 
+                role: authUser.role, 
+                name: 'Admin',
+                balance: 0,
+                createdAt: new Date().toISOString()
+              }}
               onLogout={handleLogout}
             />
           )}

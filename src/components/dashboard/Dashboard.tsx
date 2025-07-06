@@ -74,13 +74,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
       case 'sales-terminal':
         return <SalesTerminal userEmail={user.email} />;
       case 'exchange':
-        return <ExchangeRate userRole={user.role} />;
+        return <ExchangeRate userRole={user.role as 'admin' | 'worker'} />;
       case 'workers':
         return <WorkerManagement />;
       case 'employees':
         return <EmployeeManagement />;
       case 'settings':
-        return <Settings userEmail={user.email} userRole={user.role} />;
+        return <Settings userEmail={user.email} userRole={user.role as 'admin' | 'worker'} />;
       default:
         return (
           <div className="space-y-6">
