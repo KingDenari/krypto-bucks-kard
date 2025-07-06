@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +11,6 @@ import {
   CreditCard, 
   ShoppingCart, 
   BarChart3,
-  Settings,
   LogOut,
   UserCheck,
   Briefcase,
@@ -74,13 +74,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
       case 'sales-terminal':
         return <SalesTerminal userEmail={user.email} />;
       case 'exchange':
-        return <ExchangeRate />;
+        return <ExchangeRate userRole={user.role} />;
       case 'workers':
         return <WorkerManagement />;
       case 'employees':
         return <EmployeeManagement />;
       case 'settings':
-        return <Settings />;
+        return <Settings userEmail={user.email} userRole={user.role} />;
       default:
         return (
           <div className="space-y-6">

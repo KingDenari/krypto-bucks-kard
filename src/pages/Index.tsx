@@ -71,7 +71,12 @@ const Index = () => {
           userRole={authUser.role}
         />
         <main className="flex-1 overflow-auto bg-background">
-          {activeTab === 'dashboard' && <Dashboard userRole={authUser.role} />}
+          {activeTab === 'dashboard' && (
+            <Dashboard 
+              user={{ email: authUser.email, role: authUser.role, name: 'Admin' }}
+              onLogout={handleLogout}
+            />
+          )}
           {activeTab === 'scan' && <Scanner />}
           {activeTab === 'sales' && <SalesTerminal userEmail={authUser.email} />}
           {activeTab === 'exchange' && <ExchangeRate userRole={authUser.role} />}
