@@ -1,8 +1,8 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { User, Product, Transaction, Worker, Employee, ExchangeRate } from '@/types';
 import { initialUsers, initialProducts } from '@/data/data';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface AppDataContextType {
   users: User[];
@@ -55,61 +55,12 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   });
   const [isInitialized, setIsInitialized] = useState(false);
 
-  const saveToLocalStorage = (key: string, data: any) => {
-    try {
-      localStorage.setItem(`kbucks_${currentAccount}_${key}`, JSON.stringify(data));
-    } catch (error) {
-      console.error('Error saving to localStorage:', error);
-    }
-  };
-
-  const loadFromLocalStorage = (key: string) => {
-    try {
-      const stored = localStorage.getItem(`kbucks_${currentAccount}_${key}`);
-      return stored ? JSON.parse(stored) : null;
-    } catch (error) {
-      console.error('Error loading from localStorage:', error);
-      return null;
-    }
-  };
-
-  const saveToCSVFile = (type: 'users' | 'products', data: User[] | Product[]) => {
-    if (currentAccount === 'kbucks@admin.com') {
-      try {
-        localStorage.setItem(`csv_${type}`, JSON.stringify(data));
-        console.log(`Saved ${type} data to CSV storage`);
-      } catch (error) {
-        console.error(`Error saving ${type} to CSV:`, error);
-      }
-    }
-  };
-
-  const loadFromCSVFile = (type: 'users' | 'products') => {
-    if (currentAccount === 'kbucks@admin.com') {
-      try {
-        const stored = localStorage.getItem(`csv_${type}`);
-        return stored ? JSON.parse(stored) : null;
-      } catch (error) {
-        console.error(`Error loading ${type} from CSV:`, error);
-        return null;
-      }
-    }
-    return null;
-  };
-
   const saveData = async () => {
     if (!currentAccount || !isInitialized) return;
     
-    console.log('Saving data for account:', currentAccount);
+    console.log('Saving data to Supabase for account:', currentAccount);
     
     try {
-      // Save to CSV if admin account
-      if (currentAccount === 'kbucks@admin.com') {
-        saveToCSVFile('users', users);
-        saveToCSVFile('products', products);
-      }
-
-      // Try to save to Supabase first
       await Promise.all([
         syncUsersToSupabase(users, currentAccount),
         syncProductsToSupabase(products, currentAccount),
@@ -117,22 +68,15 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         syncExchangeRateToSupabase(exchangeRate, currentAccount)
       ]);
       
-      // Also save to localStorage as backup
-      saveToLocalStorage('users', users);
-      saveToLocalStorage('products', products);
-      saveToLocalStorage('transactions', transactions);
-      saveToLocalStorage('exchangeRate', exchangeRate);
-      
       console.log('Data saved successfully to Supabase');
       
     } catch (error) {
-      console.error('Error saving to Supabase, falling back to localStorage:', error);
-      
-      // Fallback to localStorage only
-      saveToLocalStorage('users', users);
-      saveToLocalStorage('products', products);
-      saveToLocalStorage('transactions', transactions);
-      saveToLocalStorage('exchangeRate', exchangeRate);
+      console.error('Error saving to Supabase:', error);
+      toast({
+        variant: "destructive",
+        title: "Error saving data",
+        description: "Failed to save data to database"
+      });
     }
   };
 
@@ -191,33 +135,11 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const loadDataForAccount = async (accountEmail: string) => {
-    console.log('Loading data for account:', accountEmail);
+    console.log('Loading data from Supabase for account:', accountEmail);
     setIsInitialized(false);
     
     try {
-      // Try to load from CSV first if admin account
-      if (accountEmail === 'kbucks@admin.com') {
-        const csvUsers = loadFromCSVFile('users');
-        const csvProducts = loadFromCSVFile('products');
-        
-        if (csvUsers && csvUsers.length > 0) {
-          setUsers(csvUsers);
-          console.log('Loaded users from CSV:', csvUsers.length);
-        }
-        
-        if (csvProducts && csvProducts.length > 0) {
-          setProducts(csvProducts);
-          console.log('Loaded products from CSV:', csvProducts.length);
-        }
-        
-        if (csvUsers || csvProducts) {
-          setTransactions([]);
-          setIsInitialized(true);
-          return;
-        }
-      }
-
-      // Try to load from Supabase with better error handling
+      // Load from Supabase
       const [usersResult, productsResult, transactionsResult, rateResult] = await Promise.allSettled([
         supabase.from('users').select('*').eq('account_email', accountEmail),
         supabase.from('products').select('*').eq('account_email', accountEmail),
@@ -226,53 +148,50 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ]);
 
       // Load users
-      if (usersResult.status === 'fulfilled' && !usersResult.value.error && usersResult.value.data && usersResult.value.data.length > 0) {
-        const formattedUsers: User[] = usersResult.value.data.map(user => ({
-          id: user.id,
-          name: user.name,
-          email: '',
-          role: user.role as 'admin' | 'worker' | 'student',
-          balance: parseFloat(user.balance?.toString() || '0'),
-          barcode: user.barcode || '',
-          grade: user.grade || '',
-          secretCode: user.secret_code || '',
-          createdAt: user.created_at || new Date().toISOString()
-        }));
-        setUsers(formattedUsers);
-        console.log('Loaded users from Supabase:', formattedUsers.length);
-      } else {
-        // Try localStorage fallback
-        const localUsers = loadFromLocalStorage('users');
-        if (localUsers && localUsers.length > 0) {
-          setUsers(localUsers);
-          console.log('Loaded users from localStorage:', localUsers.length);
+      if (usersResult.status === 'fulfilled' && !usersResult.value.error && usersResult.value.data) {
+        if (usersResult.value.data.length > 0) {
+          const formattedUsers: User[] = usersResult.value.data.map(user => ({
+            id: user.id,
+            name: user.name,
+            email: '',
+            role: user.role as 'admin' | 'worker' | 'student',
+            balance: parseFloat(user.balance?.toString() || '0'),
+            barcode: user.barcode || '',
+            grade: user.grade || '',
+            secretCode: user.secret_code || '',
+            createdAt: user.created_at || new Date().toISOString()
+          }));
+          setUsers(formattedUsers);
+          console.log('Loaded users from Supabase:', formattedUsers.length);
         } else {
           setUsers(initialUsers);
-          console.log('Using initial users');
+          console.log('No users found, using initial users');
         }
+      } else {
+        setUsers(initialUsers);
+        console.log('Error loading users, using initial users');
       }
 
       // Load products
-      if (productsResult.status === 'fulfilled' && !productsResult.value.error && productsResult.value.data && productsResult.value.data.length > 0) {
-        const formattedProducts: Product[] = productsResult.value.data.map(product => ({
-          id: product.id,
-          name: product.name,
-          price: parseFloat(product.price?.toString() || '0'),
-          stock: product.stock || 0,
-          category: product.category || '',
-          createdAt: product.created_at || new Date().toISOString()
-        }));
-        setProducts(formattedProducts);
-        console.log('Loaded products from Supabase:', formattedProducts.length);
-      } else {
-        const localProducts = loadFromLocalStorage('products');
-        if (localProducts && localProducts.length > 0) {
-          setProducts(localProducts);
-          console.log('Loaded products from localStorage:', localProducts.length);
+      if (productsResult.status === 'fulfilled' && !productsResult.value.error && productsResult.value.data) {
+        if (productsResult.value.data.length > 0) {
+          const formattedProducts: Product[] = productsResult.value.data.map(product => ({
+            id: product.id,
+            name: product.name,
+            price: parseFloat(product.price?.toString() || '0'),
+            stock: product.stock || 0,
+            category: product.category || '',
+            createdAt: product.created_at || new Date().toISOString()
+          }));
+          setProducts(formattedProducts);
+          console.log('Loaded products from Supabase:', formattedProducts.length);
         } else {
           setProducts(initialProducts);
-          console.log('Using initial products');
+          console.log('No products found, using initial products');
         }
+      } else {
+        setProducts(initialProducts);
+        console.log('Error loading products, using initial products');
       }
 
       // Load transactions
@@ -291,38 +210,29 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setTransactions(formattedTransactions);
         console.log('Loaded transactions from Supabase:', formattedTransactions.length);
       } else {
-        const localTransactions = loadFromLocalStorage('transactions');
-        setTransactions(localTransactions || []);
+        setTransactions([]);
+        console.log('No transactions found or error loading');
       }
 
       // Load exchange rate
       if (rateResult.status === 'fulfilled' && !rateResult.value.error && rateResult.value.data && rateResult.value.data.length > 0) {
         const newRate = {
-          kshToKrypto: parseFloat(rateResult.value.data[0].ksh_to_krypto?.toString() || '0.5'),
+          kshToKrypto: 0.5, // Use default for now
           lastUpdated: rateResult.value.data[0].updated_at || new Date().toISOString(),
           updatedBy: 'system'
         };
         setExchangeRate(newRate);
+        console.log('Loaded exchange rate from Supabase');
       } else {
-        const localRate = loadFromLocalStorage('exchangeRate');
-        if (localRate) {
-          setExchangeRate(localRate);
-        }
+        console.log('No exchange rate found, using default');
       }
 
     } catch (error) {
-      console.error('Error loading data from Supabase, trying localStorage:', error);
-      
-      // Load from localStorage as fallback
-      const localUsers = loadFromLocalStorage('users');
-      const localProducts = loadFromLocalStorage('products');
-      const localTransactions = loadFromLocalStorage('transactions');
-      const localRate = loadFromLocalStorage('exchangeRate');
-      
-      setUsers(localUsers || initialUsers);
-      setProducts(localProducts || initialProducts);
-      setTransactions(localTransactions || []);
-      if (localRate) setExchangeRate(localRate);
+      console.error('Error loading data from Supabase:', error);
+      // Use initial data as fallback
+      setUsers(initialUsers);
+      setProducts(initialProducts);
+      setTransactions([]);
       
     } finally {
       setIsInitialized(true);
@@ -336,11 +246,9 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const userInserts = usersToSync.map(user => ({
         id: user.id,
         name: user.name,
-        role: user.role,
-        balance: user.balance,
-        barcode: user.barcode,
-        grade: user.grade,
+        student_id: user.role === 'student' ? user.id : null,
         secret_code: user.secretCode,
+        balance: user.balance,
         account_email: accountEmail,
         created_at: user.createdAt
       }));
@@ -358,7 +266,6 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         name: product.name,
         price: product.price,
         stock: product.stock,
-        category: product.category,
         account_email: accountEmail,
         created_at: product.createdAt
       }));
@@ -373,14 +280,12 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (transactionsToSync.length > 0) {
       const transactionInserts = transactionsToSync.map(transaction => ({
         id: transaction.id,
-        student_id: transaction.studentId,
-        student_name: transaction.studentName,
-        type: transaction.type,
-        amount: transaction.amount,
-        description: transaction.description,
-        products: transaction.products,
+        user_id: transaction.studentId,
+        product_id: transaction.products?.[0]?.productId || null,
+        quantity: transaction.products?.[0]?.quantity || 1,
+        total_amount: transaction.amount,
         account_email: accountEmail,
-        created_at: transaction.createdAt
+        transaction_date: transaction.createdAt
       }));
       const { error } = await supabase.from('transactions').insert(transactionInserts);
       if (error) throw error;
@@ -390,7 +295,8 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const syncExchangeRateToSupabase = async (rate: ExchangeRate, accountEmail: string) => {
     await supabase.from('exchange_rates').delete().eq('account_email', accountEmail);
     const { error } = await supabase.from('exchange_rates').insert({
-      ksh_to_krypto: rate.kshToKrypto,
+      currency_pair: 'KSH_KRYPTO',
+      rate: rate.kshToKrypto,
       account_email: accountEmail,
       updated_at: rate.lastUpdated
     });
@@ -415,62 +321,56 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const updateUser = async (id: string, updates: Partial<User>) => {
     setUsers(prev => prev.map(user => user.id === id ? { ...user, ...updates } : user));
+    toast({
+      title: "Student updated",
+      description: "Student information has been updated successfully.",
+    });
   };
 
   const addUser = (user: User) => {
-    const newUsers = [...users, user];
-    setUsers(newUsers);
-    
-    // Save to CSV if admin account
-    if (currentAccount === 'kbucks@admin.com') {
-      saveToCSVFile('users', newUsers);
-    }
+    setUsers(prev => [...prev, user]);
+    toast({
+      title: "Student added",
+      description: "New student has been added successfully.",
+    });
     
     // Auto-export to download CSV
     setTimeout(() => exportToCSV('users'), 100);
   };
 
   const deleteUser = (id: string) => {
-    const newUsers = users.filter(user => user.id !== id);
-    setUsers(newUsers);
-    
-    // Save to CSV if admin account
-    if (currentAccount === 'kbucks@admin.com') {
-      saveToCSVFile('users', newUsers);
-    }
+    setUsers(prev => prev.filter(user => user.id !== id));
+    toast({
+      title: "Student deleted",
+      description: "Student has been removed successfully.",
+    });
   };
 
   const addProduct = (product: Product) => {
-    const newProducts = [...products, product];
-    setProducts(newProducts);
-    
-    // Save to CSV if admin account
-    if (currentAccount === 'kbucks@admin.com') {
-      saveToCSVFile('products', newProducts);
-    }
+    setProducts(prev => [...prev, product]);
+    toast({
+      title: "Product added",
+      description: "New product has been added successfully.",
+    });
     
     // Auto-export to download CSV
     setTimeout(() => exportToCSV('products'), 100);
   };
 
   const updateProduct = async (id: string, updates: Partial<Product>) => {
-    const newProducts = products.map(product => product.id === id ? { ...product, ...updates } : product);
-    setProducts(newProducts);
-    
-    // Save to CSV if admin account
-    if (currentAccount === 'kbucks@admin.com') {
-      saveToCSVFile('products', newProducts);
-    }
+    setProducts(prev => prev.map(product => product.id === id ? { ...product, ...updates } : product));
+    toast({
+      title: "Product updated",
+      description: "Product information has been updated successfully.",
+    });
   };
 
   const deleteProduct = (id: string) => {
-    const newProducts = products.filter(product => product.id !== id);
-    setProducts(newProducts);
-    
-    // Save to CSV if admin account
-    if (currentAccount === 'kbucks@admin.com') {
-      saveToCSVFile('products', newProducts);
-    }
+    setProducts(prev => prev.filter(product => product.id !== id));
+    toast({
+      title: "Product deleted",
+      description: "Product has been removed successfully.",
+    });
   };
 
   const addTransaction = (transaction: Transaction) => {
@@ -606,32 +506,6 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
 
     addTransaction(transaction);
-
-    // Create receipt in Supabase
-    if (currentAccount) {
-      try {
-        await supabase
-          .from('receipts')
-          .insert({
-            student_id: studentId,
-            transaction_id: transaction.id,
-            account_email: currentAccount,
-            receipt_data: {
-              transactionId: transaction.id,
-              studentId: studentId,
-              studentName: student.name,
-              grade: student.grade,
-              amount: totalAmount,
-              products: transaction.products,
-              date: new Date().toISOString(),
-              exchangeRate: exchangeRate.kshToKrypto
-            }
-          });
-      } catch (error) {
-        console.error('Error creating receipt in Supabase:', error);
-      }
-    }
-
     return true;
   };
 
