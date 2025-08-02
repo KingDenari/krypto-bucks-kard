@@ -249,6 +249,9 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         student_id: user.role === 'student' ? user.id : null,
         secret_code: user.secretCode,
         balance: user.balance,
+        role: user.role,
+        barcode: user.barcode || '',
+        grade: user.grade || '',
         account_email: accountEmail,
         created_at: user.createdAt
       }));

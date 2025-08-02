@@ -7,145 +7,154 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instanciate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "12.2.3 (519615d)"
+  }
   public: {
     Tables: {
-      exchange_rates: {
+      employees: {
         Row: {
-          account_email: string | null
+          account_email: string
+          created_at: string
+          department: string
+          email: string | null
           id: string
-          ksh_to_krypto: number
-          updated_at: string | null
+          name: string
+          salary: number | null
         }
         Insert: {
-          account_email?: string | null
+          account_email: string
+          created_at?: string
+          department: string
+          email?: string | null
           id?: string
-          ksh_to_krypto?: number
-          updated_at?: string | null
+          name: string
+          salary?: number | null
         }
         Update: {
-          account_email?: string | null
+          account_email?: string
+          created_at?: string
+          department?: string
+          email?: string | null
           id?: string
-          ksh_to_krypto?: number
-          updated_at?: string | null
+          name?: string
+          salary?: number | null
+        }
+        Relationships: []
+      }
+      exchange_rates: {
+        Row: {
+          account_email: string
+          currency_pair: string
+          id: string
+          rate: number
+          updated_at: string
+        }
+        Insert: {
+          account_email: string
+          currency_pair: string
+          id?: string
+          rate: number
+          updated_at?: string
+        }
+        Update: {
+          account_email?: string
+          currency_pair?: string
+          id?: string
+          rate?: number
+          updated_at?: string
         }
         Relationships: []
       }
       products: {
         Row: {
-          account_email: string | null
-          category: string | null
-          created_at: string | null
+          account_email: string
+          barcode: string | null
+          created_at: string
           id: string
-          image_url: string | null
           name: string
           price: number
           stock: number
-          updated_at: string | null
+          updated_at: string
         }
         Insert: {
-          account_email?: string | null
-          category?: string | null
-          created_at?: string | null
+          account_email: string
+          barcode?: string | null
+          created_at?: string
           id?: string
-          image_url?: string | null
           name: string
           price: number
           stock?: number
-          updated_at?: string | null
+          updated_at?: string
         }
         Update: {
-          account_email?: string | null
-          category?: string | null
-          created_at?: string | null
+          account_email?: string
+          barcode?: string | null
+          created_at?: string
           id?: string
-          image_url?: string | null
           name?: string
           price?: number
           stock?: number
-          updated_at?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
-      receipts: {
-        Row: {
-          account_email: string | null
-          created_at: string | null
-          id: string
-          receipt_data: Json
-          student_id: string | null
-          transaction_id: string | null
-        }
-        Insert: {
-          account_email?: string | null
-          created_at?: string | null
-          id?: string
-          receipt_data: Json
-          student_id?: string | null
-          transaction_id?: string | null
-        }
-        Update: {
-          account_email?: string | null
-          created_at?: string | null
-          id?: string
-          receipt_data?: Json
-          student_id?: string | null
-          transaction_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "receipts_student_id_fkey"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "receipts_transaction_id_fkey"
-            columns: ["transaction_id"]
-            isOneToOne: false
-            referencedRelation: "transactions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       transactions: {
         Row: {
-          account_email: string | null
-          amount: number
-          created_at: string | null
-          description: string
+          account_email: string
+          amount: number | null
+          description: string | null
           id: string
+          product_id: string | null
           products: Json | null
-          student_id: string | null
-          student_name: string
-          type: string
+          quantity: number
+          student_name: string | null
+          total_amount: number
+          transaction_date: string
+          type: string | null
+          user_id: string | null
         }
         Insert: {
-          account_email?: string | null
-          amount: number
-          created_at?: string | null
-          description: string
+          account_email: string
+          amount?: number | null
+          description?: string | null
           id?: string
+          product_id?: string | null
           products?: Json | null
-          student_id?: string | null
-          student_name: string
-          type: string
+          quantity: number
+          student_name?: string | null
+          total_amount: number
+          transaction_date?: string
+          type?: string | null
+          user_id?: string | null
         }
         Update: {
-          account_email?: string | null
-          amount?: number
-          created_at?: string | null
-          description?: string
+          account_email?: string
+          amount?: number | null
+          description?: string | null
           id?: string
+          product_id?: string | null
           products?: Json | null
-          student_id?: string | null
-          student_name?: string
-          type?: string
+          quantity?: number
+          student_name?: string | null
+          total_amount?: number
+          transaction_date?: string
+          type?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "transactions_student_id_fkey"
-            columns: ["student_id"]
+            foreignKeyName: "transactions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -154,40 +163,76 @@ export type Database = {
       }
       users: {
         Row: {
-          account_email: string | null
-          balance: number | null
+          account_email: string
+          balance: number
           barcode: string | null
-          created_at: string | null
+          created_at: string
+          email: string | null
           grade: string | null
           id: string
           name: string
-          role: string
-          secret_code: string | null
-          updated_at: string | null
+          role: string | null
+          secret_code: string
+          student_id: string
+          updated_at: string
         }
         Insert: {
-          account_email?: string | null
-          balance?: number | null
+          account_email: string
+          balance?: number
           barcode?: string | null
-          created_at?: string | null
+          created_at?: string
+          email?: string | null
           grade?: string | null
           id?: string
           name: string
-          role: string
-          secret_code?: string | null
-          updated_at?: string | null
+          role?: string | null
+          secret_code: string
+          student_id: string
+          updated_at?: string
         }
         Update: {
-          account_email?: string | null
-          balance?: number | null
+          account_email?: string
+          balance?: number
           barcode?: string | null
-          created_at?: string | null
+          created_at?: string
+          email?: string | null
           grade?: string | null
           id?: string
           name?: string
+          role?: string | null
+          secret_code?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      workers: {
+        Row: {
+          account_email: string
+          created_at: string
+          email: string | null
+          hourly_rate: number | null
+          id: string
+          name: string
+          role: string
+        }
+        Insert: {
+          account_email: string
+          created_at?: string
+          email?: string | null
+          hourly_rate?: number | null
+          id?: string
+          name: string
+          role: string
+        }
+        Update: {
+          account_email?: string
+          created_at?: string
+          email?: string | null
+          hourly_rate?: number | null
+          id?: string
+          name?: string
           role?: string
-          secret_code?: string | null
-          updated_at?: string | null
         }
         Relationships: []
       }
@@ -207,21 +252,25 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
@@ -239,14 +288,16 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
@@ -262,14 +313,16 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
@@ -285,14 +338,16 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
@@ -300,14 +355,16 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
