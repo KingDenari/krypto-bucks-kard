@@ -72,6 +72,7 @@ export type Database = {
         Row: {
           account_email: string
           barcode: string | null
+          category: string | null
           created_at: string
           id: string
           name: string
@@ -82,6 +83,7 @@ export type Database = {
         Insert: {
           account_email: string
           barcode?: string | null
+          category?: string | null
           created_at?: string
           id?: string
           name: string
@@ -92,6 +94,7 @@ export type Database = {
         Update: {
           account_email?: string
           barcode?: string | null
+          category?: string | null
           created_at?: string
           id?: string
           name?: string
@@ -105,44 +108,44 @@ export type Database = {
         Row: {
           account_email: string
           amount: number | null
+          created_at: string
           description: string | null
           id: string
           product_id: string | null
           products: Json | null
           quantity: number
+          student_id: string | null
           student_name: string | null
           total_amount: number
-          transaction_date: string
           type: string | null
-          user_id: string | null
         }
         Insert: {
           account_email: string
           amount?: number | null
+          created_at?: string
           description?: string | null
           id?: string
           product_id?: string | null
           products?: Json | null
           quantity: number
+          student_id?: string | null
           student_name?: string | null
           total_amount: number
-          transaction_date?: string
           type?: string | null
-          user_id?: string | null
         }
         Update: {
           account_email?: string
           amount?: number | null
+          created_at?: string
           description?: string | null
           id?: string
           product_id?: string | null
           products?: Json | null
           quantity?: number
+          student_id?: string | null
           student_name?: string | null
           total_amount?: number
-          transaction_date?: string
           type?: string | null
-          user_id?: string | null
         }
         Relationships: [
           {
@@ -154,7 +157,7 @@ export type Database = {
           },
           {
             foreignKeyName: "transactions_user_id_fkey"
-            columns: ["user_id"]
+            columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
