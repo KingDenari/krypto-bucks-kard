@@ -244,9 +244,8 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     
     if (usersToSync.length > 0) {
       const userInserts = usersToSync.map(user => ({
-        id: user.id,
         name: user.name,
-        student_id: user.role === 'student' ? user.id : null,
+        student_id: user.role === 'student' ? user.id : '',
         secret_code: user.secretCode,
         balance: user.balance,
         role: user.role,
@@ -265,10 +264,10 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     
     if (productsToSync.length > 0) {
       const productInserts = productsToSync.map(product => ({
-        id: product.id,
         name: product.name,
         price: product.price,
         stock: product.stock,
+        category: product.category || '',
         account_email: accountEmail,
         created_at: product.createdAt
       }));
@@ -282,13 +281,16 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     
     if (transactionsToSync.length > 0) {
       const transactionInserts = transactionsToSync.map(transaction => ({
-        id: transaction.id,
-        user_id: transaction.studentId,
-        product_id: transaction.products?.[0]?.productId || null,
+        student_id: transaction.studentId,
+        student_name: transaction.studentName,
+        type: transaction.type,
+        amount: transaction.amount,
+        description: transaction.description,
+        products: transaction.products || [],
         quantity: transaction.products?.[0]?.quantity || 1,
         total_amount: transaction.amount,
         account_email: accountEmail,
-        transaction_date: transaction.createdAt
+        created_at: transaction.createdAt
       }));
       const { error } = await supabase.from('transactions').insert(transactionInserts);
       if (error) throw error;

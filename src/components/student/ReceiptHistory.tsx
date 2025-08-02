@@ -41,11 +41,13 @@ const ReceiptHistory: React.FC<ReceiptHistoryProps> = ({ studentId, onBack }) =>
         return;
       }
 
+      // For now, use transactions as receipts since we don't have a receipts table
       const { data, error } = await supabase
-        .from('receipts')
+        .from('transactions')
         .select('*')
         .eq('student_id', studentId)
         .eq('account_email', currentAccount)
+        .eq('type', 'purchase')
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -57,8 +59,24 @@ const ReceiptHistory: React.FC<ReceiptHistoryProps> = ({ studentId, onBack }) =>
         });
         setReceipts([]);
       } else {
-        console.log('Loaded receipts:', data);
-        setReceipts(data || []);
+        console.log('Loaded transactions as receipts:', data);
+        // Convert transactions to receipt format
+        const receiptData = (data || []).map(transaction => ({
+          id: transaction.id,
+          student_id: transaction.student_id,
+          transaction_id: transaction.id,
+          receipt_data: {
+            transactionId: transaction.id,
+            studentName: transaction.student_name,
+            studentId: transaction.student_id,
+            amount: transaction.amount,
+            products: transaction.products,
+            date: transaction.created_at,
+            exchangeRate: 0.5
+          },
+          created_at: transaction.created_at
+        }));
+        setReceipts(receiptData);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -71,7 +89,7 @@ const ReceiptHistory: React.FC<ReceiptHistoryProps> = ({ studentId, onBack }) =>
   const deleteReceipt = async (receiptId: string) => {
     try {
       const { error } = await supabase
-        .from('receipts')
+        .from('transactions')
         .delete()
         .eq('id', receiptId)
         .eq('account_email', currentAccount);
