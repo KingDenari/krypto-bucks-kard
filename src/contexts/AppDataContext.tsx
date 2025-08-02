@@ -343,12 +343,39 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setTimeout(() => exportToCSV('users'), 100);
   };
 
-  const deleteUser = (id: string) => {
-    setUsers(prev => prev.filter(user => user.id !== id));
-    toast({
-      title: "Student deleted",
-      description: "Student has been removed successfully.",
-    });
+  const deleteUser = async (id: string) => {
+    try {
+      // Delete from Supabase first
+      const { error } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', id)
+        .eq('account_email', currentAccount);
+
+      if (error) {
+        console.error('Error deleting user from Supabase:', error);
+        toast({
+          title: "Delete failed",
+          description: "Failed to delete student from database",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Then update local state
+      setUsers(prev => prev.filter(user => user.id !== id));
+      toast({
+        title: "Student deleted",
+        description: "Student has been removed successfully.",
+      });
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: "Delete failed",
+        description: "An error occurred while deleting the student",
+        variant: "destructive",
+      });
+    }
   };
 
   const addProduct = (product: Product) => {
@@ -370,12 +397,39 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     });
   };
 
-  const deleteProduct = (id: string) => {
-    setProducts(prev => prev.filter(product => product.id !== id));
-    toast({
-      title: "Product deleted",
-      description: "Product has been removed successfully.",
-    });
+  const deleteProduct = async (id: string) => {
+    try {
+      // Delete from Supabase first
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id)
+        .eq('account_email', currentAccount);
+
+      if (error) {
+        console.error('Error deleting product from Supabase:', error);
+        toast({
+          title: "Delete failed",
+          description: "Failed to delete product from database",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Then update local state
+      setProducts(prev => prev.filter(product => product.id !== id));
+      toast({
+        title: "Product deleted",
+        description: "Product has been removed successfully.",
+      });
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast({
+        title: "Delete failed",
+        description: "An error occurred while deleting the product",
+        variant: "destructive",
+      });
+    }
   };
 
   const addTransaction = (transaction: Transaction) => {
@@ -450,8 +504,39 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setWorkers(workers.map(worker => worker.id === id ? { ...worker, ...updates } : worker));
   };
 
-  const deleteWorker = (id: string) => {
-    setWorkers(workers.filter(worker => worker.id !== id));
+  const deleteWorker = async (id: string) => {
+    try {
+      // Delete from Supabase first
+      const { error } = await supabase
+        .from('workers')
+        .delete()
+        .eq('id', id)
+        .eq('account_email', currentAccount);
+
+      if (error) {
+        console.error('Error deleting worker from Supabase:', error);
+        toast({
+          title: "Delete failed",
+          description: "Failed to delete worker from database",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Then update local state
+      setWorkers(workers.filter(worker => worker.id !== id));
+      toast({
+        title: "Worker deleted",
+        description: "Worker has been removed successfully.",
+      });
+    } catch (error) {
+      console.error('Error deleting worker:', error);
+      toast({
+        title: "Delete failed",
+        description: "An error occurred while deleting the worker",
+        variant: "destructive",
+      });
+    }
   };
 
   const addEmployee = (employee: Employee) => {
@@ -462,8 +547,39 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setEmployees(employees.map(employee => employee.id === id ? { ...employee, ...updates } : employee));
   };
 
-  const deleteEmployee = (id: string) => {
-    setEmployees(employees.filter(employee => employee.id !== id));
+  const deleteEmployee = async (id: string) => {
+    try {
+      // Delete from Supabase first
+      const { error } = await supabase
+        .from('employees')
+        .delete()
+        .eq('id', id)
+        .eq('account_email', currentAccount);
+
+      if (error) {
+        console.error('Error deleting employee from Supabase:', error);
+        toast({
+          title: "Delete failed",
+          description: "Failed to delete employee from database",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Then update local state
+      setEmployees(employees.filter(employee => employee.id !== id));
+      toast({
+        title: "Employee deleted",
+        description: "Employee has been removed successfully.",
+      });
+    } catch (error) {
+      console.error('Error deleting employee:', error);
+      toast({
+        title: "Delete failed",
+        description: "An error occurred while deleting the employee",
+        variant: "destructive",
+      });
+    }
   };
 
   const updateExchangeRate = (rate: number, updatedBy: string) => {
