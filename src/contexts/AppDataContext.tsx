@@ -15,12 +15,12 @@ interface AppDataContextType {
   getUserBySecretCode: (secretCode: string) => User | undefined;
   getUserByBarcode: (barcode: string) => User | undefined;
   updateUser: (id: string, updates: Partial<User>) => Promise<void>;
-  addUser: (user: User) => void;
-  deleteUser: (id: string) => void;
-  addProduct: (product: Product) => void;
+  addUser: (user: User) => Promise<void>;
+  deleteUser: (id: string) => Promise<void>;
+  addProduct: (product: Product) => Promise<void>;
   updateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
-  deleteProduct: (id: string) => void;
-  addTransaction: (transaction: Transaction) => void;
+  deleteProduct: (id: string) => Promise<void>;
+  addTransaction: (transaction: Transaction) => Promise<void>;
   transferKryptoBucks: (fromUserId: string, toUserId: string, amount: number, createdBy: string) => boolean;
   clearTransferHistory: () => void;
   clearSalesHistory: () => void;
@@ -55,30 +55,6 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   });
   const [isInitialized, setIsInitialized] = useState(false);
 
-  const saveData = async () => {
-    if (!currentAccount || !isInitialized) return;
-    
-    console.log('Saving data to Supabase for account:', currentAccount);
-    
-    try {
-      await Promise.all([
-        syncUsersToSupabase(users, currentAccount),
-        syncProductsToSupabase(products, currentAccount),
-        syncTransactionsToSupabase(transactions, currentAccount),
-        syncExchangeRateToSupabase(exchangeRate, currentAccount)
-      ]);
-      
-      console.log('Data saved successfully to Supabase');
-      
-    } catch (error) {
-      console.error('Error saving to Supabase:', error);
-      toast({
-        variant: "destructive",
-        title: "Error saving data",
-        description: "Failed to save data to database"
-      });
-    }
-  };
 
 
   const refreshData = async () => {
@@ -135,12 +111,12 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           setUsers(formattedUsers);
           console.log('Loaded users from Supabase:', formattedUsers.length);
         } else {
-          setUsers(initialUsers);
-          console.log('No users found, using initial users');
+          setUsers([]);
+          console.log('No users found in Supabase');
         }
       } else {
-        setUsers(initialUsers);
-        console.log('Error loading users, using initial users');
+        setUsers([]);
+        console.log('Error loading users from Supabase');
       }
 
       // Load products
@@ -157,12 +133,12 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           setProducts(formattedProducts);
           console.log('Loaded products from Supabase:', formattedProducts.length);
         } else {
-          setProducts(initialProducts);
-          console.log('No products found, using initial products');
+          setProducts([]);
+          console.log('No products found in Supabase');
         }
       } else {
-        setProducts(initialProducts);
-        console.log('Error loading products, using initial products');
+        setProducts([]);
+        console.log('Error loading products from Supabase');
       }
 
       // Load transactions
@@ -200,9 +176,8 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     } catch (error) {
       console.error('Error loading data from Supabase:', error);
-      // Use initial data as fallback
-      setUsers(initialUsers);
-      setProducts(initialProducts);
+      setUsers([]);
+      setProducts([]);
       setTransactions([]);
       
     } finally {
@@ -210,82 +185,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const syncUsersToSupabase = async (usersToSync: User[], accountEmail: string) => {
-    await supabase.from('users').delete().eq('account_email', accountEmail);
-    
-    if (usersToSync.length > 0) {
-      const userInserts = usersToSync.map(user => ({
-        name: user.name,
-        student_id: user.role === 'student' ? user.id : '',
-        secret_code: user.secretCode,
-        balance: user.balance,
-        role: user.role,
-        barcode: user.barcode || '',
-        grade: user.grade || '',
-        account_email: accountEmail,
-        created_at: user.createdAt
-      }));
-      const { error } = await supabase.from('users').insert(userInserts);
-      if (error) throw error;
-    }
-  };
 
-  const syncProductsToSupabase = async (productsToSync: Product[], accountEmail: string) => {
-    await supabase.from('products').delete().eq('account_email', accountEmail);
-    
-    if (productsToSync.length > 0) {
-      const productInserts = productsToSync.map(product => ({
-        name: product.name,
-        price: product.price,
-        stock: product.stock,
-        category: product.category || '',
-        account_email: accountEmail,
-        created_at: product.createdAt
-      }));
-      const { error } = await supabase.from('products').insert(productInserts);
-      if (error) throw error;
-    }
-  };
-
-  const syncTransactionsToSupabase = async (transactionsToSync: Transaction[], accountEmail: string) => {
-    await supabase.from('transactions').delete().eq('account_email', accountEmail);
-    
-    if (transactionsToSync.length > 0) {
-      const transactionInserts = transactionsToSync.map(transaction => ({
-        student_id: transaction.studentId,
-        student_name: transaction.studentName,
-        type: transaction.type,
-        amount: transaction.amount,
-        description: transaction.description,
-        products: transaction.products || [],
-        quantity: transaction.products?.[0]?.quantity || 1,
-        total_amount: transaction.amount,
-        account_email: accountEmail,
-        created_at: transaction.createdAt
-      }));
-      const { error } = await supabase.from('transactions').insert(transactionInserts);
-      if (error) throw error;
-    }
-  };
-
-  const syncExchangeRateToSupabase = async (rate: ExchangeRate, accountEmail: string) => {
-    await supabase.from('exchange_rates').delete().eq('account_email', accountEmail);
-    const { error } = await supabase.from('exchange_rates').insert({
-      currency_pair: 'KSH_KRYPTO',
-      rate: rate.kshToKrypto,
-      account_email: accountEmail,
-      updated_at: rate.lastUpdated
-    });
-    if (error) throw error;
-  };
-
-  // Auto-save when data changes with debouncing
-  useEffect(() => {
-    if (currentAccount && isInitialized) {
-      const timeoutId = setTimeout(saveData, 1000);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [users, products, transactions, exchangeRate, currentAccount, isInitialized]);
 
   const getUserBySecretCode = (secretCode: string) => {
     return users.find(user => user.secretCode === secretCode);
@@ -296,19 +196,74 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const updateUser = async (id: string, updates: Partial<User>) => {
+    // Update local state first
     setUsers(prev => prev.map(user => user.id === id ? { ...user, ...updates } : user));
-    toast({
-      title: "Student updated",
-      description: "Student information has been updated successfully.",
-    });
+    
+    // Update in Supabase
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({
+          name: updates.name,
+          balance: updates.balance,
+          secret_code: updates.secretCode,
+          barcode: updates.barcode,
+          grade: updates.grade
+        })
+        .eq('id', id)
+        .eq('account_email', currentAccount);
+
+      if (error) throw error;
+      
+      toast({
+        title: "Student updated",
+        description: "Student information has been updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error updating user:', error);
+      toast({
+        title: "Update failed",
+        description: "Failed to update student in database",
+        variant: "destructive",
+      });
+    }
   };
 
-  const addUser = (user: User) => {
+  const addUser = async (user: User) => {
+    // Add to local state first
     setUsers(prev => [...prev, user]);
-    toast({
-      title: "Student added",
-      description: "New student has been added successfully.",
-    });
+    
+    // Add to Supabase
+    try {
+      const { error } = await supabase.from('users').insert({
+        id: user.id,
+        name: user.name,
+        student_id: user.id,
+        secret_code: user.secretCode,
+        balance: user.balance,
+        role: user.role,
+        barcode: user.barcode || '',
+        grade: user.grade || '',
+        account_email: currentAccount,
+        created_at: user.createdAt
+      });
+
+      if (error) throw error;
+      
+      toast({
+        title: "Student added",
+        description: "New student has been added successfully.",
+      });
+    } catch (error) {
+      console.error('Error adding user:', error);
+      // Remove from local state if Supabase insert failed
+      setUsers(prev => prev.filter(u => u.id !== user.id));
+      toast({
+        title: "Add failed",
+        description: "Failed to add student to database",
+        variant: "destructive",
+      });
+    }
     
   };
 
@@ -347,21 +302,72 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const addProduct = (product: Product) => {
+  const addProduct = async (product: Product) => {
+    // Add to local state first
     setProducts(prev => [...prev, product]);
-    toast({
-      title: "Product added",
-      description: "New product has been added successfully.",
-    });
+    
+    // Add to Supabase
+    try {
+      const { error } = await supabase.from('products').insert({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        stock: product.stock,
+        category: product.category || '',
+        account_email: currentAccount,
+        created_at: product.createdAt
+      });
+
+      if (error) throw error;
+      
+      toast({
+        title: "Product added",
+        description: "New product has been added successfully.",
+      });
+    } catch (error) {
+      console.error('Error adding product:', error);
+      // Remove from local state if Supabase insert failed
+      setProducts(prev => prev.filter(p => p.id !== product.id));
+      toast({
+        title: "Add failed",
+        description: "Failed to add product to database",
+        variant: "destructive",
+      });
+    }
     
   };
 
   const updateProduct = async (id: string, updates: Partial<Product>) => {
+    // Update local state first
     setProducts(prev => prev.map(product => product.id === id ? { ...product, ...updates } : product));
-    toast({
-      title: "Product updated",
-      description: "Product information has been updated successfully.",
-    });
+    
+    // Update in Supabase
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({
+          name: updates.name,
+          price: updates.price,
+          stock: updates.stock,
+          category: updates.category
+        })
+        .eq('id', id)
+        .eq('account_email', currentAccount);
+
+      if (error) throw error;
+      
+      toast({
+        title: "Product updated",
+        description: "Product information has been updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error updating product:', error);
+      toast({
+        title: "Update failed",
+        description: "Failed to update product in database",
+        variant: "destructive",
+      });
+    }
   };
 
   const deleteProduct = async (id: string) => {
@@ -399,8 +405,32 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const addTransaction = (transaction: Transaction) => {
+  const addTransaction = async (transaction: Transaction) => {
+    // Add to local state first
     setTransactions(prev => [transaction, ...prev]);
+    
+    // Add to Supabase
+    try {
+      const { error } = await supabase.from('transactions').insert({
+        id: transaction.id,
+        student_id: transaction.studentId,
+        student_name: transaction.studentName,
+        type: transaction.type,
+        amount: transaction.amount,
+        description: transaction.description,
+        products: transaction.products || [],
+        quantity: transaction.products?.[0]?.quantity || 1,
+        total_amount: transaction.amount,
+        account_email: currentAccount,
+        created_at: transaction.createdAt
+      });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+      // Remove from local state if Supabase insert failed
+      setTransactions(prev => prev.filter(t => t.id !== transaction.id));
+    }
   };
 
   const transferKryptoBucks = (fromUserId: string, toUserId: string, amount: number, createdBy: string) => {
