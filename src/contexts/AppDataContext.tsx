@@ -36,7 +36,7 @@ interface AppDataContextType {
   clearStudentTransactions: (studentId: string) => void;
   setCurrentAccount: (email: string) => void;
   refreshData: () => void;
-  exportToCSV: (type: 'users' | 'products') => void;
+  
 }
 
 const AppDataContext = createContext<AppDataContextType | undefined>(undefined);
@@ -80,35 +80,6 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const exportToCSV = (type: 'users' | 'products') => {
-    let csvContent = '';
-    let filename = '';
-    
-    if (type === 'users') {
-      const students = users.filter(u => u.role === 'student');
-      csvContent = 'Name,Email,Grade,Balance,Barcode,Secret Code,Created At\n';
-      students.forEach(user => {
-        csvContent += `"${user.name}","${user.email}","${user.grade || ''}",${user.balance},"${user.barcode}","${user.secretCode}","${user.createdAt}"\n`;
-      });
-      filename = 'students.csv';
-    } else if (type === 'products') {
-      csvContent = 'Name,Price,Stock,Category,Created At\n';
-      products.forEach(product => {
-        csvContent += `"${product.name}",${product.price},${product.stock},"${product.category}","${product.createdAt}"\n`;
-      });
-      filename = 'products.csv';
-    }
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   const refreshData = async () => {
     if (currentAccount) {
@@ -339,8 +310,6 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       description: "New student has been added successfully.",
     });
     
-    // Auto-export to download CSV
-    setTimeout(() => exportToCSV('users'), 100);
   };
 
   const deleteUser = async (id: string) => {
@@ -385,8 +354,6 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       description: "New product has been added successfully.",
     });
     
-    // Auto-export to download CSV
-    setTimeout(() => exportToCSV('products'), 100);
   };
 
   const updateProduct = async (id: string, updates: Partial<Product>) => {
@@ -675,7 +642,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     purchaseProduct,
     setCurrentAccount,
     refreshData,
-    exportToCSV,
+    
   };
 
   return (

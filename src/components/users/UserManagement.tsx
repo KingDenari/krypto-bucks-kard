@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAppData } from '@/contexts/AppDataContext';
 
 const UserManagement: React.FC = () => {
-  const { users, addUser, updateUser, deleteUser, exportToCSV } = useAppData();
+  const { users, addUser, updateUser, deleteUser } = useAppData();
   const [students, setStudents] = useState<User[]>([]);
   
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -166,14 +166,6 @@ const UserManagement: React.FC = () => {
         </div>
         
         <div className="flex gap-2">
-          <Button 
-            onClick={() => exportToCSV('users')} 
-            variant="outline"
-            className="bg-green-600 hover:bg-green-700 text-white"
-          >
-            <FileDown className="w-4 h-4 mr-2" />
-            Export CSV
-          </Button>
           
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
