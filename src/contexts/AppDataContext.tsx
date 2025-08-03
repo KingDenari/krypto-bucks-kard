@@ -24,13 +24,13 @@ interface AppDataContextType {
   transferKryptoBucks: (fromUserId: string, toUserId: string, amount: number, createdBy: string) => boolean;
   clearTransferHistory: () => void;
   clearSalesHistory: () => void;
-  addWorker: (worker: Worker) => void;
-  updateWorker: (id: string, updates: Partial<Worker>) => void;
-  deleteWorker: (id: string) => void;
-  addEmployee: (employee: Employee) => void;
-  updateEmployee: (id: string, updates: Partial<Employee>) => void;
-  deleteEmployee: (id: string) => void;
-  updateExchangeRate: (rate: number, updatedBy: string) => void;
+  addWorker: (worker: Worker) => Promise<void>;
+  updateWorker: (id: string, updates: Partial<Worker>) => Promise<void>;
+  deleteWorker: (id: string) => Promise<void>;
+  addEmployee: (employee: Employee) => Promise<void>;
+  updateEmployee: (id: string, updates: Partial<Employee>) => Promise<void>;
+  deleteEmployee: (id: string) => Promise<void>;
+  updateExchangeRate: (rate: number, updatedBy: string) => Promise<void>;
   factoryReset: () => void;
   purchaseProduct: (studentId: string, productId: string, quantity: number, createdBy: string) => Promise<boolean>;
   clearStudentTransactions: (studentId: string) => void;
@@ -493,12 +493,69 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setTransactions(prev => prev.filter(t => t.studentId !== studentId));
   };
 
-  const addWorker = (worker: Worker) => {
+  const addWorker = async (worker: Worker) => {
+    // Add to local state first
     setWorkers([...workers, worker]);
+    
+    // Add to Supabase
+    try {
+      const { error } = await supabase.from('workers').insert({
+        id: worker.id,
+        name: worker.name,
+        email: worker.email,
+        role: 'worker',
+        hourly_rate: 0,
+        account_email: currentAccount,
+        created_at: worker.createdAt
+      });
+
+      if (error) throw error;
+      
+      toast({
+        title: "Worker added",
+        description: "New worker has been added successfully.",
+      });
+    } catch (error) {
+      console.error('Error adding worker:', error);
+      // Remove from local state if Supabase insert failed
+      setWorkers(prev => prev.filter(w => w.id !== worker.id));
+      toast({
+        title: "Add failed",
+        description: "Failed to add worker to database",
+        variant: "destructive",
+      });
+    }
   };
 
-  const updateWorker = (id: string, updates: Partial<Worker>) => {
+  const updateWorker = async (id: string, updates: Partial<Worker>) => {
+    // Update local state first
     setWorkers(workers.map(worker => worker.id === id ? { ...worker, ...updates } : worker));
+    
+    // Update in Supabase
+    try {
+      const { error } = await supabase
+        .from('workers')
+        .update({
+          name: updates.name,
+          email: updates.email
+        })
+        .eq('id', id)
+        .eq('account_email', currentAccount);
+
+      if (error) throw error;
+      
+      toast({
+        title: "Worker updated",
+        description: "Worker information has been updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error updating worker:', error);
+      toast({
+        title: "Update failed",
+        description: "Failed to update worker in database",
+        variant: "destructive",
+      });
+    }
   };
 
   const deleteWorker = async (id: string) => {
@@ -536,12 +593,69 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const addEmployee = (employee: Employee) => {
+  const addEmployee = async (employee: Employee) => {
+    // Add to local state first
     setEmployees([...employees, employee]);
+    
+    // Add to Supabase
+    try {
+      const { error } = await supabase.from('employees').insert({
+        id: employee.id,
+        name: employee.name,
+        email: employee.email,
+        department: 'General',
+        salary: 0,
+        account_email: currentAccount,
+        created_at: employee.createdAt
+      });
+
+      if (error) throw error;
+      
+      toast({
+        title: "Employee added",
+        description: "New employee has been added successfully.",
+      });
+    } catch (error) {
+      console.error('Error adding employee:', error);
+      // Remove from local state if Supabase insert failed
+      setEmployees(prev => prev.filter(e => e.id !== employee.id));
+      toast({
+        title: "Add failed",
+        description: "Failed to add employee to database",
+        variant: "destructive",
+      });
+    }
   };
 
-  const updateEmployee = (id: string, updates: Partial<Employee>) => {
+  const updateEmployee = async (id: string, updates: Partial<Employee>) => {
+    // Update local state first
     setEmployees(employees.map(employee => employee.id === id ? { ...employee, ...updates } : employee));
+    
+    // Update in Supabase
+    try {
+      const { error } = await supabase
+        .from('employees')
+        .update({
+          name: updates.name,
+          email: updates.email
+        })
+        .eq('id', id)
+        .eq('account_email', currentAccount);
+
+      if (error) throw error;
+      
+      toast({
+        title: "Employee updated",
+        description: "Employee information has been updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error updating employee:', error);
+      toast({
+        title: "Update failed",
+        description: "Failed to update employee in database",
+        variant: "destructive",
+      });
+    }
   };
 
   const deleteEmployee = async (id: string) => {
@@ -579,13 +693,39 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const updateExchangeRate = (rate: number, updatedBy: string) => {
+  const updateExchangeRate = async (rate: number, updatedBy: string) => {
     const newRate = {
       kshToKrypto: rate,
       lastUpdated: new Date().toISOString(),
       updatedBy: updatedBy
     };
     setExchangeRate(newRate);
+    
+    // Save to Supabase
+    try {
+      const { error } = await supabase.from('exchange_rates').upsert({
+        currency_pair: 'KSH_KRYPTO',
+        rate: rate,
+        account_email: currentAccount,
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'currency_pair,account_email'
+      });
+
+      if (error) throw error;
+      
+      toast({
+        title: "Exchange rate updated",
+        description: "Exchange rate has been updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error updating exchange rate:', error);
+      toast({
+        title: "Update failed",
+        description: "Failed to update exchange rate in database",
+        variant: "destructive",
+      });
+    }
   };
 
   const purchaseProduct = async (studentId: string, productId: string, quantity: number, createdBy: string): Promise<boolean> => {
