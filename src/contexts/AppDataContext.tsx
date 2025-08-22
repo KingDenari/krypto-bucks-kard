@@ -230,6 +230,15 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const addUser = async (user: User) => {
+    if (!currentAccount) {
+      toast({
+        title: "Account required",
+        description: "Please set an account before adding students",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Add to local state first
     setUsers(prev => [...prev, user]);
     
@@ -264,7 +273,6 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         variant: "destructive",
       });
     }
-    
   };
 
   const deleteUser = async (id: string) => {
@@ -303,6 +311,15 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const addProduct = async (product: Product) => {
+    if (!currentAccount) {
+      toast({
+        title: "Account required",
+        description: "Please set an account before adding products",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Add to local state first
     setProducts(prev => [...prev, product]);
     
@@ -334,7 +351,6 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         variant: "destructive",
       });
     }
-    
   };
 
   const updateProduct = async (id: string, updates: Partial<Product>) => {
@@ -494,6 +510,15 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const addWorker = async (worker: Worker) => {
+    if (!currentAccount) {
+      toast({
+        title: "Account required",
+        description: "Please set an account before adding workers",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Add to local state first
     setWorkers([...workers, worker]);
     
@@ -594,6 +619,15 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const addEmployee = async (employee: Employee) => {
+    if (!currentAccount) {
+      toast({
+        title: "Account required",
+        description: "Please set an account before adding employees",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Add to local state first
     setEmployees([...employees, employee]);
     
